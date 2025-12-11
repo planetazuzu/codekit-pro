@@ -39,21 +39,48 @@ self.addEventListener('activate', (event) => {
 
 // Estrategia: Network First, luego Cache
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+  
+  // No cachear requests POST, PUT, DELETE, etc.
+  if (request.method !== 'GET') {
+    return;
+  }
+  
+  // No cachear Google Fonts (se cargan directamente)
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    return;
+  }
+  
+  // No cachear requests a la API
+  if (url.pathname.startsWith('/api/')) {
+    return;
+  }
+  
   event.respondWith(
-    fetch(event.request)
+    fetch(request)
       .then((response) => {
-        // Clonar la respuesta
-        const responseToCache = response.clone();
-        
-        caches.open(CACHE_NAME)
-          .then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+        // Solo cachear respuestas exitosas
+        if (response.status === 200) {
+          // Clonar la respuesta
+          const responseToCache = response.clone();
+          
+          caches.open(CACHE_NAME)
+            .then((cache) => {
+              // Solo cachear GET requests
+              if (request.method === 'GET') {
+                cache.put(request, responseToCache).catch(() => {
+                  // Ignorar errores de cache
+                });
+              }
+            });
+        }
         
         return response;
       })
       .catch(() => {
-        return caches.match(event.request);
+        // Si falla la red, intentar desde cache
+        return caches.match(request);
       })
   );
 });

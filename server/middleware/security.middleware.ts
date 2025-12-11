@@ -20,7 +20,7 @@ export const securityHeaders = helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "blob:"], // Vite needs eval and blob in dev
       workerSrc: ["'self'", "blob:"], // Allow Vite workers
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://api.openai.com", "https://generativelanguage.googleapis.com", "ws://localhost:*", "http://localhost:*"], // Allow Vite HMR
+      connectSrc: ["'self'", "https://api.openai.com", "https://generativelanguage.googleapis.com", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "ws://localhost:*", "http://localhost:*"], // Allow Vite HMR and Google Fonts
       fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"], // Allow Google Fonts
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
