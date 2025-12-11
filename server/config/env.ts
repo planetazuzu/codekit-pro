@@ -55,11 +55,15 @@ export function validateEnv(): Env {
   }
 
   try {
-    // Convert GITHUB_SYNC_ENABLED to string if it's a boolean (can happen with Docker Compose)
-    const githubSyncEnabled = process.env.GITHUB_SYNC_ENABLED;
-    const githubSyncEnabledValue = typeof githubSyncEnabled === "boolean" 
-      ? String(githubSyncEnabled) 
-      : githubSyncEnabled;
+    // Normalize GITHUB_SYNC_ENABLED - ensure it's always a string or undefined
+    // Docker Compose might pass it as boolean, so we normalize it
+    const githubSyncEnabledRaw = (process.env as any).GITHUB_SYNC_ENABLED;
+    const githubSyncEnabledValue = 
+      githubSyncEnabledRaw === undefined || githubSyncEnabledRaw === null
+        ? undefined
+        : typeof githubSyncEnabledRaw === "boolean"
+        ? String(githubSyncEnabledRaw)
+        : String(githubSyncEnabledRaw);
 
     validatedEnv = envSchema.parse({
       NODE_ENV: process.env.NODE_ENV,
