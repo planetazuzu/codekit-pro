@@ -133,7 +133,7 @@ fi
 
 # 7. Instalar dependencias
 info "Instalando dependencias..."
-npm ci
+npm ci --legacy-peer-deps
 success "Dependencias instaladas"
 
 # 8. Build de la aplicación
@@ -246,4 +246,5 @@ info "  Local:           http://localhost:$PORT"
 info "  Health:          http://localhost:$PORT/health"
 info "  Dominio:         https://codekitpro.app"
 info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
 

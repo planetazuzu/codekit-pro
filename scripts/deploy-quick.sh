@@ -25,7 +25,7 @@ fi
 
 # Build
 echo "📦 Construyendo aplicación..."
-npm ci
+npm ci --legacy-peer-deps
 npm run build
 
 # PM2

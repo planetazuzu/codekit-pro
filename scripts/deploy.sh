@@ -103,7 +103,7 @@ success "Variables de entorno verificadas"
 
 # 4. Instalar dependencias
 info "Instalando dependencias..."
-npm ci --production=false
+npm ci --production=false --legacy-peer-deps
 success "Dependencias instaladas"
 
 # 5. Verificar TypeScript

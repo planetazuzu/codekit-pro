@@ -59,7 +59,7 @@ fi
 
 # 2. Instalar dependencias
 info "Instalando dependencias..."
-npm ci --production=false
+npm ci --production=false --legacy-peer-deps
 success "Dependencias instaladas"
 
 # 3. Verificar TypeScript (no bloquear si falla)
