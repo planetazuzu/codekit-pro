@@ -34,7 +34,7 @@ if command -v pm2 &> /dev/null; then
     pm2 stop "$PM2_NAME" 2>/dev/null || true
     pm2 delete "$PM2_NAME" 2>/dev/null || true
     
-    cat > ecosystem.config.js << EOF
+    cat > ecosystem.config.cjs << EOF
 module.exports = {
   apps: [{
     name: '$PM2_NAME',
@@ -48,7 +48,7 @@ module.exports = {
 EOF
     
     mkdir -p logs
-    pm2 start ecosystem.config.js
+    pm2 start ecosystem.config.cjs
     pm2 save
     
     echo "✅ Desplegado en puerto $PORT"

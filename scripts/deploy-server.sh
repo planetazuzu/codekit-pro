@@ -168,7 +168,7 @@ fi
 
 # 11. Crear archivo de configuración PM2
 info "Configurando PM2..."
-cat > ecosystem.config.js << EOF
+cat > ecosystem.config.cjs << EOF
 module.exports = {
   apps: [{
     name: '$PM2_NAME',
@@ -203,7 +203,7 @@ fi
 
 # 13. Iniciar aplicación con PM2
 info "Iniciando aplicación con PM2..."
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 pm2 save
 
 # Configurar PM2 para iniciar al arrancar el servidor
