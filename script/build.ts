@@ -58,6 +58,8 @@ async function buildAll() {
     minify: true,
     external: externals,
     logLevel: "info",
+    // Exclude vite.config.ts from server build
+    exclude: ["vite.config.ts", "**/vite.config.ts"],
   });
 }
 

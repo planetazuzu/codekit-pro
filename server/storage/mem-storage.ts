@@ -581,7 +581,7 @@ export class MemStorage implements IStorage {
     const now = new Date();
     
     // Encrypt sensitive fields
-    const { encrypt } = await import("./utils/encryption");
+    const { encrypt } = await import("../utils/encryption");
     const encryptedIntegrationConfig = insertProgram.integrationConfig
       ? encrypt(insertProgram.integrationConfig)
       : null;
@@ -620,7 +620,7 @@ export class MemStorage implements IStorage {
     }
 
     // Encrypt sensitive fields if they're being updated
-    const { encrypt } = await import("./utils/encryption");
+    const { encrypt } = await import("../utils/encryption");
     const encryptedIntegrationConfig = updateProgram.integrationConfig !== undefined
       ? (updateProgram.integrationConfig ? encrypt(updateProgram.integrationConfig) : null)
       : existing.integrationConfig;
