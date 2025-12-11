@@ -1,0 +1,80 @@
+{
+  "affiliates": [
+    {
+      "name": "Hostinger",
+      "category": "Hosting",
+      "url": "https://hostinger.com/?ref=TU-ID",
+      "code": null,
+      "commission": "60%",
+      "icon": "Server",
+      "utm": "?utm_source=codekit&utm_medium=affiliate"
+    },
+    {
+      "name": "Vercel",
+      "category": "Deployment",
+      "url": "https://vercel.com/partners/affiliate?ref=TU-ID",
+      "code": null,
+      "commission": "25% recurrente",
+      "icon": "Rocket",
+      "utm": "?utm_source=codekit"
+    },
+    {
+      "name": "DigitalOcean",
+      "category": "Cloud",
+      "url": "https://digitalocean.com/?refcode=TU-ID",
+      "code": null,
+      "commission": "$25 por registro",
+      "icon": "Cloud",
+      "utm": "?utm_source=codekit"
+    },
+    {
+      "name": "Replit",
+      "category": "IA & DevTools",
+      "url": "https://replit.com/ambassadors/TU-ID",
+      "code": null,
+      "commission": "20-30%",
+      "icon": "Terminal"
+    },
+    {
+      "name": "GitHub Copilot",
+      "category": "IA",
+      "url": "https://github.com/features/copilot?aff=TU-ID",
+      "code": null,
+      "commission": "20%",
+      "icon": "Github"
+    },
+    {
+      "name": "TailwindUI",
+      "category": "UI Kits",
+      "url": "https://tailwindui.com/?ref=TU-ID",
+      "code": null,
+      "commission": "25%",
+      "icon": "LayoutGrid"
+    },
+    {
+      "name": "Notion",
+      "category": "Productividad",
+      "url": "https://affiliate.notion.com/TU-ID",
+      "code": null,
+      "commission": "50%",
+      "icon": "Notebook"
+    },
+    {
+      "name": "Jasper AI",
+      "category": "IA",
+      "url": "https://jasper.ai?fpr=TU-ID",
+      "code": null,
+      "commission": "30% recurrente",
+      "icon": "Sparkles"
+    },
+    {
+      "name": "Canva",
+      "category": "Diseño",
+      "url": "https://partner.canva.com/TU-ID",
+      "code": null,
+      "commission": "80%",
+      "icon": "Brush"
+    }
+  ]
+}
+

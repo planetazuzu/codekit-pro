@@ -1,0 +1,50 @@
+{
+  "name": "CodeKit Pro",
+  "short_name": "CodeKit",
+  "description": "Developer toolkit for AI-assisted programming",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["developer", "productivity", "tools"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Prompts",
+      "short_name": "Prompts",
+      "description": "Acceso rápido a prompts",
+      "url": "/prompts",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Snippets",
+      "short_name": "Snippets",
+      "description": "Acceso rápido a snippets",
+      "url": "/snippets",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Herramientas",
+      "short_name": "Tools",
+      "description": "Acceso rápido a herramientas",
+      "url": "/tools",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
+

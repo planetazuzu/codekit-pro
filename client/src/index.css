@@ -1,0 +1,94 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+}
+
+/* VSCode Dark Theme Inspired */
+:root {
+  /* Dark mode by default variables - using VSCode palette */
+  --background: 216 28% 7%;    /* #0D1117 */
+  --foreground: 210 9% 82%;    /* #C9D1D9 */
+  
+  --card: 212 19% 11%;         /* #161B22 */
+  --card-foreground: 210 9% 82%;
+
+  --popover: 212 19% 11%;
+  --popover-foreground: 210 9% 82%;
+
+  --primary: 212 100% 67%;     /* #58A6FF - Blue accent */
+  --primary-foreground: 216 28% 7%;
+
+  --secondary: 213 14% 20%;    /* #1F2428 - Slightly lighter bg */
+  --secondary-foreground: 210 9% 82%;
+
+  --muted: 213 14% 20%;
+  --muted-foreground: 215 8% 54%; /* #8B949E */
+
+  --accent: 212 100% 67%;
+  --accent-foreground: 216 28% 7%;
+
+  --destructive: 347 77% 50%;
+  --destructive-foreground: 210 9% 82%;
+
+  --border: 215 14% 18%;       /* #30363D */
+  --input: 215 14% 18%;
+  --ring: 212 100% 47%;
+
+  --radius: 0.5rem;
+}
+
+/* Force dark mode styles even without .dark class since it's the default */
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 5px;
+  border: 2px solid hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}

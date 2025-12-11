@@ -1,0 +1,93 @@
+Quiero que generes una aplicación frontend completa llamada **CodeKit Pro**, pensada para ser un conjunto de herramientas para facilitar el desarrollo de apps con Vibe Code, Lovable, Cursor o cualquier entorno de programación asistida por IA.
+
+### 🎨 ESTILO VISUAL
+- Tema oscuro estilo VSCode.
+- Paleta: #0D1117, #161B22, #1F2428, #C9D1D9, acentos #58A6FF.
+- Layout con sidebar izquierdo + contenido central.
+- Tipografías: Inter + JetBrains Mono.
+- Componentes minimalistas tipo dashboard técnico.
+
+### 🧱 ESTRUCTURA PRINCIPAL
+La app debe incluir estas secciones en el sidebar:
+
+1. 🧠 **Prompts**
+   - Biblioteca de prompts organizados por categorías: IA, Desarrollo, Testing, Diseño, Mobile, Refactor, Documentación.
+
+2. 🧩 **Herramientas**
+   Cada herramienta debe ser una mini-app dentro del frontend:
+   - Generador de Favicons
+   - Generador de screenshots de mockups
+   - Generador de logos rápidos
+   - Generador de meta tags
+   - Generador de README en Markdown
+   - Generador de estructuras de carpetas
+   - Generador de JSON Schemas
+   - Conversor de imágenes → Base64
+   - Mini editor de colores y paletas
+   - Generador de íconos SVG simples
+
+3. 📚 **Guías Visuales**
+   Un espacio donde se puedan guardar:
+   - Guías UI
+   - Capturas de referencia
+   - Manuales de estilo
+   - Plantillas de componentes
+
+4. 🔗 **Enlaces Rápidos**
+   Página con accesos a:
+   - Replit
+   - Cursor
+   - Vibe Code
+   - Lovable
+   - GitHub
+   - Vercel
+   - Supabase
+   - Firebase
+
+5. 💾 **Snippets**
+   Repositorio interno con:
+   - React snippets
+   - Hooks reutilizables
+   - Snippets de Tailwind
+   - Scripts de despliegue
+   - Configs útiles (vite.config.js, tsconfig.json, etc.)
+
+### ⚙️ TECNOLOGÍAS SOLICITADAS
+Usa:
+- **React + Vite**
+- **TailwindCSS**
+- **React Router**
+- Componentes limpios y desacoplados.
+- Sistema modular para añadir herramientas futuras.
+
+### 📦 CARPETAS
+Debe crearse esta estructura:
+
+/src  
+  /components  
+  /layout  
+  /pages  
+  /tools  
+  /snippets  
+  /guides  
+  /assets  
+  /data  
+
+### 🧩 FUNCIONALIDADES EXTRAS
+- Buscador global para prompts, herramientas y recursos.
+- LocalStorage para guardar:
+  - favoritos  
+  - guías  
+  - configuraciones  
+- Modo oscuro por defecto.
+- Diseño responsive.
+
+### 🧪 ENTREGA FINAL
+Genera:
+1. El proyecto completo (todos los archivos).
+2. El package.json listo para instalar.
+3. El código de cada página y componente.
+4. Un README.md con instrucciones para ejecutar la app.
+5. Comentarios explicativos en cada parte importante del código.
+
+Crea todo el frontend de **CodeKit Pro** con estas especificaciones.

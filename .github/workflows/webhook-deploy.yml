@@ -1,0 +1,37 @@
+name: 🔔 Webhook Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  trigger-webhook:
+    name: 🔔 Trigger Server Webhook
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Build application
+        run: |
+          npm ci
+          npm run build
+        env:
+          NODE_ENV: production
+
+      - name: 🔔 Trigger deployment webhook
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.WEBHOOK_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "ref": "${{ github.ref }}",
+              "commit": "${{ github.sha }}",
+              "repository": "${{ github.repository }}",
+              "pusher": "${{ github.actor }}"
+            }' \
+            ${{ secrets.WEBHOOK_URL }}/api/webhooks/deploy
