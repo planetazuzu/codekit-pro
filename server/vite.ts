@@ -42,10 +42,8 @@ export async function setupVite(server: Server, app: Express) {
 
     try {
       const clientTemplate = path.resolve(
-        import.meta.dirname,
-        "..",
-        "client",
-        "index.html",
+        typeof __dirname !== 'undefined' ? __dirname : process.cwd(),
+        typeof __dirname !== 'undefined' ? "../client/index.html" : "client/index.html",
       );
 
       // always reload the index.html file from disk incase it changes

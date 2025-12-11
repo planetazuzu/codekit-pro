@@ -8,12 +8,14 @@ import { logger } from "../utils/logger";
 import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
-import { fileURLToPath } from "url";
 
 const execAsync = promisify(exec);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, "../..");
+// En CommonJS (formato de compilación), __dirname está disponible automáticamente
+// Usamos process.cwd() como fallback si __dirname no está disponible
+const projectRoot = path.resolve(
+  typeof __dirname !== 'undefined' ? __dirname : process.cwd(),
+  typeof __dirname !== 'undefined' ? "../.." : "."
+);
 
 const router = Router();
 
