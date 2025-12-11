@@ -30,7 +30,15 @@ const envSchema = z.object({
   GITHUB_TOKEN: z.string().optional(),
   GITHUB_REPO_OWNER: z.string().optional(),
   GITHUB_REPO_NAME: z.string().optional(),
-  GITHUB_SYNC_ENABLED: z.string().transform((val) => val === "true").optional().default(false),
+  GITHUB_SYNC_ENABLED: z
+    .union([z.string(), z.boolean()])
+    .transform((val) => {
+      if (typeof val === "boolean") return val;
+      if (typeof val === "string") return val.toLowerCase() === "true";
+      return false;
+    })
+    .optional()
+    .default(false),
 });
 
 type Env = z.infer<typeof envSchema>;
@@ -47,6 +55,12 @@ export function validateEnv(): Env {
   }
 
   try {
+    // Convert GITHUB_SYNC_ENABLED to string if it's a boolean (can happen with Docker Compose)
+    const githubSyncEnabled = process.env.GITHUB_SYNC_ENABLED;
+    const githubSyncEnabledValue = typeof githubSyncEnabled === "boolean" 
+      ? String(githubSyncEnabled) 
+      : githubSyncEnabled;
+
     validatedEnv = envSchema.parse({
       NODE_ENV: process.env.NODE_ENV,
       PORT: process.env.PORT,
@@ -60,7 +74,7 @@ export function validateEnv(): Env {
       GITHUB_TOKEN: process.env.GITHUB_TOKEN,
       GITHUB_REPO_OWNER: process.env.GITHUB_REPO_OWNER,
       GITHUB_REPO_NAME: process.env.GITHUB_REPO_NAME,
-      GITHUB_SYNC_ENABLED: process.env.GITHUB_SYNC_ENABLED,
+      GITHUB_SYNC_ENABLED: githubSyncEnabledValue,
     });
 
     logger.info("Environment variables validated successfully");
