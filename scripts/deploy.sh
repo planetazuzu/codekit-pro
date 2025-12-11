@@ -220,7 +220,7 @@ info "Iniciando aplicación en puerto $PORT..."
 
 if [ "$USE_PM2" = true ]; then
     # Crear archivo de configuración PM2
-    cat > ecosystem.config.js << EOF
+    cat > ecosystem.config.cjs << EOF
 module.exports = {
   apps: [{
     name: '$PM2_NAME',
@@ -246,7 +246,7 @@ EOF
     mkdir -p logs
     
     # Iniciar con PM2
-    pm2 start ecosystem.config.js
+    pm2 start ecosystem.config.cjs
     pm2 save
     
     success "Aplicación iniciada con PM2"
