@@ -246,7 +246,7 @@ function Card({ title, description, icon: Icon, href, color, bgColor }: CardProp
   return (
     <Link 
       href={href}
-      className="group rounded-xl border border-border bg-card p-6 transition-all hover:shadow-md hover:shadow-primary/5 hover:border-primary/50 hover:-translate-y-0.5 block"
+      className="group rounded-xl border border-border bg-card p-6 transition-all hover:shadow-md hover:shadow-primary/5 hover:border-primary/50 hover:-translate-y-0.5 block cursor-pointer"
     >
       <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg ${bgColor} ${color} transition-transform group-hover:scale-110`}>
         <Icon className="h-6 w-6" />
