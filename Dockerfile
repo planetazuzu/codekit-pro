@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copiar archivos de dependencias
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copiar código fuente
 COPY . .
@@ -17,19 +17,26 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Instalar curl para healthcheck
+RUN apk add --no-cache curl
+
 # Copiar solo dependencias de producción
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
 
 # Copiar archivos compilados
 COPY --from=builder /app/dist ./dist
 
 # Exponer puerto
-EXPOSE 5000
+EXPOSE 8604
 
-# Variables de entorno
+# Variables de entorno por defecto
 ENV NODE_ENV=production
-ENV PORT=5000
+ENV PORT=8604
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:8604/health || exit 1
 
 # Comando de inicio
 CMD ["node", "dist/index.cjs"]
