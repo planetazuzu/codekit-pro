@@ -24,6 +24,9 @@ RUN apk add --no-cache curl
 COPY package*.json ./
 RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
 
+# Instalar drizzle-kit globalmente para poder ejecutar db:push
+RUN npm install -g drizzle-kit@^0.31.4 --legacy-peer-deps
+
 # Copiar archivos compilados
 COPY --from=builder /app/dist ./dist
 
