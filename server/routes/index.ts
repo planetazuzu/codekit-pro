@@ -18,6 +18,8 @@ import { registerPlansRoutes } from "./plans";
 import { registerModerationRoutes } from "./moderation";
 import { registerGitHubSyncRoutes } from "./github-sync";
 import webhooksRouter from "./webhooks";
+import deploymentsRouter from "./deployments";
+import deploymentsRouter from "./deployments";
 
 /**
  * Register all routes
@@ -51,5 +53,8 @@ export function registerRoutes(app: Express): void {
   
   // Webhook routes (for CI/CD)
   app.use("/api/webhooks", webhooksRouter);
+  
+  // Deployment routes (for CI/CD management)
+  app.use("/api/deployments", deploymentsRouter);
 }
 

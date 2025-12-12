@@ -8,6 +8,8 @@ import { logger } from "../utils/logger";
 import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
+import { deploymentService } from "../services/deployment.service";
+import { notificationService } from "../services/notification.service";
 
 const execAsync = promisify(exec);
 // En CommonJS (formato de compilación), __dirname está disponible automáticamente
@@ -81,6 +83,16 @@ router.post("/deploy", verifyWebhookSecret, async (req, res) => {
 
     logger.info(`Executing deployment script: ${deployScript} (Docker: ${useDocker})`);
 
+    // Iniciar tracking de deployment
+    const deployment = await deploymentService.startDeployment(
+      commit || "unknown",
+      ref || "unknown",
+      pusher || "system"
+    );
+
+    // Notificar inicio de despliegue
+    await notificationService.notifyDeployment(deployment, "started");
+
     // Responder inmediatamente para evitar timeout
     res.json({
       success: true,
@@ -88,7 +100,11 @@ router.post("/deploy", verifyWebhookSecret, async (req, res) => {
       commit: commit?.substring(0, 7),
       ref,
       docker: useDocker,
+      deploymentId: deployment.id,
     });
+
+    // Actualizar estado a "deploying"
+    await deploymentService.updateDeploymentStatus(deployment.id, "deploying");
 
     // Ejecutar despliegue en background
     execAsync(`bash ${deployScript}`, {
@@ -101,12 +117,33 @@ router.post("/deploy", verifyWebhookSecret, async (req, res) => {
         DEPLOY_WORKFLOW: workflow,
         DEPLOY_RUN_ID: run_id,
       },
-    }).then(({ stdout, stderr }) => {
+    }).then(async ({ stdout, stderr }) => {
       if (stdout) logger.info("Deployment output:", stdout);
       if (stderr) logger.warn("Deployment warnings:", stderr);
-      logger.info("Deployment completed successfully");
-    }).catch((error) => {
+      
+      // Esperar un poco para que la app inicie
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+      
+      // Realizar health check
+      const isHealthy = await deploymentService.performHealthCheck(deployment.id);
+      
+      if (isHealthy) {
+        await notificationService.notifyDeployment(deployment, "completed");
+        logger.info("Deployment completed successfully");
+      } else {
+        await notificationService.notifyDeployment(deployment, "failed");
+        logger.error("Deployment health check failed");
+        
+        // Intentar rollback automático si está configurado
+        if (process.env.AUTO_ROLLBACK_ON_FAILURE === "true") {
+          logger.info("Auto-rollback enabled, attempting rollback...");
+          await deploymentService.rollback(deployment.id);
+        }
+      }
+    }).catch(async (error) => {
       logger.error("Deployment error:", error);
+      await deploymentService.updateDeploymentStatus(deployment.id, "failed");
+      await notificationService.notifyDeployment(deployment, "failed");
     });
 
   } catch (error: any) {
