@@ -30,6 +30,10 @@ RUN npm install -g drizzle-kit@^0.31.4 --legacy-peer-deps
 # Copiar archivos compilados
 COPY --from=builder /app/dist ./dist
 
+# Copiar archivos necesarios para drizzle-kit (configuración y schema)
+COPY drizzle.config.ts ./
+COPY shared ./shared
+
 # Exponer puerto
 EXPOSE 8604
 
