@@ -79,19 +79,19 @@ Implementar un sistema completo de:
 
 ---
 
-## 🚧 FASE 4: CI/CD AVANZADO (PENDIENTE)
+## 🚧 FASE 4: CI/CD AVANZADO (EN PROGRESO)
 
-### 4.1 Rollback Automático
-- [ ] Detección de fallos post-despliegue
-- [ ] Rollback automático a versión anterior
-- [ ] Notificaciones de rollback
-- [ ] Logs de rollback
+### 4.1 Rollback Automático ✅
+- [x] Detección de fallos post-despliegue
+- [x] Rollback automático a versión anterior
+- [x] Notificaciones de rollback
+- [x] Logs de rollback
 
-### 4.2 Notificaciones
-- [ ] Integración con Slack
-- [ ] Notificaciones por Email
-- [ ] Notificaciones Discord/Telegram
-- [ ] Dashboard de despliegues
+### 4.2 Notificaciones ✅ (Parcial)
+- [x] Integración con Slack
+- [ ] Notificaciones por Email (pendiente nodemailer)
+- [x] Notificaciones Discord/Telegram
+- [ ] Dashboard de despliegues (frontend pendiente)
 
 ### 4.3 Despliegues por Etapas
 - [ ] Ambiente de Staging
