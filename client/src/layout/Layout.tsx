@@ -1,5 +1,5 @@
 import { Sidebar } from "./Sidebar";
-import { Search, Bell, User, Menu } from "lucide-react";
+import { Search, Bell, User, Menu, Home, MessageSquare, Wrench, BookOpen, Link2, Code, Settings, TrendingUp, Gift } from "lucide-react";
 import { SearchCommand } from "@/components/SearchCommand";
 import { CookieBanner } from "@/components/common/CookieBanner";
 import { AffiliateDisclaimer } from "@/components/common/AffiliateDisclaimer";
@@ -7,6 +7,7 @@ import { SalesBanner } from "@/components/common/SalesBanner";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Link, useLocation } from "wouter";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -32,13 +33,13 @@ export function Layout({ children }: LayoutProps) {
         desktopMenuOpen ? "md:ml-64" : "md:ml-0"
       )}>
         {/* Header */}
-        <header className="h-16 border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 gap-4">
-          <div className="flex items-center gap-2">
+        <header className="h-14 md:h-16 border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-3 md:px-8 gap-2 md:gap-4">
+          <div className="flex items-center gap-1.5 md:gap-2 flex-1 min-w-0">
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden h-9 w-9 flex-shrink-0"
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Abrir menú"
             >
@@ -55,6 +56,14 @@ export function Layout({ children }: LayoutProps) {
             >
               <Menu className="h-5 w-5" />
             </Button>
+
+            {/* Mobile Logo/Title */}
+            <div className="md:hidden flex items-center gap-2 min-w-0">
+              <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center text-primary-foreground flex-shrink-0">
+                <Code className="h-4 w-4" />
+              </div>
+              <span className="font-bold text-sm truncate">CodeKit Pro</span>
+            </div>
 
             {/* Search Bar - Hidden on mobile, visible on desktop */}
             <div className="relative hidden md:block w-96">
@@ -78,12 +87,14 @@ export function Layout({ children }: LayoutProps) {
                 </kbd>
               </div>
             </div>
+          </div>
 
+          <div className="flex items-center gap-1.5 md:gap-4 flex-shrink-0">
             {/* Mobile Search Button */}
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden h-9 w-9"
               onClick={() => {
                 const event = new KeyboardEvent("keydown", {
                   key: "k",
@@ -96,28 +107,40 @@ export function Layout({ children }: LayoutProps) {
             >
               <Search className="h-5 w-5" />
             </Button>
-          </div>
 
-          <div className="flex items-center gap-2 md:gap-4">
+            {/* Desktop Notifications */}
             <button className="relative p-2 rounded-full hover:bg-accent/10 text-muted-foreground hover:text-foreground transition-colors hidden md:flex">
               <Bell className="h-5 w-5" />
               <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full border-2 border-background"></span>
             </button>
-            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-purple-500 p-[1px]">
+
+            {/* User Avatar */}
+            <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-tr from-primary to-purple-500 p-[1px] flex-shrink-0">
               <div className="h-full w-full rounded-full bg-background flex items-center justify-center overflow-hidden">
-                <User className="h-4 w-4 text-foreground" />
+                <User className="h-4 w-4 md:h-5 md:w-5 text-foreground" />
               </div>
             </div>
           </div>
         </header>
 
         {/* Content */}
-        <div className="flex-1 p-4 md:p-8 pb-24 animate-in fade-in duration-500 overflow-visible">
-          <div className="max-w-7xl mx-auto overflow-visible">
+        <div className="flex-1 p-3 md:p-8 pb-20 md:pb-24 animate-in fade-in duration-500 overflow-visible">
+          <div className="max-w-7xl mx-auto overflow-visible w-full">
             {children}
           </div>
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border/50">
+        <div className="grid grid-cols-5 h-16">
+          <MobileNavItem href="/" icon={Home} label="Inicio" />
+          <MobileNavItem href="/prompts" icon={MessageSquare} label="Prompts" />
+          <MobileNavItem href="/tools" icon={Wrench} label="Tools" />
+          <MobileNavItem href="/snippets" icon={Code} label="Code" />
+          <MobileNavItem href="/links" icon={Link2} label="Links" />
+        </div>
+      </nav>
       
       {/* Affiliate Disclaimer */}
       <AffiliateDisclaimer />
@@ -128,5 +151,24 @@ export function Layout({ children }: LayoutProps) {
       {/* Cookie Banner */}
       <CookieBanner />
     </div>
+  );
+}
+
+// Componente para items de navegación móvil
+function MobileNavItem({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
+  const [location] = useLocation();
+  const isActive = location === href;
+
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "flex flex-col items-center justify-center gap-1 transition-colors",
+        isActive ? "text-primary" : "text-muted-foreground"
+      )}
+    >
+      <Icon className={cn("h-5 w-5", isActive && "text-primary")} />
+      <span className={cn("text-[10px] font-medium", isActive && "text-primary")}>{label}</span>
+    </Link>
   );
 }
