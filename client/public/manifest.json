@@ -6,7 +6,10 @@
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#6366f1",
-  "orientation": "portrait-primary",
+  "orientation": "any",
+  "scope": "/",
+  "prefer_related_applications": false,
+  "offline_enabled": true,
   "icons": [
     {
       "src": "/icon-192.png",

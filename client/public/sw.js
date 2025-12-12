@@ -1,5 +1,6 @@
-// Service Worker para CodeKit Pro PWA
-const CACHE_NAME = 'codekit-pro-v1';
+// Service Worker para CodeKit Pro PWA - Optimizado para móvil
+const CACHE_NAME = 'codekit-pro-v2-mobile';
+const STATIC_CACHE = 'codekit-pro-static-v2';
 const urlsToCache = [
   '/',
   '/prompts',
@@ -10,30 +11,50 @@ const urlsToCache = [
   '/resources'
 ];
 
-// Instalación del Service Worker
+// Assets críticos para carga rápida en móvil
+const criticalAssets = [
+  '/',
+  '/manifest.json',
+];
+
+// Instalación del Service Worker - Optimizado para móvil
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Cache abierto');
-        return cache.addAll(urlsToCache);
+    Promise.all([
+      // Cache crítico primero
+      caches.open(STATIC_CACHE).then((cache) => {
+        return cache.addAll(criticalAssets);
+      }),
+      // Cache completo en background
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.addAll(urlsToCache).catch((err) => {
+          console.log('Algunos recursos no se pudieron cachear:', err);
+        });
       })
+    ])
   );
+  // Activar inmediatamente sin esperar
+  self.skipWaiting();
 });
 
-// Activación del Service Worker
+// Activación del Service Worker - Limpiar caches antiguos
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Eliminando cache antiguo:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      // Limpiar caches antiguos
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME && cacheName !== STATIC_CACHE) {
+              console.log('Eliminando cache antiguo:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Tomar control de todas las páginas
+      self.clients.claim()
+    ])
   );
 });
 
@@ -70,30 +91,49 @@ self.addEventListener('fetch', (event) => {
     return; // No interceptar recursos externos
   }
   
+  // Estrategia: Network First con fallback a Cache (mejor para móvil)
   event.respondWith(
-    fetch(request)
-      .then((response) => {
-        // Solo cachear respuestas exitosas del mismo origen
-        if (response.status === 200 && response.type === 'basic') {
-          // Clonar la respuesta
-          const responseToCache = response.clone();
-          
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(request, responseToCache).catch(() => {
-                // Ignorar errores de cache silenciosamente
+    caches.match(request).then((cachedResponse) => {
+      // Intentar red primero
+      return fetch(request)
+        .then((response) => {
+          // Solo cachear respuestas exitosas del mismo origen
+          if (response.status === 200 && response.type === 'basic') {
+            const responseToCache = response.clone();
+            const cacheToUse = criticalAssets.some(url => request.url.includes(url)) 
+              ? STATIC_CACHE 
+              : CACHE_NAME;
+            
+            caches.open(cacheToUse)
+              .then((cache) => {
+                cache.put(request, responseToCache).catch(() => {
+                  // Ignorar errores de cache silenciosamente
+                });
+              });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Si falla la red, usar cache si existe
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // Si es una página HTML y no hay cache, devolver página offline
+          if (request.headers.get('accept')?.includes('text/html')) {
+            return caches.match('/').then((indexCache) => {
+              return indexCache || new Response('Offline - Sin conexión', {
+                status: 503,
+                headers: { 'Content-Type': 'text/plain' }
               });
             });
-        }
-        
-        return response;
-      })
-      .catch(() => {
-        // Si falla la red, intentar desde cache solo para recursos del mismo origen
-        return caches.match(request).then(cachedResponse => {
-          return cachedResponse || fetch(request); // Si no hay cache, intentar fetch normal
+          }
+          // Para otros recursos, devolver error
+          return new Response('Recurso no disponible offline', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' }
+          });
         });
-      })
+    })
   );
 });
 
