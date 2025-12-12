@@ -91,7 +91,7 @@ export default function Resources() {
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Encuentra las mejores herramientas, guías y recursos para potenciar tu
-            desarrollo. Más de {totalResources} recursos curados.
+            desarrollo. {totalResources > 0 ? `Más de ${totalResources} recursos curados.` : 'Recursos curados para desarrolladores.'}
           </p>
 
           {/* Search */}
