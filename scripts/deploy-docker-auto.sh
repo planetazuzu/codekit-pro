@@ -78,9 +78,44 @@ success "Docker Compose encontrado"
 # 1. Pull latest changes (si estamos en un repo git)
 if [ -d ".git" ]; then
     info "Actualizando código desde Git..."
-    git fetch origin || warning "No se pudo hacer fetch (puede ser normal si ya está actualizado)"
-    git reset --hard origin/main 2>/dev/null || git reset --hard origin/master 2>/dev/null || warning "No se pudo hacer reset (continuando...)"
-    success "Código actualizado"
+    
+    # Verificar que estamos en la rama correcta
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+    info "Rama actual: $CURRENT_BRANCH"
+    
+    # Hacer fetch primero
+    if git fetch origin main 2>&1 || git fetch origin master 2>&1; then
+        success "Fetch completado"
+    else
+        warning "No se pudo hacer fetch (puede ser normal si ya está actualizado)"
+    fi
+    
+    # Verificar commits pendientes
+    COMMITS_BEHIND=$(git rev-list --count HEAD..origin/main 2>/dev/null || git rev-list --count HEAD..origin/master 2>/dev/null || echo "0")
+    if [ "$COMMITS_BEHIND" != "0" ] && [ "$COMMITS_BEHIND" != "" ]; then
+        info "Hay $COMMITS_BEHIND commits pendientes de actualizar"
+        
+        # Hacer reset hard para actualizar
+        if git reset --hard origin/main 2>&1 || git reset --hard origin/master 2>&1; then
+            success "Código actualizado (reset hard completado)"
+        else
+            error "No se pudo hacer reset hard. Intentando pull..."
+            if git pull origin main 2>&1 || git pull origin master 2>&1; then
+                success "Código actualizado (pull completado)"
+            else
+                error "No se pudo actualizar el código. Verifica permisos y conexión."
+                exit 1
+            fi
+        fi
+    else
+        success "Código ya está actualizado (sin commits pendientes)"
+    fi
+    
+    # Mostrar último commit
+    LAST_COMMIT=$(git log -1 --oneline 2>/dev/null || echo "unknown")
+    info "Último commit: $LAST_COMMIT"
+else
+    warning "No es un repositorio Git, saltando actualización de código"
 fi
 
 # 2. Verificar que existe .env
@@ -99,11 +134,16 @@ if $DOCKER_COMPOSE_CMD ps app | grep -q "Up"; then
 fi
 
 # 4. Reconstruir y reiniciar contenedores
-info "Reconstruyendo imagen Docker..."
-if $DOCKER_COMPOSE_CMD build --no-cache app; then
+info "Reconstruyendo imagen Docker (esto puede tardar varios minutos)..."
+info "Esto incluirá los últimos cambios del código actualizado"
+
+# Usar build normal (más rápido) en lugar de --no-cache para producción
+# Solo usar --no-cache si es necesario para forzar rebuild completo
+if $DOCKER_COMPOSE_CMD build app; then
     success "Imagen reconstruida"
 else
     error "Error al reconstruir la imagen Docker."
+    error "Revisa los logs: $DOCKER_COMPOSE_CMD logs app"
     exit 1
 fi
 

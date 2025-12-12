@@ -107,10 +107,14 @@ router.post("/deploy", verifyWebhookSecret, async (req, res) => {
     await deploymentService.updateDeploymentStatus(deployment.id, "deploying");
 
     // Ejecutar despliegue en background
+    // Asegurar que PROJECT_DIR esté configurado correctamente
+    const projectDir = process.env.PROJECT_DIR || "/var/www/codekit-pro";
+    
     execAsync(`bash ${deployScript}`, {
       cwd: projectRoot,
       env: {
         ...process.env,
+        PROJECT_DIR: projectDir,
         DEPLOY_COMMIT: commit,
         DEPLOY_REF: ref,
         DEPLOY_USER: pusher,
