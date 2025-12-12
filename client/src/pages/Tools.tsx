@@ -23,7 +23,17 @@ import {
   Wand2,
   AlertCircle,
   TestTube,
-  BookOpen
+  BookOpen,
+  Scissors,
+  Package,
+  CheckCircle2,
+  BarChart3,
+  Eye,
+  Zap,
+  FileCheck,
+  Bug,
+  Activity,
+  Search
 } from "lucide-react";
 
 const tools = [

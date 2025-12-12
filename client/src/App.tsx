@@ -24,6 +24,7 @@ const AffiliateProgramsDashboard = lazy(() => import("@/pages/AffiliateProgramsD
 const Deals = lazy(() => import("@/pages/Deals"));
 const Legal = lazy(() => import("@/pages/Legal"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
+const Docs = lazy(() => import("@/pages/Docs"));
 
 // Lazy load tools - Heavy components
 const ReadmeGenerator = lazy(() => import("@/tools/ReadmeGenerator"));
@@ -103,6 +104,11 @@ function Router() {
       <Route path="/resources">
         <SuspenseWrapper>
           <Resources />
+        </SuspenseWrapper>
+      </Route>
+      <Route path="/docs/:path*">
+        <SuspenseWrapper>
+          <Docs />
         </SuspenseWrapper>
       </Route>
       <Route path="/deals">

@@ -11,6 +11,8 @@ import { useTrackPageView } from "@/hooks/use-track-view";
 import { PromptCardSkeleton } from "@/components/Skeleton";
 import { FilterBar, SortSelect, type FilterOption, type SortOption, BackButton } from "@/components/common";
 import { useFilter } from "@/hooks/utils/use-filter";
+import { MobilePullToRefresh, MobileFloatingButton, MobileBottomSheet, MobileOnly, DesktopOnly } from "@/components/mobile";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,9 +31,11 @@ export default function Prompts() {
   const [viewingPrompt, setViewingPrompt] = useState<Prompt | null>(null);
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
   const [deletingPrompt, setDeletingPrompt] = useState<Prompt | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const { toast } = useToast();
-  const { data: prompts = [], isLoading, error } = usePrompts();
+  const { data: prompts = [], isLoading, error, refetch } = usePrompts();
   const deletePrompt = useDeletePrompt();
+  const queryClient = useQueryClient();
 
   // Use filter hook
   const {
@@ -133,6 +137,11 @@ export default function Prompts() {
     setDeletingPrompt(prompt);
   }, []);
 
+  const handleRefresh = useCallback(async () => {
+    await refetch();
+    queryClient.invalidateQueries({ queryKey: ["prompts"] });
+  }, [refetch, queryClient]);
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -143,14 +152,16 @@ export default function Prompts() {
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Biblioteca de Prompts</h1>
-            <p className="text-muted-foreground mt-1">Colección curada de prompts para optimizar tu desarrollo.</p>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Biblioteca de Prompts</h1>
+            <p className="text-muted-foreground mt-1 text-sm md:text-base">Colección curada de prompts para optimizar tu desarrollo.</p>
           </div>
           
-          <Button onClick={handleCreate}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Prompt
-          </Button>
+          <DesktopOnly>
+            <Button onClick={handleCreate}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Prompt
+            </Button>
+          </DesktopOnly>
         </div>
 
         {/* Filter Bar */}

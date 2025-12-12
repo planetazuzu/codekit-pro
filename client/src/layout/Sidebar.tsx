@@ -21,6 +21,7 @@ const menuItems = [
   { icon: MessageSquare, label: "Prompts", href: "/prompts" },
   { icon: Wrench, label: "Herramientas", href: "/tools" },
   { icon: BookOpen, label: "Guías Visuales", href: "/guides" },
+  { icon: FileText, label: "Documentación", href: "/docs" },
   { icon: Link2, label: "Enlaces Rápidos", href: "/links" },
   { icon: Code, label: "Snippets", href: "/snippets" },
   { icon: Settings, label: "APIs y Tokens", href: "/api-guides" },

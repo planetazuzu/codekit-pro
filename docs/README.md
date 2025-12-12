@@ -1,53 +1,26 @@
-# 📚 Documentación de CodeKit Pro
+# 📚 CodeKit Pro - Documentación
 
-Esta carpeta contiene toda la documentación del proyecto CodeKit Pro.
+Bienvenido a la documentación de CodeKit Pro. Esta sección contiene guías, comparativas, arquitectura y mejores prácticas para usar y entender la aplicación.
 
-## 📚 Archivos de Documentación
+## 📖 Estructura
 
-### 🚀 Despliegue y Configuración
-- **QUICK_DEPLOY.md** - Guía rápida de despliegue
-- **DESPLIEGUE_PUERTO_8604.md** - Despliegue específico en puerto 8604
-- **CHECKLIST_DESPLIEGUE_COMPLETO.md** - Checklist completo y detallado de despliegue
-- **CONFIGURACION_DOMINIO.md** - Configuración del dominio codekitpro.app
+- **[Introducción](./01-introduccion/README.md)** - Qué es CodeKit Pro y cómo empezar
+- **[Guías](./02-guias/README.md)** - Guías paso a paso para usar las funcionalidades
+- **[Comparativas](./03-comparativas/README.md)** - Comparativas de herramientas y tecnologías
+- **[Arquitectura](./04-arquitectura/README.md)** - Decisiones técnicas y estructura del proyecto
+- **[Buenas Prácticas](./05-buenas-practicas/README.md)** - Recomendaciones y patrones
+- **[Conceptos](./06-conceptos/README.md)** - Explicaciones de conceptos clave
+- **[FAQ](./07-faq/README.md)** - Preguntas frecuentes
 
-### 🗄️ Base de Datos
-- **CONFIGURACION_POSTGRESQL.md** - Guía completa de configuración PostgreSQL
-- **DATOS_NECESARIOS_POSTGRESQL.md** - Datos necesarios para configurar PostgreSQL
-- **INSTALAR_POSTGRESQL_LOCAL.md** - Instalación local de PostgreSQL en Ubuntu/Debian
+## 🎯 Cómo Usar Esta Documentación
 
-### 📖 Referencias
-- **PROJECT_MEMORY.md** - Memoria del proyecto y decisiones técnicas
-- **CARACTERISTICAS.md** - Características de la aplicación
-- **APIS_AFILIADOS.md** - Documentación de APIs de afiliados
+1. **Navega por las secciones** usando el sidebar
+2. **Busca** términos específicos con Ctrl/Cmd + F
+3. **Sigue los enlaces** entre documentos relacionados
+4. **Lee los ejemplos** para entender mejor los conceptos
 
-### 🔄 GitHub Sync
-- **GUIA_CONFIGURACION_GITHUB.md** - Guía paso a paso para configurar sincronización con GitHub
-- **GITHUB_SYNC.md** - Documentación técnica de sincronización con GitHub
-- **PROMPT_LISTO_USAR.md** - Prompt para crear el repositorio de datos en GitHub
+## 📝 Convenciones
 
-### 📁 Archivos Archivados
-Los archivos históricos y obsoletos se han movido a la carpeta `archive/`:
-- Auditorías antiguas
-- Documentación de fases completadas
-- Checklists duplicados
-- Estados y resúmenes históricos
-
----
-
-## 🚀 Inicio Rápido
-
-### Para Desarrolladores Nuevos
-1. Lee **PROJECT_MEMORY.md** para entender el proyecto
-2. Revisa **CHECKLIST_DESPLIEGUE_COMPLETO.md** para despliegue
-3. Consulta **CONFIGURACION_POSTGRESQL.md** para configurar la BD
-
-### Para Despliegue
-1. **QUICK_DEPLOY.md** - Despliegue rápido
-2. **DESPLIEGUE_PUERTO_8604.md** - Despliegue en puerto específico
-3. **CHECKLIST_DESPLIEGUE_COMPLETO.md** - Checklist completo paso a paso
-4. **CONFIGURACION_POSTGRESQL.md** - Configurar PostgreSQL
-5. **CONFIGURACION_DOMINIO.md** - Configurar dominio
-
----
-
-**Última actualización**: 2025-01-07
+- **Código**: Ejemplos de código están en bloques con sintaxis destacada
+- **Callouts**: Información importante está marcada con ⚠️, 💡, o ✅
+- **Enlaces**: Los enlaces internos te llevan a documentos relacionados

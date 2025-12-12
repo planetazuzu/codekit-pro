@@ -20,6 +20,7 @@ import { registerGitHubSyncRoutes } from "./github-sync";
 import webhooksRouter from "./webhooks";
 import deploymentsRouter from "./deployments";
 import adminRouter from "./admin";
+import { docsRouter } from "./docs";
 
 /**
  * Register all routes
@@ -59,5 +60,8 @@ export function registerRoutes(app: Express): void {
   
   // Admin routes
   app.use("/api/admin", adminRouter);
+  
+  // Documentation routes
+  app.use("/api/docs", docsRouter);
 }
 
