@@ -4228,6 +4228,7 @@ export async function initializeData() {
         await storage.createGuide({
           ...guide,
           userId: systemUserId,
+          status: CONTENT_STATUS.APPROVED, // System user content is auto-approved
         });
       }
       log(`Initialized ${staticGuides.length} guides`, "init");
