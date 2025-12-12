@@ -22,7 +22,7 @@ echo ""
 
 # Opción 1: Eliminar prompts del sistema y reiniciar
 echo "Eliminando prompts del sistema..."
-docker compose exec -T postgres psql -U codekit_user -d codekit_pro -c "DELETE FROM prompts WHERE \"userId\" = '$SYSTEM_USER_ID';"
+docker compose exec -T postgres psql -U codekit_user -d codekit_pro -c "DELETE FROM prompts WHERE user_id = '$SYSTEM_USER_ID';"
 
 echo "✅ Prompts eliminados"
 echo "Reiniciando contenedor para recrear prompts..."

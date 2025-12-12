@@ -17,7 +17,7 @@ echo "System User ID: $SYSTEM_USER_ID"
 
 ### 2. Eliminar prompts del sistema
 ```bash
-docker compose exec -T postgres psql -U codekit_user -d codekit_pro -c "DELETE FROM prompts WHERE \"userId\" = '$SYSTEM_USER_ID';"
+docker compose exec -T postgres psql -U codekit_user -d codekit_pro -c "DELETE FROM prompts WHERE user_id = '$SYSTEM_USER_ID';"
 ```
 
 ### 3. Reiniciar contenedor para recrear prompts
@@ -39,7 +39,7 @@ docker compose exec postgres psql -U codekit_user -d codekit_pro -c "SELECT titl
 cd /var/www/codekit-pro && \
 SYSTEM_USER_ID=$(docker compose exec -T postgres psql -U codekit_user -d codekit_pro -t -c "SELECT id FROM users WHERE email = 'system@codekit.pro';" | tr -d ' ') && \
 echo "Eliminando prompts del sistema (ID: $SYSTEM_USER_ID)..." && \
-docker compose exec -T postgres psql -U codekit_user -d codekit_pro -c "DELETE FROM prompts WHERE \"userId\" = '$SYSTEM_USER_ID';" && \
+docker compose exec -T postgres psql -U codekit_user -d codekit_pro -c "DELETE FROM prompts WHERE user_id = '$SYSTEM_USER_ID';" && \
 echo "Reiniciando contenedor..." && \
 docker compose restart app && \
 sleep 20 && \
