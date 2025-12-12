@@ -42,45 +42,57 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
   
-  // No cachear requests POST, PUT, DELETE, etc.
+  // No interceptar requests POST, PUT, DELETE, etc.
   if (request.method !== 'GET') {
-    return;
+    return; // Dejar que el navegador maneje la request normalmente
   }
   
-  // No cachear Google Fonts (se cargan directamente)
+  // No interceptar Google Fonts - dejar que el navegador las cargue directamente
+  // Esto evita problemas con CSP
   if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    return;
+    return; // No interceptar, dejar pasar
   }
   
-  // No cachear requests a la API
+  // No interceptar requests a la API
   if (url.pathname.startsWith('/api/')) {
-    return;
+    return; // No interceptar, dejar pasar
+  }
+  
+  // No interceptar archivos estáticos con extensiones específicas que pueden tener CSP estricto
+  const staticExtensions = ['.css', '.js', '.mjs', '.json', '.png', '.jpg', '.jpeg', '.svg', '.woff', '.woff2', '.ttf', '.eot'];
+  const hasStaticExtension = staticExtensions.some(ext => url.pathname.endsWith(ext));
+  if (hasStaticExtension && url.origin !== self.location.origin) {
+    return; // No interceptar recursos externos con extensiones estáticas
+  }
+  
+  // Interceptar solo requests del mismo origen para la SPA
+  if (url.origin !== self.location.origin) {
+    return; // No interceptar recursos externos
   }
   
   event.respondWith(
     fetch(request)
       .then((response) => {
-        // Solo cachear respuestas exitosas
-        if (response.status === 200) {
+        // Solo cachear respuestas exitosas del mismo origen
+        if (response.status === 200 && response.type === 'basic') {
           // Clonar la respuesta
           const responseToCache = response.clone();
           
           caches.open(CACHE_NAME)
             .then((cache) => {
-              // Solo cachear GET requests
-              if (request.method === 'GET') {
-                cache.put(request, responseToCache).catch(() => {
-                  // Ignorar errores de cache
-                });
-              }
+              cache.put(request, responseToCache).catch(() => {
+                // Ignorar errores de cache silenciosamente
+              });
             });
         }
         
         return response;
       })
       .catch(() => {
-        // Si falla la red, intentar desde cache
-        return caches.match(request);
+        // Si falla la red, intentar desde cache solo para recursos del mismo origen
+        return caches.match(request).then(cachedResponse => {
+          return cachedResponse || fetch(request); // Si no hay cache, intentar fetch normal
+        });
       })
   );
 });
