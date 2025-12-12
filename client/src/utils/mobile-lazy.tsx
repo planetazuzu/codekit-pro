@@ -18,7 +18,7 @@ export function lazyMobile<T extends ComponentType<any>>(
     }
     // Return empty component for desktop
     return {
-      default: (() => null) as T,
+      default: (() => null) as unknown as T,
     };
   });
 }
@@ -36,7 +36,7 @@ export function lazyDesktop<T extends ComponentType<any>>(
     }
     // Return empty component for mobile
     return {
-      default: (() => null) as T,
+      default: (() => null) as unknown as T,
     };
   });
 }
