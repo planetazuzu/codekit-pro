@@ -245,6 +245,273 @@ Formato:
 - Lenguaje claro
 - Orientado a no técnicos`,
     tags: ['vibe-coding', 'documentación', 'markdown', 'escalabilidad', 'onboarding']
+  },
+  // Limpieza y Optimización de Código
+  {
+    title: '1️⃣ Limpieza total de documentación (.md)',
+    category: 'Limpieza',
+    content: `Actúa como un editor técnico senior.
+
+Voy a pegar un archivo Markdown (.md).
+Quiero que:
+- Elimines texto redundante o repetido
+- Simplifiques frases largas sin perder significado
+- Unifiques títulos y subtítulos
+- Elimines secciones obsoletas o vacías
+- Corrijas formato Markdown
+- Mantengas solo información útil y actual
+
+Devuélveme el archivo limpio y ordenado.
+No inventes contenido nuevo.`,
+    tags: ['limpieza', 'documentación', 'markdown', 'edición']
+  },
+  {
+    title: '2️⃣ Normalización de README.md (proyecto profesional)',
+    category: 'Limpieza',
+    content: `Reestructura este README.md para que sea profesional y claro.
+
+Objetivo:
+- Onboarding rápido
+- Lectura en 5 minutos
+- Apto para desarrolladores y no técnicos
+
+Estructura deseada:
+1. Descripción breve
+2. Qué problema resuelve
+3. Stack tecnológico
+4. Instalación / despliegue
+5. Estructura del proyecto
+6. Roles y permisos
+7. Roadmap
+
+Respeta el contenido existente.`,
+    tags: ['limpieza', 'readme', 'documentación', 'onboarding']
+  },
+  {
+    title: '3️⃣ Limpieza de notas técnicas caóticas',
+    category: 'Limpieza',
+    content: `Convierte estas notas técnicas en documentación clara.
+
+Acciones:
+- Agrupa ideas relacionadas
+- Elimina frases incompletas
+- Convierte listas sueltas en secciones
+- Señala TODO / PENDIENTE si aparece
+
+Formato final:
+- Markdown limpio
+- Títulos claros
+- Bullet points`,
+    tags: ['limpieza', 'documentación', 'organización', 'notas']
+  },
+  {
+    title: '4️⃣ Documentación mínima (modo MVP)',
+    category: 'Limpieza',
+    content: `Reduce este archivo .md a su mínima expresión útil.
+
+Mantén solo:
+- Qué es el proyecto
+- Cómo arrancarlo
+- Dónde tocar si hay problemas
+
+Elimina todo lo que no sea crítico.`,
+    tags: ['limpieza', 'documentación', 'mvp', 'minimalismo']
+  },
+  {
+    title: '5️⃣ Limpieza general de archivo de código',
+    category: 'Optimización',
+    content: `Actúa como un revisor de código senior.
+
+Voy a pegar un archivo de código.
+Quiero que:
+- Elimines código muerto o comentado
+- Simplifiques lógica innecesaria
+- Mejores nombres de variables
+- Mantengas el comportamiento actual
+- No añadas nuevas dependencias
+
+Devuelve el archivo limpio y funcional.`,
+    tags: ['limpieza', 'código', 'refactor', 'optimización']
+  },
+  {
+    title: '6️⃣ Optimización sin romper nada (modo seguro)',
+    category: 'Optimización',
+    content: `Optimiza este código con enfoque conservador.
+
+Prioridades:
+- Legibilidad
+- Mantenimiento
+- Evitar efectos secundarios
+
+No:
+- Cambies la API pública
+- Cambies el flujo funcional
+- Introduzcas abstracciones complejas`,
+    tags: ['optimización', 'código', 'seguro', 'refactor']
+  },
+  {
+    title: '7️⃣ Limpieza de componentes React (muy útil para ti)',
+    category: 'Optimización',
+    content: `Limpia y optimiza este componente React.
+
+Objetivos:
+- Reducir estados innecesarios
+- Extraer lógica repetida
+- Mejorar legibilidad
+- Preparar para escalado
+
+No:
+- Cambies la UI
+- Cambies props externas`,
+    tags: ['optimización', 'react', 'componentes', 'refactor']
+  },
+  {
+    title: '8️⃣ Refactor Vibe Coding (sin sobreingeniería)',
+    category: 'Optimización',
+    content: `Refactoriza este código con mentalidad Vibe Coding.
+
+Principios:
+- Simple > Perfecto
+- Claro > Clever
+- Reutilizable > Específico
+
+Mantén el código fácil de modificar por no expertos.`,
+    tags: ['optimización', 'vibe-coding', 'refactor', 'simplicidad']
+  },
+  {
+    title: '9️⃣ Auditoría rápida del proyecto',
+    category: 'Optimización',
+    content: `Analiza esta estructura de proyecto.
+
+Quiero:
+- Archivos redundantes
+- Carpetas innecesarias
+- Posibles simplificaciones
+- Riesgos técnicos
+
+Devuelve recomendaciones accionables.`,
+    tags: ['optimización', 'auditoría', 'estructura', 'proyecto']
+  },
+  {
+    title: '🔟 Optimización de rendimiento (frontend)',
+    category: 'Optimización',
+    content: `Analiza este código frontend.
+
+Busca:
+- Renderizados innecesarios
+- Estados mal gestionados
+- Efectos redundantes
+- Imports pesados
+
+Propón mejoras simples.`,
+    tags: ['optimización', 'rendimiento', 'frontend', 'react']
+  },
+  {
+    title: '1️⃣1️⃣ Limpieza de lógica de estados',
+    category: 'Optimización',
+    content: `Simplifica la gestión de estados de esta app.
+
+Objetivo:
+- Menos estados
+- Más estados derivados
+- Menos sincronización manual
+
+Explica los cambios.`,
+    tags: ['optimización', 'estados', 'react', 'gestión']
+  },
+  {
+    title: '1️⃣2️⃣ Optimización backend low-code',
+    category: 'Optimización',
+    content: `Optimiza esta lógica backend low-code.
+
+Contexto:
+- NocoDB / Supabase / Firebase
+
+Busca:
+- Queries innecesarias
+- Campos redundantes
+- Relaciones mal usadas
+- Automatizaciones duplicadas`,
+    tags: ['optimización', 'backend', 'low-code', 'queries']
+  },
+  {
+    title: '1️⃣3️⃣ Limpieza de proyecto antes de producción',
+    category: 'Mantenimiento',
+    content: `Prepara este proyecto para producción.
+
+Incluye:
+- Eliminación de logs temporales
+- Eliminación de comentarios debug
+- Variables de entorno claras
+- Chequeos básicos de seguridad`,
+    tags: ['limpieza', 'producción', 'seguridad', 'preparación']
+  },
+  {
+    title: '1️⃣4️⃣ Renombrado y consistencia',
+    category: 'Mantenimiento',
+    content: `Revisa nombres de archivos, carpetas y variables.
+
+Objetivo:
+- Consistencia
+- Convenciones claras
+- Evitar ambigüedades
+
+Sugiere cambios sin aplicarlos automáticamente.`,
+    tags: ['mantenimiento', 'nomenclatura', 'consistencia', 'organización']
+  },
+  {
+    title: '1️⃣5️⃣ Archivo DEUDA_TECNICA.md',
+    category: 'Mantenimiento',
+    content: `Extrae la deuda técnica de este proyecto.
+
+Crea un archivo DEUDA_TECNICA.md con:
+- Qué se debe mejorar
+- Prioridad
+- Riesgo
+- Impacto futuro`,
+    tags: ['mantenimiento', 'deuda-técnica', 'documentación', 'planificación']
+  },
+  {
+    title: '1️⃣6️⃣ Qué NO tocar',
+    category: 'Pro',
+    content: `Analiza este código y dime:
+- Qué NO debería tocarse
+- Qué partes son frágiles
+- Qué rompería la app
+
+Enfócate en prevención de errores.`,
+    tags: ['pro', 'análisis', 'riesgo', 'prevención']
+  },
+  {
+    title: '1️⃣7️⃣ Simplificación extrema',
+    category: 'Pro',
+    content: `Si tuvieras que borrar el 30% de este código,
+¿qué borrarías sin perder funcionalidad?
+
+Justifica cada eliminación.`,
+    tags: ['pro', 'simplificación', 'optimización', 'minimalismo']
+  },
+  {
+    title: '1️⃣8️⃣ Limpieza para traspaso a otro desarrollador',
+    category: 'Pro',
+    content: `Prepara este proyecto para que lo coja otro desarrollador mañana.
+
+Incluye:
+- Qué entender primero
+- Qué partes son críticas
+- Qué partes se pueden tocar sin miedo`,
+    tags: ['pro', 'onboarding', 'documentación', 'traspaso']
+  },
+  {
+    title: '🔥 BONUS – Prompt Universal de Limpieza',
+    category: 'Pro',
+    content: `Actúa como un ingeniero senior obsesionado con la simplicidad.
+
+Limpia, optimiza y ordena lo que te pase,
+priorizando claridad, mantenibilidad y bajo coste cognitivo.
+
+No sobreingenierices.`,
+    tags: ['pro', 'limpieza', 'optimización', 'simplicidad', 'universal']
   }
 ];
 
