@@ -19,6 +19,7 @@ import { registerModerationRoutes } from "./moderation";
 import { registerGitHubSyncRoutes } from "./github-sync";
 import webhooksRouter from "./webhooks";
 import deploymentsRouter from "./deployments";
+import adminRouter from "./admin";
 
 /**
  * Register all routes
@@ -55,5 +56,8 @@ export function registerRoutes(app: Express): void {
   
   // Deployment routes (for CI/CD management)
   app.use("/api/deployments", deploymentsRouter);
+  
+  // Admin routes
+  app.use("/api/admin", adminRouter);
 }
 
