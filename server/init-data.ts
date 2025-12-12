@@ -3462,6 +3462,7 @@ export async function initializeData() {
         await storage.createPrompt({
           ...prompt,
           userId: systemUserId,
+          status: CONTENT_STATUS.APPROVED, // System user content is auto-approved
         });
       }
       log(`Initialized ${staticPrompts.length} prompts`, "init");
