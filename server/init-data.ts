@@ -502,6 +502,262 @@ Incluye:
 - Qué partes se pueden tocar sin miedo`,
     tags: ['pro', 'onboarding', 'documentación', 'traspaso']
   },
+  // Desarrollo Eficiente - Etapa 0: Claridad Total
+  {
+    title: '🧩 0.1 – Destrucción de la idea (antihumo)',
+    category: 'Desarrollo Eficiente',
+    content: `Actúa como un desarrollador senior escéptico.
+
+Voy a describir una idea de app.
+Quiero que:
+- Detectes ambigüedades
+- Identifiques supuestos no validados
+- Señales complejidad innecesaria
+- Me obligues a simplificar
+
+Sé directo y crítico.`,
+    tags: ['desarrollo-eficiente', 'claridad', 'validación', 'simplicidad']
+  },
+  {
+    title: '🧩 0.2 – Problema → solución concreta',
+    category: 'Desarrollo Eficiente',
+    content: `Reduce esta idea de app a una sola frase clara.
+
+Formato:
+"Esta app sirve para __________
+para que __________
+sin necesidad de __________."
+
+No adornes.`,
+    tags: ['desarrollo-eficiente', 'claridad', 'definición', 'simplicidad']
+  },
+  // Desarrollo Eficiente - Etapa 1: Diseño Técnico
+  {
+    title: '🧱 1.1 – Arquitectura eficiente',
+    category: 'Desarrollo Eficiente',
+    content: `Diseña la arquitectura más simple posible para esta app.
+
+Condiciones:
+- Escalable
+- Fácil de mantener
+- Apta para low-code / vibe coding
+
+Indica:
+- Qué va en frontend
+- Qué va en backend
+- Qué NO hace falta ahora`,
+    tags: ['desarrollo-eficiente', 'arquitectura', 'diseño', 'low-code']
+  },
+  {
+    title: '🧱 1.2 – Qué NO construir',
+    category: 'Desarrollo Eficiente',
+    content: `Lista explícitamente:
+- Funcionalidades que NO deben construirse ahora
+- Complejidad que debe evitarse
+- Errores típicos en este tipo de app`,
+    tags: ['desarrollo-eficiente', 'planificación', 'simplicidad', 'evitar']
+  },
+  {
+    title: '🧱 1.3 – Decisiones irreversibles',
+    category: 'Desarrollo Eficiente',
+    content: `Identifica las decisiones técnicas de esta app que:
+- Son difíciles de cambiar
+- Afectan a todo el proyecto
+
+Para cada una:
+- Riesgo
+- Alternativa
+- Recomendación`,
+    tags: ['desarrollo-eficiente', 'decisiones', 'arquitectura', 'riesgo']
+  },
+  // Desarrollo Eficiente - Etapa 2: Modelo de Datos
+  {
+    title: '🗂️ 2.1 – Modelo de datos mínimo',
+    category: 'Desarrollo Eficiente',
+    content: `Diseña el modelo de datos mínimo viable.
+
+Objetivo:
+- Cubrir el 80% del valor
+- Evitar tablas innecesarias
+
+Incluye:
+- Tablas
+- Campos
+- Relaciones
+- Estados`,
+    tags: ['desarrollo-eficiente', 'base-de-datos', 'modelo', 'mvp']
+  },
+  {
+    title: '🗂️ 2.2 – Antideuda de datos',
+    category: 'Desarrollo Eficiente',
+    content: `Analiza este modelo de datos y dime:
+- Qué sobra
+- Qué está duplicado
+- Qué crecerá mal en el tiempo`,
+    tags: ['desarrollo-eficiente', 'base-de-datos', 'deuda-técnica', 'optimización']
+  },
+  {
+    title: '🗂️ 2.3 – Preparación para offline / sync',
+    category: 'Desarrollo Eficiente',
+    content: `Adapta este modelo de datos para:
+- Uso offline
+- Sincronización futura
+- Conflictos de edición
+
+Sin sobreingeniería.`,
+    tags: ['desarrollo-eficiente', 'base-de-datos', 'offline', 'sincronización']
+  },
+  // Desarrollo Eficiente - Etapa 3: Experiencia de Usuario
+  {
+    title: '🧭 3.1 – Flujo real por rol',
+    category: 'Desarrollo Eficiente',
+    content: `Define el flujo real de cada rol.
+
+Para cada rol:
+- Qué ve primero
+- Qué hace el 80% del tiempo
+- Qué solo hace ocasionalmente`,
+    tags: ['desarrollo-eficiente', 'ux', 'flujos', 'roles']
+  },
+  {
+    title: '🧭 3.2 – Pantallas mínimas',
+    category: 'Desarrollo Eficiente',
+    content: `Reduce la app al mínimo número de pantallas posible.
+
+Justifica cada pantalla.`,
+    tags: ['desarrollo-eficiente', 'ux', 'pantallas', 'simplicidad']
+  },
+  // Desarrollo Eficiente - Etapa 4: MVP Real
+  {
+    title: '🧪 4.1 – MVP brutalmente honesto',
+    category: 'Desarrollo Eficiente',
+    content: `Define un MVP que:
+- Pueda usarse mañana
+- Aunque sea feo
+- Aunque falten cosas
+
+Enumera:
+- Incluido
+- Excluido`,
+    tags: ['desarrollo-eficiente', 'mvp', 'planificación', 'realismo']
+  },
+  {
+    title: '🧪 4.2 – Qué validar primero',
+    category: 'Desarrollo Eficiente',
+    content: `¿Qué es lo primero que hay que validar en esta app?
+
+- Supuesto principal
+- Métrica mínima
+- Cómo saber si funciona`,
+    tags: ['desarrollo-eficiente', 'mvp', 'validación', 'métricas']
+  },
+  // Desarrollo Eficiente - Etapa 5: Implementación
+  {
+    title: '⚙️ 5.1 – Orden de implementación',
+    category: 'Desarrollo Eficiente',
+    content: `Define el orden óptimo de implementación.
+
+Prioriza:
+- Lo que desbloquea más cosas
+- Lo que reduce riesgo`,
+    tags: ['desarrollo-eficiente', 'implementación', 'orden', 'priorización']
+  },
+  {
+    title: '⚙️ 5.2 – Qué hacer low-code y qué no',
+    category: 'Desarrollo Eficiente',
+    content: `Decide qué partes hacer en:
+- Low-code
+- Código custom
+
+Justifica cada decisión.`,
+    tags: ['desarrollo-eficiente', 'low-code', 'implementación', 'decisión']
+  },
+  {
+    title: '⚙️ 5.3 – Estructura de carpetas clara',
+    category: 'Desarrollo Eficiente',
+    content: `Diseña una estructura de proyecto:
+- Fácil de entender
+- Fácil de borrar cosas
+- Fácil de escalar`,
+    tags: ['desarrollo-eficiente', 'estructura', 'organización', 'proyecto']
+  },
+  // Desarrollo Eficiente - Etapa 6: Limpieza Continua
+  {
+    title: '🧹 6.1 – Limpieza después de cada sesión',
+    category: 'Desarrollo Eficiente',
+    content: `Revisa lo construido hoy y dime:
+- Qué sobra
+- Qué está mal nombrado
+- Qué complicamos sin querer`,
+    tags: ['desarrollo-eficiente', 'limpieza', 'refactor', 'mantenimiento']
+  },
+  {
+    title: '🧹 6.2 – Refactor sin ego',
+    category: 'Desarrollo Eficiente',
+    content: `Refactoriza este código:
+- Sin hacerlo "bonito"
+- Solo para hacerlo claro`,
+    tags: ['desarrollo-eficiente', 'refactor', 'limpieza', 'claridad']
+  },
+  // Desarrollo Eficiente - Etapa 7: Preproducción
+  {
+    title: '🚀 7.1 – Checklist de producción',
+    category: 'Desarrollo Eficiente',
+    content: `Genera un checklist realista antes de producción.
+
+Incluye:
+- Seguridad
+- Datos
+- Errores comunes
+- Backups`,
+    tags: ['desarrollo-eficiente', 'producción', 'checklist', 'seguridad']
+  },
+  {
+    title: '🚀 7.2 – Qué puede romperse',
+    category: 'Desarrollo Eficiente',
+    content: `Dime qué cosas se romperán primero en producción
+y cómo detectarlas rápido.`,
+    tags: ['desarrollo-eficiente', 'producción', 'riesgo', 'monitoreo']
+  },
+  // Desarrollo Eficiente - Etapa 8: Mantenimiento
+  {
+    title: '🧠 8.1 – Puntos calientes',
+    category: 'Desarrollo Eficiente',
+    content: `Identifica:
+- Partes frágiles
+- Puntos de alto cambio
+- Zonas que crecerán rápido`,
+    tags: ['desarrollo-eficiente', 'mantenimiento', 'análisis', 'riesgo']
+  },
+  {
+    title: '🧠 8.2 – Deuda técnica consciente',
+    category: 'Desarrollo Eficiente',
+    content: `Genera un DEUDA_TECNICA.md priorizado.
+
+Solo deuda real, no teórica.`,
+    tags: ['desarrollo-eficiente', 'deuda-técnica', 'documentación', 'priorización']
+  },
+  {
+    title: '🔥 PROMPT FINAL – Desarrollador Eficiente Total',
+    category: 'Desarrollo Eficiente',
+    content: `Actúa como un desarrollador senior extremadamente eficiente.
+
+Acompáñame desde:
+- Idea
+- Diseño
+- Implementación
+- Producción
+- Mantenimiento
+
+En cada paso:
+- Reduce complejidad
+- Evita deuda técnica
+- Prioriza valor real
+- Usa low-code cuando convenga
+
+No me dejes hacer tonterías técnicas.`,
+    tags: ['desarrollo-eficiente', 'universal', 'completo', 'metodología']
+  },
   {
     title: '🔥 BONUS – Prompt Universal de Limpieza',
     category: 'Pro',
