@@ -19,7 +19,6 @@ import { registerModerationRoutes } from "./moderation";
 import { registerGitHubSyncRoutes } from "./github-sync";
 import webhooksRouter from "./webhooks";
 import deploymentsRouter from "./deployments";
-import deploymentsRouter from "./deployments";
 
 /**
  * Register all routes
