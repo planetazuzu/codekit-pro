@@ -50,13 +50,15 @@ function verifyWebhookSecret(req: any, res: any, next: any) {
  */
 router.post("/deploy", verifyWebhookSecret, async (req, res) => {
   try {
-    const { ref, commit, repository, pusher } = req.body;
+    const { ref, commit, repository, pusher, workflow, run_id } = req.body;
 
     logger.info("Deployment webhook triggered", {
       ref,
       commit: commit?.substring(0, 7),
       repository,
       pusher,
+      workflow,
+      run_id,
     });
 
     // Only deploy from main/master branch
@@ -68,30 +70,45 @@ router.post("/deploy", verifyWebhookSecret, async (req, res) => {
       });
     }
 
-    // Run deployment script
-    const deployScript = path.join(projectRoot, "scripts", "deploy-auto.sh");
+    // Detectar si estamos usando Docker
+    const useDocker = process.env.USE_DOCKER === "true" || 
+                      (await execAsync("command -v docker > /dev/null 2>&1 && echo 'yes' || echo 'no'")).stdout.trim() === "yes";
 
-    logger.info("Executing deployment script...");
+    // Seleccionar script de despliegue
+    const deployScript = useDocker 
+      ? path.join(projectRoot, "scripts", "deploy-docker-auto.sh")
+      : path.join(projectRoot, "scripts", "deploy-auto.sh");
 
-    const { stdout, stderr } = await execAsync(`bash ${deployScript}`, {
+    logger.info(`Executing deployment script: ${deployScript} (Docker: ${useDocker})`);
+
+    // Responder inmediatamente para evitar timeout
+    res.json({
+      success: true,
+      message: "Deployment triggered successfully",
+      commit: commit?.substring(0, 7),
+      ref,
+      docker: useDocker,
+    });
+
+    // Ejecutar despliegue en background
+    execAsync(`bash ${deployScript}`, {
       cwd: projectRoot,
       env: {
         ...process.env,
         DEPLOY_COMMIT: commit,
         DEPLOY_REF: ref,
         DEPLOY_USER: pusher,
+        DEPLOY_WORKFLOW: workflow,
+        DEPLOY_RUN_ID: run_id,
       },
+    }).then(({ stdout, stderr }) => {
+      if (stdout) logger.info("Deployment output:", stdout);
+      if (stderr) logger.warn("Deployment warnings:", stderr);
+      logger.info("Deployment completed successfully");
+    }).catch((error) => {
+      logger.error("Deployment error:", error);
     });
 
-    if (stdout) logger.info("Deployment output:", stdout);
-    if (stderr) logger.warn("Deployment warnings:", stderr);
-
-    res.json({
-      success: true,
-      message: "Deployment triggered successfully",
-      commit: commit?.substring(0, 7),
-      ref,
-    });
   } catch (error: any) {
     logger.error("Deployment webhook error:", error);
     res.status(500).json({
