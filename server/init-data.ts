@@ -46,6 +46,205 @@ const staticPrompts = [
     category: 'Mobile',
     content: 'Diseña la arquitectura de carpetas y navegación para una app React Native que debe escalar a 50+ pantallas. Sugiere librerías para manejo de estado y navegación.',
     tags: ['mobile', 'react-native', 'architecture']
+  },
+  // Vibe Coding & Low-Code Prompts
+  {
+    title: '1️⃣ Prompt Maestro – Arranque de Aplicación (Vibe Coding)',
+    category: 'Vibe Coding',
+    content: `Actúa como un arquitecto senior de producto digital especializado en low-code y Vibe Coding.
+
+Quiero crear una aplicación llamada: [NOMBRE_APP]
+
+Tipo de app:
+- Web / PWA / Mobile / Híbrida
+
+Objetivo principal:
+- [qué problema resuelve]
+
+Usuarios principales:
+- [roles]
+
+Tecnologías preferidas:
+- Frontend: [React / Next / Lovable / Glide / etc.]
+- Backend / DB: [NocoDB / Supabase / Firebase / Airtable]
+- Auth: [ninguna / email / Google / manual]
+- IA: [sí/no]
+
+Quiero que me propongas:
+1. Arquitectura general de la app
+2. Módulos principales
+3. Flujo de usuario por rol
+4. Qué partes conviene hacer low-code y cuáles custom
+5. Roadmap en fases (MVP → versión profesional)
+
+No escribas código todavía.`,
+    tags: ['vibe-coding', 'low-code', 'arquitectura', 'mvp']
+  },
+  {
+    title: '2️⃣ Definición de Roles y Permisos (Low-Code)',
+    category: 'Vibe Coding',
+    content: `Define un sistema de roles y permisos para esta aplicación:
+
+App: [NOMBRE_APP]
+
+Roles iniciales:
+- [ej: admin, gestor, usuario, técnico]
+
+Para cada rol define:
+- Qué puede ver
+- Qué puede crear / editar / borrar
+- Qué NO puede hacer
+- Pantallas a las que accede
+- Acciones críticas protegidas
+
+Devuélvelo en formato tabla clara.
+
+👉 Ideal para NocoDB, Supabase RLS, Airtable Interfaces, Retool.`,
+    tags: ['vibe-coding', 'low-code', 'roles', 'permisos', 'seguridad']
+  },
+  {
+    title: '3️⃣ Estructura de Base de Datos (Low-Code Friendly)',
+    category: 'Vibe Coding',
+    content: `Diseña la estructura de base de datos para esta app usando un enfoque simple y escalable.
+
+Backend: [NocoDB / Supabase / Airtable]
+
+Requisitos:
+- Multiusuario
+- Roles
+- Estados (pendiente, activo, cerrado, etc.)
+- Historial de cambios
+- Compatible con sincronización offline futura
+
+Devuélvelo como:
+- Lista de tablas
+- Campos por tabla
+- Relaciones
+- Campos clave (id, created_at, updated_at, status)`,
+    tags: ['vibe-coding', 'low-code', 'database', 'estructura', 'escalabilidad']
+  },
+  {
+    title: '4️⃣ Diseño de Pantallas (UI/UX Vibe Coding)',
+    category: 'Vibe Coding',
+    content: `Diseña las pantallas de esta aplicación con un enfoque moderno, claro y productivo.
+
+Estilo:
+- Dashboard tipo Supabase / Airtable
+- Responsive
+- Uso intensivo de tablas, cards y estados visuales
+
+Para cada pantalla indica:
+- Nombre
+- Objetivo
+- Componentes principales
+- Acciones del usuario
+- Estados vacíos y errores
+
+No diseñes gráficos todavía.`,
+    tags: ['vibe-coding', 'ui', 'ux', 'diseño', 'pantallas']
+  },
+  {
+    title: '5️⃣ Convertir Lógica en Low-Code',
+    category: 'Vibe Coding',
+    content: `Convierte esta funcionalidad en lógica compatible con herramientas low-code:
+
+Funcionalidad:
+[describe la funcionalidad]
+
+Condiciones:
+- Sin backend complejo
+- Usando estados, tablas y relaciones
+- Pensado para NocoDB / Supabase / Firebase
+
+Explícame:
+- Qué tablas intervienen
+- Qué eventos disparan acciones
+- Qué validaciones son necesarias
+- Qué puede automatizarse sin código`,
+    tags: ['vibe-coding', 'low-code', 'lógica', 'automatización', 'workflows']
+  },
+  {
+    title: '6️⃣ Automatizaciones y Workflows',
+    category: 'Vibe Coding',
+    content: `Define automatizaciones útiles para esta app.
+
+Incluye:
+- Disparadores (crear, editar, cambiar estado)
+- Acciones (notificar, bloquear, calcular, asignar)
+- Usuarios afectados
+- Prioridad de ejecución
+
+Devuélvelo en formato lista clara para implementarlo en:
+- NocoDB
+- Supabase Functions
+- Zapier / Make`,
+    tags: ['vibe-coding', 'low-code', 'automatización', 'workflows', 'zapier']
+  },
+  {
+    title: '7️⃣ Integración de IA (Sin Complicar el Sistema)',
+    category: 'Vibe Coding',
+    content: `Diseña cómo integrar funciones de IA en esta app sin complicar el sistema.
+
+Objetivo de la IA:
+- [ej: ayuda, análisis, recomendaciones]
+
+Requisitos:
+- Configurable solo por admin
+- No invasiva
+- Útil desde el primer MVP
+
+Propón:
+- Casos de uso concretos
+- Qué datos consume
+- Qué datos genera
+- Riesgos y límites`,
+    tags: ['vibe-coding', 'ia', 'ai', 'integración', 'automatización']
+  },
+  {
+    title: '8️⃣ MVP Rápido (Time-to-Market)',
+    category: 'Vibe Coding',
+    content: `Quiero lanzar un MVP funcional en 7 días.
+
+App: [NOMBRE_APP]
+
+Prioriza:
+- Lo imprescindible
+- Lo que puede esperar
+- Lo que NO debe hacerse ahora
+
+Devuélvelo como checklist diaria (Día 1 a Día 7).`,
+    tags: ['vibe-coding', 'mvp', 'time-to-market', 'productividad', 'roadmap']
+  },
+  {
+    title: '9️⃣ Modelo de Monetización Realista',
+    category: 'Vibe Coding',
+    content: `Propón un modelo de monetización realista para esta app.
+
+Contexto:
+- Público objetivo
+- Uso profesional
+- Bajo coste inicial
+
+Incluye:
+- Planes posibles
+- Qué se limita en cada plan
+- Qué métricas medir
+- Estrategia de validación temprana`,
+    tags: ['vibe-coding', 'monetización', 'negocio', 'planes', 'métricas']
+  },
+  {
+    title: '🔟 Documentación Automática (Escalable)',
+    category: 'Vibe Coding',
+    content: `Genera documentación clara para esta aplicación pensada para:
+- Administradores
+- Usuarios finales
+- Desarrolladores futuros
+
+Formato:
+- Markdown
+- Lenguaje claro
+- Orientado a no técnicos`,
+    tags: ['vibe-coding', 'documentación', 'markdown', 'escalabilidad', 'onboarding']
   }
 ];
 
