@@ -3,7 +3,7 @@
  * Lists all tools, guides, and affiliate links
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import {
   Search,
@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Star,
   Filter,
+  RefreshCw,
 } from "lucide-react";
 import { Link } from "wouter";
 import { Layout } from "@/layout/Layout";
@@ -27,14 +28,38 @@ import { BackButton } from "@/components/common/BackButton";
 import { useAffiliates } from "@/hooks/use-affiliates";
 import { useGuides } from "@/hooks/use-guides";
 import { useLinks } from "@/hooks/use-links";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Resources() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const queryClient = useQueryClient();
   
-  const { data: affiliates } = useAffiliates();
-  const { data: guides } = useGuides();
-  const { data: links } = useLinks();
+  // Fetch resources with auto-refresh
+  const { data: affiliates, isLoading: affiliatesLoading, refetch: refetchAffiliates } = useAffiliates();
+  const { data: guides, isLoading: guidesLoading, refetch: refetchGuides } = useGuides();
+  const { data: links, isLoading: linksLoading, refetch: refetchLinks } = useLinks();
+
+  // Auto-refresh every 30 seconds to get new resources
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetchAffiliates();
+      refetchGuides();
+      refetchLinks();
+    }, 30000); // 30 segundos
+
+    return () => clearInterval(interval);
+  }, [refetchAffiliates, refetchGuides, refetchLinks]);
+
+  // Manual refresh function
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/affiliates"] });
+    queryClient.invalidateQueries({ queryKey: ["guides"] });
+    queryClient.invalidateQueries({ queryKey: ["links"] });
+    refetchAffiliates();
+    refetchGuides();
+    refetchLinks();
+  };
 
   // Filter all resources by search
   const filteredResources = useMemo(() => {
@@ -61,8 +86,12 @@ export default function Resources() {
     return { affiliates: filteredAffiliates, guides: filteredGuides, links: filteredLinks };
   }, [affiliates, guides, links, searchTerm]);
 
-  const totalResources =
-    (affiliates?.length || 0) + (guides?.length || 0) + (links?.length || 0);
+  // Calculate total resources with loading state
+  const totalResources = useMemo(() => {
+    return (affiliates?.length || 0) + (guides?.length || 0) + (links?.length || 0);
+  }, [affiliates, guides, links]);
+
+  const isLoading = affiliatesLoading || guidesLoading || linksLoading;
 
   return (
     <Layout>
@@ -86,12 +115,33 @@ export default function Resources() {
 
         {/* Hero Section */}
         <div className="text-center space-y-4 py-8">
-          <h1 className="text-4xl font-bold text-foreground">
-            Recursos para Desarrolladores
-          </h1>
+          <div className="flex items-center justify-center gap-3">
+            <h1 className="text-4xl font-bold text-foreground">
+              Recursos para Desarrolladores
+            </h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="h-8 w-8"
+              title="Actualizar recursos"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Encuentra las mejores herramientas, guías y recursos para potenciar tu
-            desarrollo. {totalResources > 0 ? `Más de ${totalResources} recursos curados.` : 'Recursos curados para desarrolladores.'}
+            desarrollo.{" "}
+            {isLoading ? (
+              <span className="text-muted-foreground/70">Cargando recursos...</span>
+            ) : totalResources > 0 ? (
+              <span className="font-semibold text-foreground">
+                {totalResources} {totalResources === 1 ? 'recurso' : 'recursos'} curados
+              </span>
+            ) : (
+              <span>Recursos curados para desarrolladores.</span>
+            )}
           </p>
 
           {/* Search */}
@@ -110,32 +160,56 @@ export default function Resources() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="text-center">
+          <Card className="text-center transition-all hover:border-primary/50">
             <CardContent className="pt-6">
               <TrendingUp className="h-8 w-8 text-blue-400 mx-auto mb-2" />
-              <p className="text-2xl font-bold">{affiliates?.length || 0}</p>
+              <p className="text-2xl font-bold">
+                {affiliatesLoading ? (
+                  <span className="text-muted-foreground">...</span>
+                ) : (
+                  affiliates?.length || 0
+                )}
+              </p>
               <p className="text-sm text-muted-foreground">Herramientas</p>
             </CardContent>
           </Card>
-          <Card className="text-center">
+          <Card className="text-center transition-all hover:border-primary/50">
             <CardContent className="pt-6">
               <BookOpen className="h-8 w-8 text-green-400 mx-auto mb-2" />
-              <p className="text-2xl font-bold">{guides?.length || 0}</p>
+              <p className="text-2xl font-bold">
+                {guidesLoading ? (
+                  <span className="text-muted-foreground">...</span>
+                ) : (
+                  guides?.length || 0
+                )}
+              </p>
               <p className="text-sm text-muted-foreground">Guías</p>
             </CardContent>
           </Card>
-          <Card className="text-center">
+          <Card className="text-center transition-all hover:border-primary/50">
             <CardContent className="pt-6">
               <LinkIcon className="h-8 w-8 text-purple-400 mx-auto mb-2" />
-              <p className="text-2xl font-bold">{links?.length || 0}</p>
+              <p className="text-2xl font-bold">
+                {linksLoading ? (
+                  <span className="text-muted-foreground">...</span>
+                ) : (
+                  links?.length || 0
+                )}
+              </p>
               <p className="text-sm text-muted-foreground">Enlaces</p>
             </CardContent>
           </Card>
-          <Card className="text-center">
+          <Card className="text-center transition-all hover:border-primary/50">
             <CardContent className="pt-6">
               <Star className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
-              <p className="text-2xl font-bold">100%</p>
-              <p className="text-sm text-muted-foreground">Gratuito</p>
+              <p className="text-2xl font-bold">
+                {isLoading ? (
+                  <span className="text-muted-foreground">...</span>
+                ) : (
+                  totalResources
+                )}
+              </p>
+              <p className="text-sm text-muted-foreground">Total</p>
             </CardContent>
           </Card>
         </div>
