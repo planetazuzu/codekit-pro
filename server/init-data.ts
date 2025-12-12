@@ -4178,6 +4178,8 @@ export async function initializeData() {
     
     // Initialize prompts
     const existingPrompts = await storage.getPrompts();
+    const existingPromptTitles = new Set(existingPrompts.map(p => p.title));
+    
     if (existingPrompts.length === 0) {
       log("Initializing prompts...", "init");
       for (const prompt of staticPrompts) {
@@ -4188,6 +4190,22 @@ export async function initializeData() {
         });
       }
       log(`Initialized ${staticPrompts.length} prompts`, "init");
+    } else {
+      // Add missing prompts
+      let addedCount = 0;
+      for (const prompt of staticPrompts) {
+        if (!existingPromptTitles.has(prompt.title)) {
+          await storage.createPrompt({
+            ...prompt,
+            userId: systemUserId,
+            status: CONTENT_STATUS.APPROVED, // System user content is auto-approved
+          });
+          addedCount++;
+        }
+      }
+      if (addedCount > 0) {
+        log(`Added ${addedCount} new prompts`, "init");
+      }
     }
 
     // Initialize snippets
