@@ -10,9 +10,11 @@ import {
   Terminal,
   BarChart3,
   Gift,
-  TrendingUp
+  TrendingUp,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
@@ -27,11 +29,15 @@ const menuItems = [
   // Admin oculto - acceso directo por URL /admin con contraseña
 ];
 
-export function Sidebar() {
+interface SidebarContentProps {
+  onLinkClick?: () => void;
+}
+
+function SidebarContent({ onLinkClick }: SidebarContentProps) {
   const [location] = useLocation();
 
   return (
-    <aside className="w-64 border-r border-border bg-card/50 backdrop-blur-xl h-screen fixed left-0 top-0 flex flex-col z-50">
+    <>
       <div className="p-6 flex items-center gap-3 border-b border-border/50">
         <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
           <Terminal className="h-5 w-5" />
@@ -49,6 +55,7 @@ export function Sidebar() {
             <Link 
               key={item.href} 
               href={item.href}
+              onClick={onLinkClick}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200",
                 isActive 
@@ -79,6 +86,7 @@ export function Sidebar() {
         <div className="flex flex-wrap gap-2 text-xs">
           <Link 
             href="/legal"
+            onClick={onLinkClick}
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
             Aviso Legal
@@ -86,12 +94,48 @@ export function Sidebar() {
           <span className="text-muted-foreground">•</span>
           <Link 
             href="/privacy"
+            onClick={onLinkClick}
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
             Privacidad
           </Link>
         </div>
       </div>
-    </aside>
+    </>
+  );
+}
+
+interface SidebarProps {
+  mobileOpen?: boolean;
+  desktopOpen?: boolean;
+  onMobileClose?: () => void;
+  onDesktopToggle?: () => void;
+}
+
+export function Sidebar({ mobileOpen, desktopOpen, onMobileClose, onDesktopToggle }: SidebarProps) {
+  return (
+    <>
+      {/* Desktop Sidebar - Colapsable */}
+      <aside className={cn(
+        "hidden md:flex border-r border-border bg-card/50 backdrop-blur-xl h-screen fixed left-0 top-0 flex-col z-50 transition-all duration-300",
+        desktopOpen ? "w-64" : "w-0 overflow-hidden"
+      )}>
+        <div className="w-64 h-full flex flex-col">
+          <SidebarContent />
+        </div>
+      </aside>
+
+      {/* Mobile Sidebar - Sheet/Drawer */}
+      <Sheet open={mobileOpen} onOpenChange={(open) => !open && onMobileClose?.()}>
+        <SheetContent side="left" className="w-64 p-0 bg-card/50 backdrop-blur-xl">
+          <SheetHeader className="sr-only">
+            <SheetTitle>Menú de Navegación</SheetTitle>
+          </SheetHeader>
+          <div className="h-full flex flex-col">
+            <SidebarContent onLinkClick={onMobileClose} />
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
