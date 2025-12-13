@@ -46,37 +46,80 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
+        /**
+         * Code-splitting strategy for optimal caching and mobile performance
+         * 
+         * CRITICAL RULE: Dependencies that require React at initialization MUST be in the same chunk
+         * 
+         * Safe to separate (load after React):
+         * - react-helmet-async (uses React but doesn't need it at init)
+         * - @tanstack/react-query (uses React but doesn't need it at init)
+         * - wouter (router, independent)
+         * - framer-motion (uses React but doesn't need it at init)
+         * 
+         * MUST be together (need React at initialization):
+         * - react, react-dom (React core)
+         * - @radix-ui/* (needs React.forwardRef at init)
+         * - lucide-react (registers icons at init, needs React context)
+         * - react-hook-form (may need React at init)
+         * - react-markdown (may need React at init)
+         * - react-syntax-highlighter (may need React at init)
+         * - react-window (may need React at init)
+         * - react-resizable-panels (may need React at init)
+         * - react-day-picker (may need React at init)
+         * - embla-carousel-react (may need React at init)
+         * - recharts (may need React at init)
+         * - next-themes (may need React at init)
+         * - sonner (may need React at init)
+         * - vaul (may need React at init)
+         * 
+         * Solution: Keep all React-dependent libraries in vendor chunk to ensure
+         * React is available when they initialize. This prevents errors like:
+         * - "Cannot read properties of undefined (reading 'forwardRef')"
+         * - "Cannot set properties of undefined (setting 'Activity')"
+         */
         manualChunks(id) {
-          // Separar vendor chunks para mejor caching y rendimiento móvil
-          // FIX: Desactivar code-splitting para React y dependencias para evitar errores
-          // El problema parece ser el orden de carga de chunks
+          // Only split code from node_modules
           if (id.includes('node_modules')) {
-            // NO separar React, Radix UI ni lucide-react - dejarlos en vendor principal
-            // Esto asegura que se carguen en el orden correcto sin problemas de inicialización
-            // React ecosystem (puede estar separado, no causa problemas)
+            // Safe to separate - these don't need React at initialization
+            // They can load after React is available
+            
+            // React ecosystem (safe to separate)
             if (id.includes('react-helmet') || id.includes('react-router')) {
               return 'react-ecosystem';
             }
-            // Query library (puede estar separado)
+            
+            // Query library (safe to separate - uses React but doesn't need it at init)
             if (id.includes('@tanstack/react-query')) {
               return 'query-vendor';
             }
-            // Router (puede estar separado)
+            
+            // Router (safe to separate - independent)
             if (id.includes('wouter')) {
               return 'router-vendor';
             }
-            // Framer motion (puede estar separado)
+            
+            // Animation library (safe to separate - uses React but doesn't need it at init)
             if (id.includes('framer-motion')) {
               return 'animation-vendor';
             }
-            // Todo lo demás (incluyendo React, Radix UI, lucide-react) va al vendor principal
+            
+            // Everything else goes to vendor chunk
+            // This includes:
+            // - react, react-dom (React core)
+            // - All @radix-ui packages (need React.forwardRef)
+            // - lucide-react (registers icons, needs React)
+            // - All other React-dependent libraries
+            // This ensures React is loaded first and available when other libs initialize
             return 'vendor';
           }
-          // Separar herramientas pesadas
+          
+          // Separate heavy tools for lazy loading
           if (id.includes('/tools/')) {
             return 'tools';
           }
-          // Separar componentes comunes
+          
+          // Separate common components
           if (id.includes('/components/common/')) {
             return 'common-components';
           }
