@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom/vitest";
 import { EmptyState } from "./EmptyState";
 import { Search } from "lucide-react";
 

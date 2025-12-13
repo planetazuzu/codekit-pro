@@ -34,7 +34,7 @@ export function AffiliateStats({ affiliateId, className }: AffiliateStatsProps) 
       totalClicks,
       avgPerDay,
       topDay: topDayData.date !== "-" ? topDayData.date : "-",
-      topDayCount: topDayData.count,
+      topDayCount: topDayData.count > 0 ? topDayData.count : undefined,
     };
   }, [stats]);
 
@@ -116,7 +116,7 @@ export function AffiliateStats({ affiliateId, className }: AffiliateStatsProps) 
           <div className="text-lg font-bold text-foreground">
             {summary.topDay}
           </div>
-          {summary.topDayCount > 0 && (
+          {summary.topDayCount && summary.topDayCount > 0 && (
             <p className="text-xs text-muted-foreground">
               {summary.topDayCount} clics
             </p>

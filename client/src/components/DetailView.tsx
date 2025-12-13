@@ -30,6 +30,8 @@ export const DetailView = memo(function DetailView({ open, onOpenChange, type, d
   }, [type, toast]);
 
   const handleExportMarkdown = useCallback(() => {
+    if (!data) return;
+    
     let markdown = "";
     
     if (type === "prompt") {
@@ -54,7 +56,7 @@ export const DetailView = memo(function DetailView({ open, onOpenChange, type, d
       markdown += `${snippet.code}\n`;
       markdown += `\`\`\`\n`;
     }
-
+    
     const blob = new Blob([markdown], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

@@ -35,9 +35,15 @@ export function VirtualizedList<T>({
     const item = items[index];
     if (!item) return null;
 
+    const rendered = renderItem(item, index);
+    // Ensure we return a valid React element
+    if (!rendered || typeof rendered !== 'object' || !('$$typeof' in rendered)) {
+      return null;
+    }
+
     return (
       <div style={style} className={cn("px-2", itemClassName)}>
-        {renderItem(item, index)}
+        {rendered}
       </div>
     );
   });
@@ -54,14 +60,15 @@ export function VirtualizedList<T>({
     );
   }
 
-  const listProps: ListProps<unknown> = {
+  // Use type assertion to avoid TypeScript error with react-window types
+  const listProps = {
     rowCount: items.length,
     rowHeight: itemHeight,
     defaultHeight: height,
     overscanCount,
-    rowComponent: Row,
+    rowComponent: Row as any,
     className: cn("w-full", className),
-  };
+  } as any;
 
   return <List {...listProps} />;
 }
@@ -101,6 +108,12 @@ export function VirtualizedGrid<T>({
     
     if (!item) return null;
 
+    const rendered = renderItem(item, index);
+    // Ensure we return a valid React element
+    if (!rendered || typeof rendered !== 'object' || !('$$typeof' in rendered)) {
+      return null;
+    }
+
     return (
       <div
         {...ariaAttributes}
@@ -113,7 +126,7 @@ export function VirtualizedGrid<T>({
         }}
         className={itemClassName}
       >
-        {renderItem(item, index)}
+        {rendered}
       </div>
     );
   });

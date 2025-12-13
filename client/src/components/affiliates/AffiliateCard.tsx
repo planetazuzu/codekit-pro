@@ -32,7 +32,7 @@ export const AffiliateCard = memo(function AffiliateCard({ affiliate, className 
   const trackClick = useTrackAffiliateClick();
   const [isNavigating, setIsNavigating] = useState(false);
 
-  const handleClick = useCallback(async (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleClick = useCallback(async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     
     if (isNavigating) return;
