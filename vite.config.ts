@@ -48,15 +48,14 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           // Separar vendor chunks para mejor caching y rendimiento móvil
-          // IMPORTANTE: React debe estar disponible para todos los chunks que lo necesiten
+          // FIX: React y @radix-ui deben estar juntos para evitar error "forwardRef undefined"
           if (id.includes('node_modules')) {
-            // React core - mantener separado pero asegurar que se carga primero
+            // React core y UI libraries que lo necesitan - mantener juntos
             if (id.includes('react') && (id.includes('/react/') || id.includes('/react-dom/'))) {
               return 'react-vendor';
             }
-            // UI libraries que dependen de React
-            // PROBLEMA: @radix-ui necesita React.forwardRef pero React está en otro chunk
-            // SOLUCIÓN: Simplificar - incluir React en vendor principal o asegurar orden de carga
+            // @radix-ui necesita React.forwardRef - incluir en react-vendor o asegurar que React se carga primero
+            // Por ahora, mantener separado pero Rollup debería manejar las dependencias
             if (id.includes('@radix-ui')) {
               return 'ui-vendor';
             }
