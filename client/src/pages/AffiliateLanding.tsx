@@ -251,6 +251,7 @@ export default function AffiliateLanding() {
             limit={3}
           />
         </div>
+        </div>
       </MobilePullToRefresh>
     </Layout>
   );

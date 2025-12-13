@@ -235,6 +235,7 @@ export default function Deals() {
             Los códigos de descuento pueden expirar sin previo aviso.
           </p>
         </div>
+        </div>
       </MobilePullToRefresh>
     </Layout>
   );
