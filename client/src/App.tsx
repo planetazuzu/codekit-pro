@@ -107,6 +107,11 @@ function Router() {
           <Resources />
         </SuspenseWrapper>
       </Route>
+      <Route path="/docs">
+        <SuspenseWrapper>
+          <Docs />
+        </SuspenseWrapper>
+      </Route>
       <Route path="/docs/:path*">
         <SuspenseWrapper>
           <Docs />
