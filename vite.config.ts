@@ -54,10 +54,10 @@ export default defineConfig({
             if (id.includes('react') && (id.includes('/react/') || id.includes('/react-dom/'))) {
               return 'react-vendor';
             }
-            // @radix-ui necesita React.forwardRef - incluir en react-vendor o asegurar que React se carga primero
-            // Por ahora, mantener separado pero Rollup debería manejar las dependencias
+            // @radix-ui necesita React.forwardRef - SOLUCIÓN: incluir en react-vendor
+            // Esto asegura que React esté disponible cuando Radix UI lo necesite
             if (id.includes('@radix-ui')) {
-              return 'ui-vendor';
+              return 'react-vendor'; // Incluir en mismo chunk que React
             }
             // React ecosystem
             if (id.includes('react-helmet') || id.includes('react-router')) {
