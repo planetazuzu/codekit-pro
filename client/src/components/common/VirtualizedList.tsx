@@ -4,7 +4,7 @@
  * Updated for react-window v2.2.3 API
  */
 
-import { memo } from "react";
+import { isValidElement } from "react";
 import { List, Grid, type ListProps, type RowComponentProps, type CellComponentProps } from "react-window";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +31,8 @@ export function VirtualizedList<T>({
   emptyIcon,
   overscanCount = 5,
 }: VirtualizedListProps<T>) {
-  const Row = memo(({ index, style }: RowComponentProps) => {
+  // Create row component as a function (not memoized) for react-window
+  const Row = ({ index, style }: RowComponentProps) => {
     const item = items[index];
     if (!item) return null;
 
@@ -42,8 +43,8 @@ export function VirtualizedList<T>({
         return null;
       }
       
-      // Check if it's a valid React element
-      if (typeof rendered === 'object' && rendered !== null && '$$typeof' in rendered) {
+      // Check if it's a valid React element using React's isValidElement
+      if (isValidElement(rendered)) {
         return (
           <div style={style} className={cn("px-2", itemClassName)}>
             {rendered}
@@ -60,14 +61,18 @@ export function VirtualizedList<T>({
         );
       }
       
+      // If it's a component (function/class), log error and return null
+      if (typeof rendered === 'function' || (typeof rendered === 'object' && rendered !== null && 'render' in rendered)) {
+        console.error("VirtualizedList: renderItem returned a component instead of an element. Index:", index, "Item:", item);
+        return null;
+      }
+      
       return null;
     } catch (error) {
       console.error("Error rendering item:", error);
       return null;
     }
-  });
-
-  Row.displayName = "Row";
+  };
 
   if (items.length === 0) {
     const EmptyIcon = emptyIcon;
@@ -85,7 +90,7 @@ export function VirtualizedList<T>({
     rowHeight: itemHeight,
     defaultHeight: height,
     overscanCount,
-    rowComponent: Row as any,
+    rowComponent: Row,
     className: cn("w-full", className),
   } as any;
 
@@ -121,7 +126,8 @@ export function VirtualizedGrid<T>({
   emptyIcon,
   gap = 16,
 }: VirtualizedGridProps<T>) {
-  const Cell = memo(({ columnIndex, rowIndex, style, ariaAttributes }: CellComponentProps) => {
+  // Create cell component as a function (not memoized) for react-window
+  const Cell = ({ columnIndex, rowIndex, style, ariaAttributes }: CellComponentProps) => {
     const index = rowIndex * columnCount + columnIndex;
     const item = items[index];
     
@@ -134,8 +140,8 @@ export function VirtualizedGrid<T>({
         return null;
       }
       
-      // Check if it's a valid React element
-      if (typeof rendered === 'object' && rendered !== null && '$$typeof' in rendered) {
+      // Check if it's a valid React element using React's isValidElement
+      if (isValidElement(rendered)) {
         return (
           <div
             {...ariaAttributes}
@@ -172,14 +178,18 @@ export function VirtualizedGrid<T>({
         );
       }
       
+      // If it's a component (function/class), log error and return null
+      if (typeof rendered === 'function' || (typeof rendered === 'object' && rendered !== null && 'render' in rendered)) {
+        console.error("VirtualizedGrid: renderItem returned a component instead of an element. Cell:", rowIndex, columnIndex, "Item:", item);
+        return null;
+      }
+      
       return null;
     } catch (error) {
       console.error("Error rendering cell:", error);
       return null;
     }
-  });
-
-  Cell.displayName = "Cell";
+  };
 
   const rowCount = Math.ceil(items.length / columnCount);
   // Calculate column width as percentage (100% / columnCount)
@@ -203,7 +213,7 @@ export function VirtualizedGrid<T>({
         defaultHeight={height}
         rowCount={rowCount}
         rowHeight={itemHeight + gap}
-        cellComponent={Cell as any}
+        cellComponent={Cell}
         cellProps={{}}
         overscanCount={5}
       />
