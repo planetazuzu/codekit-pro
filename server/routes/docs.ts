@@ -15,10 +15,35 @@ const router = Router();
 // In development, __dirname points to server/routes
 // So we need to go up to project root, then to docs
 const isProduction = process.env.NODE_ENV === "production";
-const basePath = isProduction 
-  ? path.resolve(__dirname, "../../../docs")  // dist/server/routes -> ../../../docs
-  : path.resolve(__dirname, "../../docs");    // server/routes -> ../../docs
-const docsPath = basePath;
+
+// Try multiple possible paths
+const possiblePaths = isProduction
+  ? [
+      path.resolve(__dirname, "../../../docs"),  // dist/server/routes -> ../../../docs
+      path.resolve(process.cwd(), "docs"),       // From working directory
+      "/app/docs",                                // Absolute path in Docker
+    ]
+  : [
+      path.resolve(__dirname, "../../docs"),     // server/routes -> ../../docs
+      path.resolve(process.cwd(), "docs"),       // From working directory
+    ];
+
+// Find the first path that exists
+let docsPath: string | null = null;
+for (const possiblePath of possiblePaths) {
+  if (fs.existsSync(possiblePath)) {
+    docsPath = possiblePath;
+    logger.info(`Using docs path: ${docsPath}`);
+    break;
+  }
+}
+
+if (!docsPath) {
+  logger.error("Docs directory not found. Tried paths:", possiblePaths);
+  // Fallback to first path
+  docsPath = possiblePaths[0];
+}
+
 const publicDocsPath = path.join(docsPath, "public");
 
 /**
@@ -53,7 +78,17 @@ router.get("/:path*", (req: Request, res: Response) => {
 
     // Check if file exists
     if (!fs.existsSync(fullPath)) {
-      return res.status(404).json({ error: "Document not found" });
+      logger.warn(`Document not found: ${requestedPath}`, {
+        fullPath,
+        docsPath,
+        requestedPath,
+        exists: fs.existsSync(docsPath),
+        publicExists: fs.existsSync(publicDocsPath),
+      });
+      return res.status(404).json({ 
+        error: `Documento no encontrado: ${requestedPath}`,
+        debug: isProduction ? undefined : { fullPath, docsPath, requestedPath }
+      });
     }
 
     // Check if it's a directory
