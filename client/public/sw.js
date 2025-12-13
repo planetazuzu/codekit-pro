@@ -63,14 +63,21 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Estrategia: Network First, luego Cache
+// Estrategia optimizada para móvil: Cache First para assets, Network First para HTML/API
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  const url = new URL(request.url);
   
   // No interceptar requests POST, PUT, DELETE, etc.
   if (request.method !== 'GET') {
     return; // Dejar que el navegador maneje la request normalmente
+  }
+  
+  // Crear URL una sola vez
+  let url;
+  try {
+    url = new URL(request.url);
+  } catch (e) {
+    return; // No es una URL válida, no interceptar
   }
   
   // No interceptar Google Fonts - dejar que el navegador las cargue directamente
@@ -79,27 +86,12 @@ self.addEventListener('fetch', (event) => {
     return; // No interceptar, dejar pasar
   }
   
-  // No interceptar requests a la API
-  if (url.pathname.startsWith('/api/')) {
-    return; // No interceptar, dejar pasar
-  }
-  
-  // No interceptar archivos estáticos con extensiones específicas que pueden tener CSP estricto
-  const staticExtensions = ['.css', '.js', '.mjs', '.json', '.png', '.jpg', '.jpeg', '.svg', '.woff', '.woff2', '.ttf', '.eot'];
-  const hasStaticExtension = staticExtensions.some(ext => url.pathname.endsWith(ext));
-  if (hasStaticExtension && url.origin !== self.location.origin) {
-    return; // No interceptar recursos externos con extensiones estáticas
-  }
-  
   // Interceptar solo requests del mismo origen para la SPA
   if (url.origin !== self.location.origin) {
     return; // No interceptar recursos externos
   }
   
-  // Estrategia optimizada para móvil:
-  // - Cache First para assets estáticos (JS, CSS, imágenes) - más rápido
-  // - Network First para HTML y API - siempre fresco
-  const url = new URL(request.url);
+  // Determinar tipo de recurso
   const isStaticAsset = url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|woff|woff2|ttf|eot|ico)$/);
   const isAPI = url.pathname.startsWith('/api/');
   
