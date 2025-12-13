@@ -96,49 +96,69 @@ self.addEventListener('fetch', (event) => {
     return; // No interceptar recursos externos
   }
   
-  // Estrategia: Network First con fallback a Cache (mejor para móvil)
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      // Intentar red primero
-      return fetch(request)
-        .then((response) => {
-          // Solo cachear respuestas exitosas del mismo origen
+  // Estrategia optimizada para móvil:
+  // - Cache First para assets estáticos (JS, CSS, imágenes) - más rápido
+  // - Network First para HTML y API - siempre fresco
+  const url = new URL(request.url);
+  const isStaticAsset = url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|woff|woff2|ttf|eot|ico)$/);
+  const isAPI = url.pathname.startsWith('/api/');
+  
+  if (isStaticAsset) {
+    // Cache First para assets estáticos (más rápido en móvil)
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(request).then((response) => {
           if (response.status === 200 && response.type === 'basic') {
             const responseToCache = response.clone();
-            const cacheToUse = criticalAssets.some(url => request.url.includes(url)) 
+            const cacheToUse = criticalAssets.some(asset => request.url.includes(asset)) 
               ? STATIC_CACHE 
               : CACHE_NAME;
-            
-            caches.open(cacheToUse)
-              .then((cache) => {
-                cache.put(request, responseToCache).catch(() => {
-                  // Ignorar errores de cache silenciosamente
-                });
-              });
-          }
-          return response;
-        })
-        .catch(() => {
-          // Si falla la red, usar cache si existe
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          // Si es una página HTML y no hay cache, devolver página offline
-          if (request.headers.get('accept')?.includes('text/html')) {
-            return caches.match('/').then((indexCache) => {
-              return indexCache || new Response('Offline - Sin conexión', {
-                status: 503,
-                headers: { 'Content-Type': 'text/plain' }
-              });
+            caches.open(cacheToUse).then((cache) => {
+              cache.put(request, responseToCache).catch(() => {});
             });
           }
-          // Para otros recursos, devolver error
-          return new Response('Recurso no disponible offline', {
+          return response;
+        });
+      })
+    );
+  } else if (isAPI) {
+    // Network First para API (siempre datos frescos)
+    event.respondWith(
+      fetch(request).catch(() => {
+        // Si falla la red, intentar cache
+        return caches.match(request).then((cachedResponse) => {
+          return cachedResponse || new Response(JSON.stringify({ error: 'Offline' }), {
             status: 503,
-            headers: { 'Content-Type': 'text/plain' }
+            headers: { 'Content-Type': 'application/json' }
           });
         });
-    })
-  );
+      })
+    );
+  } else {
+    // Network First para HTML
+    event.respondWith(
+      fetch(request).then((response) => {
+        if (response.status === 200 && response.type === 'basic') {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, responseToCache).catch(() => {});
+          });
+        }
+        return response;
+      }).catch(() => {
+        return caches.match(request).then((cachedResponse) => {
+          return cachedResponse || caches.match('/').then((indexCache) => {
+            return indexCache || new Response('Offline - Sin conexión', {
+              status: 503,
+              headers: { 'Content-Type': 'text/plain' }
+            });
+          });
+        });
+      })
+    );
+  }
 });
 

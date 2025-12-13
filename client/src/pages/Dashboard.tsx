@@ -3,10 +3,7 @@ import { ArrowRight, Sparkles, Wrench, Code2, FileCode, Download, Upload, Messag
 import { Link } from "wouter";
 import { useTrackPageView } from "@/hooks/use-track-view";
 import { useExportImport } from "@/hooks/use-export-import";
-import { usePrompts } from "@/hooks/use-prompts";
-import { useSnippets } from "@/hooks/use-snippets";
-import { useLinks } from "@/hooks/use-links";
-import { useGuides } from "@/hooks/use-guides";
+import { useStats } from "@/hooks/use-stats";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import { MobilePullToRefresh, MobileFloatingButton, MobileOnly, DesktopOnly } from "@/components/mobile";
@@ -18,19 +15,15 @@ export default function Dashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   
-  // Obtener datos reales para estadísticas
-  const { data: prompts = [], refetch: refetchPrompts } = usePrompts();
-  const { data: snippets = [], refetch: refetchSnippets } = useSnippets();
-  const { data: links = [], refetch: refetchLinks } = useLinks();
-  const { data: guides = [], refetch: refetchGuides } = useGuides();
+  // Obtener solo contadores (mucho más rápido que cargar todos los datos)
+  const { data: stats, refetch: refetchStats } = useStats();
+  const promptsCount = stats?.prompts ?? 0;
+  const snippetsCount = stats?.snippets ?? 0;
+  const linksCount = stats?.links ?? 0;
+  const guidesCount = stats?.guides ?? 0;
 
   const handleRefresh = async () => {
-    await Promise.all([
-      refetchPrompts(),
-      refetchSnippets(),
-      refetchLinks(),
-      refetchGuides(),
-    ]);
+    await refetchStats();
     queryClient.invalidateQueries();
   };
 
@@ -115,7 +108,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 overflow-visible">
           <StatCard
             title="Prompts"
-            value={prompts.length}
+            value={promptsCount}
             icon={MessageSquare}
             href="/prompts"
             color="text-primary"
@@ -123,7 +116,7 @@ export default function Dashboard() {
           />
           <StatCard
             title="Snippets"
-            value={snippets.length}
+            value={snippetsCount}
             icon={Code2}
             href="/snippets"
             color="text-emerald-500"
@@ -131,7 +124,7 @@ export default function Dashboard() {
           />
           <StatCard
             title="Enlaces"
-            value={links.length}
+            value={linksCount}
             icon={Link2}
             href="/links"
             color="text-blue-500"
@@ -139,7 +132,7 @@ export default function Dashboard() {
           />
           <StatCard
             title="Guías"
-            value={guides.length}
+            value={guidesCount}
             icon={BookOpen}
             href="/guides"
             color="text-purple-500"

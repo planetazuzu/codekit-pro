@@ -8,6 +8,7 @@ import { registerSnippetsRoutes } from "./snippets";
 import { registerLinksRoutes } from "./links";
 import { registerGuidesRoutes } from "./guides";
 import { registerAnalyticsRoutes } from "./analytics";
+import { registerStatsRoutes } from "./stats";
 import { registerAffiliatesRoutes } from "./affiliates";
 import { registerShortlinkRoutes } from "./shortlinks";
 import { registerAffiliateProgramsRoutes } from "./affiliatePrograms";
@@ -45,6 +46,7 @@ export function registerRoutes(app: Express): void {
   registerLinksRoutes(app);
   registerGuidesRoutes(app);
   registerAnalyticsRoutes(app);
+  registerStatsRoutes(app);
   registerAffiliatesRoutes(app);
   registerShortlinkRoutes(app);
   
