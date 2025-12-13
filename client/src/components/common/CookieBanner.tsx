@@ -89,57 +89,110 @@ export function CookieBanner() {
 
   return (
     <>
-      {/* Cookie Banner */}
-      <div className="fixed bottom-0 left-64 right-0 z-50 p-4 bg-[#161B22] border-t border-white/10 shadow-lg">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="flex items-start gap-3 flex-1">
-            <Cookie className="h-5 w-5 text-yellow-400 mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm text-foreground mb-1">
-                <strong>Utilizamos cookies</strong>
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Utilizamos cookies para mejorar su experiencia, analizar el tráfico del sitio y 
-                personalizar el contenido. Al hacer clic en "Aceptar todas", acepta nuestro uso de cookies.{" "}
-                <button
-                  onClick={() => setShowSettings(true)}
-                  className="text-primary hover:underline"
-                >
-                  Configurar preferencias
-                </button>
-                {" o "}
-                <a href="/privacy" className="text-primary hover:underline">
-                  leer más
-                </a>
-                .
-              </p>
+      {/* Cookie Banner - Optimizado para móvil */}
+      <div className="fixed bottom-0 left-0 md:left-64 right-0 z-50 p-3 md:p-4 bg-[#161B22] border-t border-white/10 shadow-lg">
+        <div className="max-w-6xl mx-auto">
+          {/* Mobile Layout */}
+          <div className="md:hidden flex flex-col gap-3">
+            <div className="flex items-start gap-2">
+              <Cookie className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-foreground mb-1">
+                  Utilizamos cookies
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Mejoramos tu experiencia con cookies.{" "}
+                  <button
+                    onClick={() => setShowSettings(true)}
+                    className="text-primary hover:underline text-xs"
+                  >
+                    Configurar
+                  </button>
+                  {" o "}
+                  <a href="/privacy" className="text-primary hover:underline text-xs">
+                    más info
+                  </a>
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRejectAll}
+                className="flex-1 min-w-0 text-xs h-8"
+              >
+                Rechazar
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleAcceptAll}
+                className="flex-1 min-w-0 text-xs h-8 bg-primary text-primary-foreground"
+              >
+                Aceptar
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSettings(true)}
+                className="text-xs h-8 px-3"
+              >
+                <Settings className="h-3 w-3" />
+              </Button>
             </div>
           </div>
-          <div className="flex gap-2 flex-shrink-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowSettings(true)}
-              className="whitespace-nowrap"
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Configurar
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRejectAll}
-              className="whitespace-nowrap"
-            >
-              Rechazar
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleAcceptAll}
-              className="whitespace-nowrap bg-primary text-primary-foreground"
-            >
-              Aceptar todas
-            </Button>
+
+          {/* Desktop Layout */}
+          <div className="hidden md:flex flex-row items-start md:items-center gap-4">
+            <div className="flex items-start gap-3 flex-1">
+              <Cookie className="h-5 w-5 text-yellow-400 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm text-foreground mb-1">
+                  <strong>Utilizamos cookies</strong>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Utilizamos cookies para mejorar su experiencia, analizar el tráfico del sitio y 
+                  personalizar el contenido. Al hacer clic en "Aceptar todas", acepta nuestro uso de cookies.{" "}
+                  <button
+                    onClick={() => setShowSettings(true)}
+                    className="text-primary hover:underline"
+                  >
+                    Configurar preferencias
+                  </button>
+                  {" o "}
+                  <a href="/privacy" className="text-primary hover:underline">
+                    leer más
+                  </a>
+                  .
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 flex-shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSettings(true)}
+                className="whitespace-nowrap"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Configurar
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRejectAll}
+                className="whitespace-nowrap"
+              >
+                Rechazar
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleAcceptAll}
+                className="whitespace-nowrap bg-primary text-primary-foreground"
+              >
+                Aceptar todas
+              </Button>
+            </div>
           </div>
         </div>
       </div>

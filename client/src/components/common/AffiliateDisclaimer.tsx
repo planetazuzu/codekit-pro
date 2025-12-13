@@ -27,8 +27,8 @@ export function AffiliateDisclaimer() {
     };
 
     checkCookieBanner();
-    // Check periodically in case cookie consent changes
-    const interval = setInterval(checkCookieBanner, 500);
+    // Check periodically in case cookie consent changes (reducido a 2s para mejor rendimiento)
+    const interval = setInterval(checkCookieBanner, 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -41,16 +41,17 @@ export function AffiliateDisclaimer() {
 
   return (
     <div 
-      className={`fixed left-64 right-0 z-40 border-t border-border/50 bg-card/95 backdrop-blur-sm transition-all duration-300 ${
-        cookieBannerVisible ? 'bottom-[200px]' : 'bottom-[80px]'
+      className={`fixed left-0 md:left-64 right-0 z-40 border-t border-border/50 bg-card/95 backdrop-blur-sm transition-all duration-300 ${
+        cookieBannerVisible ? 'bottom-[200px] md:bottom-[200px]' : 'bottom-[80px] md:bottom-[80px]'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-8 py-2">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap flex-1">
+      <div className="max-w-7xl mx-auto px-3 md:px-8 py-2">
+        <div className="flex items-center justify-between gap-2 md:gap-4">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap flex-1 min-w-0">
             <Info className="h-3 w-3 text-blue-400 flex-shrink-0" />
-            <span className="flex-1 min-w-0">
-              Esta aplicación contiene{" "}
+            <span className="flex-1 min-w-0 text-xs leading-tight">
+              <span className="hidden md:inline">Esta aplicación contiene{" "}</span>
+              <span className="md:hidden">Contiene{" "}</span>
               <Link 
                 href="/deals"
                 className="text-primary hover:underline inline-flex items-center gap-1"
@@ -58,12 +59,13 @@ export function AffiliateDisclaimer() {
                 enlaces de afiliados
                 <ExternalLink className="h-3 w-3" />
               </Link>
-              {" "}que pueden generar comisiones.{" "}
+              {" "}
+              <span className="hidden md:inline">que pueden generar comisiones.{" "}</span>
               <Link 
                 href="/privacy"
                 className="text-primary hover:underline"
               >
-                Más información
+                Más info
               </Link>
             </span>
           </div>

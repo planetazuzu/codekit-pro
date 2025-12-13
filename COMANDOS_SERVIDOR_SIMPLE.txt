@@ -1,0 +1,19 @@
+# Copia y pega estos comandos UNO POR UNO en el servidor:
+
+cd /var/www/codekit-pro
+
+git pull origin main
+
+docker compose down
+
+docker compose build --no-cache app
+
+docker compose up -d
+
+sleep 15
+
+docker compose ps
+
+docker compose logs --tail=30 app
+
+curl http://localhost:8604/api/health

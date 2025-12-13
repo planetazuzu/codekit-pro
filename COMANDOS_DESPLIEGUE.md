@@ -16,22 +16,36 @@ git commit -m "Fix: corregir import de FileText en Sidebar para evitar error en 
 git push origin main
 ```
 
-### 2. Desplegar en Servidor (SSH)
-```bash
-# Conectarse al servidor
-ssh root@207.180.226.141
+### 2. Desplegar en Servidor (Una vez dentro del servidor)
 
-# Ejecutar despliegue
+**Conectarse primero:**
+```bash
+ssh root@207.180.226.141
+```
+
+**Luego ejecutar estos comandos:**
+```bash
 cd /var/www/codekit-pro
 git pull origin main
 docker compose down
 docker compose build --no-cache app
 docker compose up -d
-
-# Verificar
 sleep 15
 docker compose ps
 docker compose logs --tail=30 app
+curl http://localhost:8604/api/health
+```
+
+**O usar el comando todo-en-uno:**
+```bash
+cd /var/www/codekit-pro && \
+git pull origin main && \
+docker compose down && \
+docker compose build --no-cache app && \
+docker compose up -d && \
+sleep 15 && \
+docker compose ps && \
+docker compose logs --tail=30 app && \
 curl http://localhost:8604/api/health
 ```
 

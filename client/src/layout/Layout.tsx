@@ -1,10 +1,13 @@
 import { Sidebar } from "./Sidebar";
 import { Search, Bell, User, Menu, Home, MessageSquare, Wrench, BookOpen, Link2, Code, Settings, TrendingUp, Gift } from "lucide-react";
 import { SearchCommand } from "@/components/SearchCommand";
-import { CookieBanner } from "@/components/common/CookieBanner";
-import { AffiliateDisclaimer } from "@/components/common/AffiliateDisclaimer";
-import { SalesBanner } from "@/components/common/SalesBanner";
+import { lazy, Suspense } from "react";
 import { useState } from "react";
+
+// Lazy load banners para mejorar rendimiento en móvil
+const CookieBanner = lazy(() => import("@/components/common/CookieBanner").then(m => ({ default: m.CookieBanner })));
+const AffiliateDisclaimer = lazy(() => import("@/components/common/AffiliateDisclaimer").then(m => ({ default: m.AffiliateDisclaimer })));
+const SalesBanner = lazy(() => import("@/components/common/SalesBanner").then(m => ({ default: m.SalesBanner })));
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
@@ -142,14 +145,12 @@ export function Layout({ children }: LayoutProps) {
         </div>
       </nav>
       
-      {/* Affiliate Disclaimer */}
-      <AffiliateDisclaimer />
-      
-      {/* Sales Banner */}
-      <SalesBanner />
-      
-      {/* Cookie Banner */}
-      <CookieBanner />
+      {/* Banners - Lazy loaded para mejor rendimiento */}
+      <Suspense fallback={null}>
+        <AffiliateDisclaimer />
+        <SalesBanner />
+        <CookieBanner />
+      </Suspense>
     </div>
   );
 }

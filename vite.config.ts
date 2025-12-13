@@ -43,6 +43,54 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // Separar vendor chunks para mejor caching y rendimiento móvil
+          if (id.includes('node_modules')) {
+            // React core
+            if (id.includes('react') && (id.includes('/react/') || id.includes('/react-dom/'))) {
+              return 'react-vendor';
+            }
+            // React ecosystem
+            if (id.includes('react-helmet') || id.includes('react-router')) {
+              return 'react-ecosystem';
+            }
+            // Router
+            if (id.includes('wouter')) {
+              return 'router-vendor';
+            }
+            // UI libraries
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor';
+            }
+            // Query library
+            if (id.includes('@tanstack/react-query')) {
+              return 'query-vendor';
+            }
+            // Icons (puede ser grande)
+            if (id.includes('lucide-react')) {
+              return 'icons-vendor';
+            }
+            // Framer motion (si se usa)
+            if (id.includes('framer-motion')) {
+              return 'animation-vendor';
+            }
+            // Otros vendor más pequeños
+            return 'vendor';
+          }
+          // Separar herramientas pesadas
+          if (id.includes('/tools/')) {
+            return 'tools';
+          }
+          // Separar componentes comunes
+          if (id.includes('/components/common/')) {
+            return 'common-components';
+          }
+        },
+      },
+    },
   },
   server: {
     host: "0.0.0.0",

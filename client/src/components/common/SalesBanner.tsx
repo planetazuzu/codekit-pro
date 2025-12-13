@@ -26,9 +26,50 @@ export function SalesBanner() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-64 right-0 z-50 border-t border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 backdrop-blur-sm shadow-lg">
-      <div className="max-w-7xl mx-auto px-8 py-4">
-        <div className="flex items-center justify-between gap-4">
+    <div className="fixed bottom-0 left-0 md:left-64 right-0 z-50 border-t border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 backdrop-blur-sm shadow-lg">
+      <div className="max-w-7xl mx-auto px-3 md:px-8 py-3 md:py-4">
+        {/* Mobile Layout */}
+        <div className="md:hidden flex flex-col gap-3">
+          <div className="flex items-start gap-3">
+            <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xs font-semibold text-foreground mb-1">
+                ¿Te gusta? ¡Está en venta!
+              </h3>
+              <p className="text-xs text-muted-foreground leading-tight">
+                CodeKit Pro disponible. Código completo, PostgreSQL, Stripe y más.
+              </p>
+            </div>
+            <button
+              onClick={handleDismiss}
+              className="p-1 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+              aria-label="Cerrar banner"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <a
+              href="mailto:iafactorystudio@proton.me?subject=Interesado en comprar CodeKit Pro&body=Hola,%0D%0A%0D%0AEstoy interesado en adquirir CodeKit Pro. Por favor, envíame más información sobre:%0D%0A- Precio%0D%0A- Qué incluye%0D%0A- Forma de pago%0D%0A- Soporte incluido%0D%0A%0D%0AGracias"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors shadow-sm"
+            >
+              <Mail className="h-3 w-3" />
+              Email
+            </a>
+            <a
+              href="tel:+34642082016"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md border border-primary/20 bg-background text-primary text-xs font-medium hover:bg-primary/10 transition-colors"
+            >
+              <Phone className="h-3 w-3" />
+              Llamar
+            </a>
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden md:flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 flex-1">
             <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
               <Sparkles className="h-6 w-6 text-primary" />
