@@ -48,33 +48,28 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           // Separar vendor chunks para mejor caching y rendimiento móvil
-          // FIX: React y @radix-ui deben estar juntos para evitar error "forwardRef undefined"
+          // FIX: Desactivar code-splitting para React y dependencias para evitar errores
+          // El problema parece ser el orden de carga de chunks
           if (id.includes('node_modules')) {
-            // React core y todas sus dependencias directas - mantener juntas en un solo chunk
-            // FIX: Simplificar para evitar problemas de orden de carga e inicialización
-            // React, Radix UI y lucide-react deben estar juntos para evitar errores
-            if (id.includes('react') || 
-                id.includes('@radix-ui') || 
-                id.includes('lucide-react')) {
-              return 'react-vendor';
-            }
-            // React ecosystem
+            // NO separar React, Radix UI ni lucide-react - dejarlos en vendor principal
+            // Esto asegura que se carguen en el orden correcto sin problemas de inicialización
+            // React ecosystem (puede estar separado, no causa problemas)
             if (id.includes('react-helmet') || id.includes('react-router')) {
               return 'react-ecosystem';
             }
-            // Query library (depende de React)
+            // Query library (puede estar separado)
             if (id.includes('@tanstack/react-query')) {
               return 'query-vendor';
             }
-            // Router
+            // Router (puede estar separado)
             if (id.includes('wouter')) {
               return 'router-vendor';
             }
-            // Framer motion (si se usa, depende de React)
+            // Framer motion (puede estar separado)
             if (id.includes('framer-motion')) {
               return 'animation-vendor';
             }
-            // Otros vendor más pequeños
+            // Todo lo demás (incluyendo React, Radix UI, lucide-react) va al vendor principal
             return 'vendor';
           }
           // Separar herramientas pesadas
