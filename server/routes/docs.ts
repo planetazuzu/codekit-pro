@@ -11,8 +11,15 @@ import { logger } from "../utils/logger";
 const router = Router();
 
 // Path to docs directory - prioritize public docs
-const docsPath = path.resolve(__dirname, "../../docs");
-const publicDocsPath = path.resolve(__dirname, "../../docs/public");
+// In production (Docker), __dirname points to dist/server/routes
+// In development, __dirname points to server/routes
+// So we need to go up to project root, then to docs
+const isProduction = process.env.NODE_ENV === "production";
+const basePath = isProduction 
+  ? path.resolve(__dirname, "../../../docs")  // dist/server/routes -> ../../../docs
+  : path.resolve(__dirname, "../../docs");    // server/routes -> ../../docs
+const docsPath = basePath;
+const publicDocsPath = path.join(docsPath, "public");
 
 /**
  * GET /api/docs/:path*

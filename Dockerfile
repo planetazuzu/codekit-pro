@@ -34,6 +34,9 @@ COPY --from=builder /app/dist ./dist
 COPY drizzle.config.ts ./
 COPY shared ./shared
 
+# Copiar documentación (necesaria para /api/docs)
+COPY docs ./docs
+
 # Exponer puerto
 EXPOSE 8604
 
