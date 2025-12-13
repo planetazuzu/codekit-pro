@@ -17,11 +17,26 @@ export function useStats() {
   return useQuery<Stats>({
     queryKey: ["/api/stats"],
     queryFn: async () => {
-      const response = await get<Stats>("/api/stats");
-      return response.data;
+      try {
+        const response = await get<Stats>("/api/stats");
+        return response.data;
+      } catch (error) {
+        // Si falla, devolver valores por defecto en lugar de lanzar error
+        console.warn("Error fetching stats, using defaults:", error);
+        return {
+          prompts: 0,
+          snippets: 0,
+          links: 0,
+          guides: 0,
+        };
+      }
     },
     staleTime: 30000, // Cache for 30 seconds
     refetchOnWindowFocus: false,
+    retry: 1, // Solo reintentar una vez
+    retryDelay: 1000, // Esperar 1 segundo antes de reintentar
+    // No bloquear render si falla
+    throwOnError: false,
   });
 }
 

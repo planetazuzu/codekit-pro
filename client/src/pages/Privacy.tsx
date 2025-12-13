@@ -6,25 +6,27 @@ import { Layout } from "@/layout/Layout";
 import { Shield } from "lucide-react";
 import { Link } from "wouter";
 import { BackButton } from "@/components/common/BackButton";
+import { MobilePullToRefresh, MobileOnly, DesktopOnly } from "@/components/mobile";
 
 export default function Privacy() {
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-8 py-8">
-        {/* Back Button */}
-        <div className="flex items-center gap-4">
-          <BackButton />
-        </div>
+      <MobilePullToRefresh onRefresh={async () => {}}>
+        <div className="max-w-4xl mx-auto space-y-4 md:space-y-8 py-4 md:py-8 px-4">
+          {/* Back Button */}
+          <div className="flex items-center gap-4">
+            <BackButton />
+          </div>
 
-        <div className="flex items-center gap-3 mb-8">
-          <Shield className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">Política de Privacidad</h1>
-        </div>
+          <div className="flex items-center gap-3 mb-4 md:mb-8">
+            <Shield className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+            <h1 className="text-xl md:text-3xl font-bold">Política de Privacidad</h1>
+          </div>
 
-        <div className="prose prose-invert max-w-none space-y-6">
-          <section>
-            <h2 className="text-2xl font-semibold mb-4">1. Responsable del Tratamiento</h2>
-            <p className="text-muted-foreground leading-relaxed">
+          <div className="prose prose-invert max-w-none space-y-4 md:space-y-6">
+            <section>
+              <h2 className="text-lg md:text-2xl font-semibold mb-2 md:mb-4">1. Responsable del Tratamiento</h2>
+              <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
               El responsable del tratamiento de los datos personales recabados a través de CodeKit Pro 
               es [Tu Nombre/Empresa], con domicilio en [Tu Dirección] y NIF/CIF [Tu NIF/CIF].
             </p>
@@ -164,7 +166,7 @@ export default function Privacy() {
             </p>
           </section>
         </div>
-      </div>
+      </MobilePullToRefresh>
     </Layout>
   );
 }

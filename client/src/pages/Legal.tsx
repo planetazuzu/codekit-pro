@@ -6,24 +6,27 @@ import { Layout } from "@/layout/Layout";
 import { FileText } from "lucide-react";
 import { BackButton } from "@/components/common/BackButton";
 
+import { MobilePullToRefresh, MobileOnly, DesktopOnly } from "@/components/mobile";
+
 export default function Legal() {
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-8 py-8">
-        {/* Back Button */}
-        <div className="flex items-center gap-4">
-          <BackButton />
-        </div>
+      <MobilePullToRefresh onRefresh={async () => {}}>
+        <div className="max-w-4xl mx-auto space-y-4 md:space-y-8 py-4 md:py-8 px-4">
+          {/* Back Button */}
+          <div className="flex items-center gap-4">
+            <BackButton />
+          </div>
 
-        <div className="flex items-center gap-3 mb-8">
-          <FileText className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">Aviso Legal</h1>
-        </div>
+          <div className="flex items-center gap-3 mb-4 md:mb-8">
+            <FileText className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+            <h1 className="text-xl md:text-3xl font-bold">Aviso Legal</h1>
+          </div>
 
-        <div className="prose prose-invert max-w-none space-y-6">
+        <div className="prose prose-invert max-w-none space-y-4 md:space-y-6">
           <section>
-            <h2 className="text-2xl font-semibold mb-4">1. Información General</h2>
-            <p className="text-muted-foreground leading-relaxed">
+            <h2 className="text-lg md:text-2xl font-semibold mb-2 md:mb-4">1. Información General</h2>
+            <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
               El presente aviso legal regula el uso del sitio web CodeKit Pro (en adelante, "el Sitio"), 
               propiedad de [Tu Nombre/Empresa], con domicilio en [Tu Dirección] y NIF/CIF [Tu NIF/CIF].
             </p>
@@ -114,7 +117,7 @@ export default function Legal() {
             </p>
           </section>
         </div>
-      </div>
+      </MobilePullToRefresh>
     </Layout>
   );
 }

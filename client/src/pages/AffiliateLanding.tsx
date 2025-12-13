@@ -23,6 +23,7 @@ import { BackButton } from "@/components/common/BackButton";
 import { AffiliateRecommendations } from "@/components/affiliates/AffiliateRecommendations";
 import { useAffiliates, useTrackAffiliateClick } from "@/hooks/use-affiliates";
 import { buildAffiliateUrl } from "@/lib/affiliate-utils";
+import { MobilePullToRefresh, MobileShareSheet, MobileOnly, DesktopOnly } from "@/components/mobile";
 
 // Benefits by category
 const CATEGORY_BENEFITS: Record<string, string[]> = {
@@ -153,18 +154,26 @@ export default function AffiliateLanding() {
         <meta name="keywords" content={`${affiliate.name}, ${affiliate.category}, descuento, oferta, código promocional`} />
       </Helmet>
 
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Back Button */}
-        <div className="flex items-center gap-4">
-          <BackButton />
-        </div>
-        {/* Hero */}
-        <div className="text-center space-y-6 py-8">
-          <Badge variant="secondary" className="text-sm">
-            {affiliate.category}
-          </Badge>
-          
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+      <MobilePullToRefresh onRefresh={async () => {}}>
+        <div className="max-w-4xl mx-auto space-y-4 md:space-y-8 px-4">
+          {/* Back Button */}
+          <div className="flex items-center gap-4">
+            <BackButton />
+            <MobileOnly>
+              <MobileShareSheet
+                title={`Compartir ${affiliate.name}`}
+                url={window.location.href}
+                text={`¡Descubre ${affiliate.name}! ${affiliate.code ? `Código: ${affiliate.code}` : ""}`}
+              />
+            </MobileOnly>
+          </div>
+          {/* Hero */}
+          <div className="text-center space-y-4 md:space-y-6 py-4 md:py-8">
+            <Badge variant="secondary" className="text-xs md:text-sm">
+              {affiliate.category}
+            </Badge>
+            
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground">
             {affiliate.name}
           </h1>
           
@@ -242,7 +251,7 @@ export default function AffiliateLanding() {
             limit={3}
           />
         </div>
-      </div>
+      </MobilePullToRefresh>
     </Layout>
   );
 }

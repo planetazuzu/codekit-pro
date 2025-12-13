@@ -10,6 +10,7 @@ import { MarkdownRenderer } from "@/components/docs/MarkdownRenderer";
 import { Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { BackButton } from "@/components/common/BackButton";
+import { MobilePullToRefresh, MobileOnly, DesktopOnly } from "@/components/mobile";
 
 // Map routes to markdown files (using new public structure)
 const docRoutes: Record<string, string> = {
@@ -63,36 +64,42 @@ export default function Docs() {
 
   return (
     <Layout>
-      <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)]">
         {/* Sidebar - Hidden on mobile, shown on desktop */}
-        <div className="hidden md:block">
-          <DocsSidebar />
-        </div>
+        <DesktopOnly>
+          <div className="hidden md:block">
+            <DocsSidebar />
+          </div>
+        </DesktopOnly>
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8">
-            {/* Back Button - Mobile only */}
-            <div className="md:hidden mb-4">
-              <BackButton />
-            </div>
+          <MobilePullToRefresh onRefresh={async () => {}}>
+            <div className="max-w-4xl mx-auto px-4 md:px-8 py-4 md:py-6 lg:py-8">
+              {/* Back Button - Mobile only */}
+              <MobileOnly>
+                <div className="mb-4">
+                  <BackButton />
+                </div>
+              </MobileOnly>
 
-            {/* Content */}
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : error ? (
-              <div className="text-center py-12">
-                <p className="text-destructive mb-4">{error}</p>
-                <p className="text-muted-foreground text-sm">
-                  El documento no está disponible. Verifica que el archivo existe.
-                </p>
-              </div>
-            ) : (
-              <MarkdownRenderer content={content} />
-            )}
-          </div>
+              {/* Content */}
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : error ? (
+                <div className="text-center py-12 px-4">
+                  <p className="text-destructive mb-4 text-sm md:text-base">{error}</p>
+                  <p className="text-muted-foreground text-xs md:text-sm">
+                    El documento no está disponible. Verifica que el archivo existe.
+                  </p>
+                </div>
+              ) : (
+                <MarkdownRenderer content={content} />
+              )}
+            </div>
+          </MobilePullToRefresh>
         </div>
       </div>
     </Layout>

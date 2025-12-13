@@ -10,12 +10,14 @@ import { MobilePullToRefresh, MobileFloatingButton, MobileOnly, DesktopOnly } fr
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function Dashboard() {
+  // Hooks que no deben bloquear el render
   useTrackPageView("page", "dashboard");
   const { exportData, importData } = useExportImport();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   
   // Obtener solo contadores (mucho más rápido que cargar todos los datos)
+  // Si falla, usar valores por defecto para no bloquear el render
   const { data: stats, refetch: refetchStats } = useStats();
   const promptsCount = stats?.prompts ?? 0;
   const snippetsCount = stats?.snippets ?? 0;

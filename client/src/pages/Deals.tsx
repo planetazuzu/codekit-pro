@@ -78,26 +78,34 @@ export default function Deals() {
         />
       </Helmet>
 
-      <div className="space-y-8">
-        {/* Back Button */}
-        <div className="flex items-center gap-4">
-          <BackButton />
-        </div>
+      <MobilePullToRefresh onRefresh={async () => {}}>
+        <div className="space-y-4 md:space-y-8">
+          {/* Back Button */}
+          <div className="flex items-center gap-4">
+            <BackButton />
+            <MobileOnly>
+              <MobileShareSheet
+                title="Compartir Ofertas"
+                url={window.location.href}
+                text="¡Mira estas increíbles ofertas para desarrolladores!"
+              />
+            </MobileOnly>
+          </div>
 
-        {/* Header */}
-        <div className="text-center space-y-4 py-8">
-          <Badge variant="secondary" className="text-sm">
-            <Tag className="h-3 w-3 mr-1" />
-            Ofertas Activas
-          </Badge>
-          <h1 className="text-4xl font-bold text-foreground">
-            Deals & Descuentos
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Descuentos exclusivos en las mejores herramientas para desarrolladores.
-            Códigos promocionales actualizados.
-          </p>
-        </div>
+          {/* Header */}
+          <div className="text-center space-y-3 md:space-y-4 py-4 md:py-8">
+            <Badge variant="secondary" className="text-xs md:text-sm">
+              <Tag className="h-3 w-3 mr-1" />
+              Ofertas Activas
+            </Badge>
+            <h1 className="text-2xl md:text-4xl font-bold text-foreground">
+              Deals & Descuentos
+            </h1>
+            <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
+              Descuentos exclusivos en las mejores herramientas para desarrolladores.
+              Códigos promocionales actualizados.
+            </p>
+          </div>
 
         {/* Deal of the Day */}
         {dealOfTheDay && (
@@ -221,13 +229,13 @@ export default function Deals() {
         </section>
 
         {/* SEO Footer */}
-        <div className="text-center py-8 text-muted-foreground">
-          <p className="text-sm">
+        <div className="text-center py-4 md:py-8 text-muted-foreground px-4">
+          <p className="text-xs md:text-sm">
             💡 Todas las ofertas son verificadas y actualizadas regularmente.
             Los códigos de descuento pueden expirar sin previo aviso.
           </p>
         </div>
-      </div>
+      </MobilePullToRefresh>
     </Layout>
   );
 }

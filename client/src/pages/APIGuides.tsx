@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiGuides, type APIGuide } from "@/data/api-guides";
 import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/common/BackButton";
+import { MobilePullToRefresh, MobileOnly, DesktopOnly } from "@/components/mobile";
 
 export default function APIGuides() {
   const { toast } = useToast();
@@ -22,25 +23,27 @@ export default function APIGuides() {
 
   return (
     <Layout>
-      <div className="space-y-6">
-        {/* Back Button */}
-        <div className="flex items-center gap-4">
-          <BackButton />
-        </div>
+      <MobilePullToRefresh onRefresh={async () => {}}>
+        <div className="space-y-4 md:space-y-6">
+          {/* Back Button */}
+          <div className="flex items-center gap-4">
+            <BackButton />
+          </div>
 
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Guías de APIs y Tokens</h1>
-          <p className="text-muted-foreground mt-1">
-            Aprende cómo obtener API keys y tokens para las principales herramientas de IA.
-          </p>
-        </div>
+          <div>
+            <h1 className="text-xl md:text-3xl font-bold tracking-tight">Guías de APIs y Tokens</h1>
+            <p className="text-muted-foreground mt-1 text-sm md:text-base">
+              Aprende cómo obtener API keys y tokens para las principales herramientas de IA.
+            </p>
+          </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {apiGuides.map((guide) => (
-            <APIGuideCard key={guide.id} guide={guide} onCopy={copyToClipboard} copiedId={copiedId} />
-          ))}
+          <div className="grid gap-4 md:gap-6 md:grid-cols-2">
+            {apiGuides.map((guide) => (
+              <APIGuideCard key={guide.id} guide={guide} onCopy={copyToClipboard} copiedId={copiedId} />
+            ))}
+          </div>
         </div>
-      </div>
+      </MobilePullToRefresh>
     </Layout>
   );
 }
