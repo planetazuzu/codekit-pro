@@ -9,24 +9,37 @@ import { metaImagesPlugin } from "./vite-plugin-meta-images";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default defineConfig({
-  plugins: [
-    react(),
-    runtimeErrorOverlay(),
-    tailwindcss(),
-    metaImagesPlugin(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
-          await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
-          ),
-        ]
-      : []),
-  ],
+// Función para obtener plugins de Replit (solo en desarrollo)
+async function getReplitPlugins() {
+  if (process.env.NODE_ENV === "production" || !process.env.REPL_ID) {
+    return [];
+  }
+  
+  try {
+    const cartographer = await import("@replit/vite-plugin-cartographer");
+    const devBanner = await import("@replit/vite-plugin-dev-banner");
+    return [
+      cartographer.cartographer(),
+      devBanner.devBanner(),
+    ];
+  } catch (err) {
+    // Si los plugins de Replit no están disponibles, continuar sin ellos
+    console.warn("Replit plugins not available, skipping");
+    return [];
+  }
+}
+
+export default defineConfig(async () => {
+  const replitPlugins = await getReplitPlugins();
+  
+  return {
+    plugins: [
+      react(),
+      runtimeErrorOverlay(),
+      tailwindcss(),
+      metaImagesPlugin(),
+      ...replitPlugins,
+    ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "client", "src"),
@@ -135,4 +148,5 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
+  };
 });

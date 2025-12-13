@@ -117,6 +117,7 @@ export default function Legal() {
             </p>
           </section>
         </div>
+        </div>
       </MobilePullToRefresh>
     </Layout>
   );

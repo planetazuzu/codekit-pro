@@ -9,8 +9,8 @@ RUN npm ci --legacy-peer-deps
 # Copiar código fuente
 COPY . .
 
-# Build de la aplicación
-RUN npm run build
+# Build de la aplicación con mejor manejo de errores
+RUN npm run build || (echo "Build failed, showing error details:" && cat /tmp/build-error.log 2>/dev/null || true && exit 1)
 
 # Imagen de producción
 FROM node:20-alpine
