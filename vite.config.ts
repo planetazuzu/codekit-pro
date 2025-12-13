@@ -50,14 +50,13 @@ export default defineConfig({
           // Separar vendor chunks para mejor caching y rendimiento móvil
           // FIX: React y @radix-ui deben estar juntos para evitar error "forwardRef undefined"
           if (id.includes('node_modules')) {
-            // React core y UI libraries que lo necesitan - mantener juntos
-            if (id.includes('react') && (id.includes('/react/') || id.includes('/react-dom/'))) {
+            // React core y todas sus dependencias directas - mantener juntas en un solo chunk
+            // FIX: Simplificar para evitar problemas de orden de carga e inicialización
+            // React, Radix UI y lucide-react deben estar juntos para evitar errores
+            if (id.includes('react') || 
+                id.includes('@radix-ui') || 
+                id.includes('lucide-react')) {
               return 'react-vendor';
-            }
-            // @radix-ui necesita React.forwardRef - SOLUCIÓN: incluir en react-vendor
-            // Esto asegura que React esté disponible cuando Radix UI lo necesite
-            if (id.includes('@radix-ui')) {
-              return 'react-vendor'; // Incluir en mismo chunk que React
             }
             // React ecosystem
             if (id.includes('react-helmet') || id.includes('react-router')) {
@@ -70,11 +69,6 @@ export default defineConfig({
             // Router
             if (id.includes('wouter')) {
               return 'router-vendor';
-            }
-            // Icons - incluir en react-vendor para evitar problemas de inicialización
-            // lucide-react puede tener problemas si se carga antes que React
-            if (id.includes('lucide-react')) {
-              return 'react-vendor'; // Incluir en mismo chunk que React
             }
             // Framer motion (si se usa, depende de React)
             if (id.includes('framer-motion')) {
