@@ -152,23 +152,26 @@ export function VirtualizedGrid<T>({
 }: VirtualizedGridProps<T>) {
   // Memoize the Cell component to prevent recreation on every render
   // This ensures react-window receives a stable component reference
+  // CRITICAL: Cell must always return a valid ReactElement, never null
   const Cell = useMemo(() => {
-    return ({ columnIndex, rowIndex, style, ariaAttributes }: CellComponentProps) => {
+    return ({ columnIndex, rowIndex, style, ariaAttributes }: CellComponentProps): React.ReactElement => {
       const index = rowIndex * columnCount + columnIndex;
       const item = items[index];
       
+      const cellStyle = {
+        ...style,
+        paddingLeft: columnIndex === 0 ? 0 : gap / 2,
+        paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
+        paddingTop: rowIndex === 0 ? 0 : gap / 2,
+        paddingBottom: gap / 2,
+      };
+
       // Return empty div if no item (react-window requires a valid element)
       if (!item) {
         return (
           <div
             {...ariaAttributes}
-            style={{
-              ...style,
-              paddingLeft: columnIndex === 0 ? 0 : gap / 2,
-              paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
-              paddingTop: rowIndex === 0 ? 0 : gap / 2,
-              paddingBottom: gap / 2,
-            }}
+            style={cellStyle}
             className={itemClassName}
           />
         );
@@ -177,9 +180,15 @@ export function VirtualizedGrid<T>({
       try {
         const rendered = renderItem(item, index);
         
-        // Early return for null/undefined
+        // Early return for null/undefined - return empty div instead
         if (rendered == null) {
-          return null;
+          return (
+            <div
+              {...ariaAttributes}
+              style={cellStyle}
+              className={itemClassName}
+            />
+          );
         }
         
         // Check if it's a valid React element using React's isValidElement
@@ -187,13 +196,7 @@ export function VirtualizedGrid<T>({
           return (
             <div
               {...ariaAttributes}
-              style={{
-                ...style,
-                paddingLeft: columnIndex === 0 ? 0 : gap / 2,
-                paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
-                paddingTop: rowIndex === 0 ? 0 : gap / 2,
-                paddingBottom: gap / 2,
-              }}
+              style={cellStyle}
               className={itemClassName}
             >
               {rendered}
@@ -206,13 +209,7 @@ export function VirtualizedGrid<T>({
           return (
             <div
               {...ariaAttributes}
-              style={{
-                ...style,
-                paddingLeft: columnIndex === 0 ? 0 : gap / 2,
-                paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
-                paddingTop: rowIndex === 0 ? 0 : gap / 2,
-                paddingBottom: gap / 2,
-              }}
+              style={cellStyle}
               className={itemClassName}
             >
               {rendered}
@@ -221,7 +218,7 @@ export function VirtualizedGrid<T>({
         }
         
         // If it's a component (function/class), this is an error
-        // Log it and return null to prevent React error #31
+        // Log it and return empty div to prevent React error #31
         if (typeof rendered === 'function' || (typeof rendered === 'object' && rendered !== null && ('render' in rendered || '$$typeof' in rendered))) {
           console.error(
             "VirtualizedGrid: renderItem returned a component/object instead of an element.",
@@ -229,7 +226,13 @@ export function VirtualizedGrid<T>({
             "Type:", typeof rendered,
             "Item:", item
           );
-          return null;
+          return (
+            <div
+              {...ariaAttributes}
+              style={cellStyle}
+              className={itemClassName}
+            />
+          );
         }
         
         // For arrays, React can handle them, but we'll wrap for consistency
@@ -237,13 +240,7 @@ export function VirtualizedGrid<T>({
           return (
             <div
               {...ariaAttributes}
-              style={{
-                ...style,
-                paddingLeft: columnIndex === 0 ? 0 : gap / 2,
-                paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
-                paddingTop: rowIndex === 0 ? 0 : gap / 2,
-                paddingBottom: gap / 2,
-              }}
+              style={cellStyle}
               className={itemClassName}
             >
               {rendered}
@@ -251,12 +248,25 @@ export function VirtualizedGrid<T>({
           );
         }
         
-        // Fallback: log and return null
+        // Fallback: log and return empty div
         console.warn("VirtualizedGrid: renderItem returned unexpected type:", typeof rendered, "Cell:", rowIndex, columnIndex);
-        return null;
+        return (
+          <div
+            {...ariaAttributes}
+            style={cellStyle}
+            className={itemClassName}
+          />
+        );
       } catch (error) {
         console.error("VirtualizedGrid: Error rendering cell at", rowIndex, columnIndex, ":", error);
-        return null;
+        // Always return a valid element, even on error
+        return (
+          <div
+            {...ariaAttributes}
+            style={cellStyle}
+            className={itemClassName}
+          />
+        );
       }
     };
   }, [items, renderItem, itemClassName, columnCount, gap]);
@@ -283,7 +293,7 @@ export function VirtualizedGrid<T>({
         defaultHeight={height}
         rowCount={rowCount}
         rowHeight={itemHeight + gap}
-        cellComponent={Cell}
+        cellComponent={Cell as (props: CellComponentProps) => React.ReactElement}
         cellProps={{}}
         overscanCount={5}
       />
