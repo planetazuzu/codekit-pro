@@ -23,7 +23,7 @@ export default function Legal() {
             <h1 className="text-xl md:text-3xl font-bold">Aviso Legal</h1>
           </div>
 
-        <div className="prose prose-invert max-w-none space-y-4 md:space-y-6">
+          <div className="prose prose-invert max-w-none space-y-4 md:space-y-6">
           <section>
             <h2 className="text-lg md:text-2xl font-semibold mb-2 md:mb-4">1. Información General</h2>
             <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
@@ -116,7 +116,7 @@ export default function Legal() {
               })}
             </p>
           </section>
-        </div>
+          </div>
         </div>
       </MobilePullToRefresh>
     </Layout>

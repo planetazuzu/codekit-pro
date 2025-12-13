@@ -207,10 +207,10 @@ export default function AffiliateLanding() {
             Obtener {affiliate.name} ahora
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
-        </div>
+          </div>
 
-        {/* Benefits */}
-        <Card className="bg-card/50">
+          {/* Benefits */}
+          <Card className="bg-card/50">
           <CardContent className="pt-6">
             <h2 className="text-xl font-semibold mb-4 text-center">
               ¿Por qué elegir {affiliate.name}?
@@ -224,10 +224,10 @@ export default function AffiliateLanding() {
               ))}
             </div>
           </CardContent>
-        </Card>
+          </Card>
 
-        {/* Secondary CTA */}
-        <div className="text-center p-8 rounded-xl bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-white/10">
+          {/* Secondary CTA */}
+          <div className="text-center p-8 rounded-xl bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-white/10">
           <h3 className="text-2xl font-bold mb-2">
             ¿Listo para empezar?
           </h3>
@@ -238,10 +238,10 @@ export default function AffiliateLanding() {
             <ExternalLink className="mr-2 h-4 w-4" />
             Ir a {affiliate.name}
           </Button>
-        </div>
+          </div>
 
-        {/* Related tools */}
-        <div className="pt-8 border-t border-border">
+          {/* Related tools */}
+          <div className="pt-8 border-t border-border">
           <h3 className="text-lg font-semibold mb-4">
             Herramientas relacionadas
           </h3>
@@ -250,7 +250,7 @@ export default function AffiliateLanding() {
             category={affiliate.category}
             limit={3}
           />
-        </div>
+          </div>
         </div>
       </MobilePullToRefresh>
     </Layout>

@@ -165,7 +165,7 @@ export default function Privacy() {
               </Link>.
             </p>
           </section>
-        </div>
+          </div>
         </div>
       </MobilePullToRefresh>
     </Layout>

@@ -107,8 +107,8 @@ export default function Deals() {
             </p>
           </div>
 
-        {/* Deal of the Day */}
-        {dealOfTheDay && (
+          {/* Deal of the Day */}
+          {dealOfTheDay && (
           <Card className="bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 border-yellow-500/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-yellow-400">
@@ -151,10 +151,10 @@ export default function Deals() {
               </div>
             </CardContent>
           </Card>
-        )}
+          )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="text-center">
             <CardContent className="pt-6">
               <Tag className="h-8 w-8 text-blue-400 mx-auto mb-2" />
@@ -183,10 +183,10 @@ export default function Deals() {
               <p className="text-sm text-muted-foreground">Actualizados</p>
             </CardContent>
           </Card>
-        </div>
+          </div>
 
-        {/* Deals with Discount Codes */}
-        {dealsWithCodes.length > 0 && (
+          {/* Deals with Discount Codes */}
+          {dealsWithCodes.length > 0 && (
           <section>
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <Tag className="h-5 w-5 text-yellow-400" />
@@ -198,10 +198,10 @@ export default function Deals() {
               ))}
             </div>
           </section>
-        )}
+          )}
 
-        {/* Top Affiliates */}
-        {topAffiliates.length > 0 && (
+          {/* Top Affiliates */}
+          {topAffiliates.length > 0 && (
           <section>
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-purple-400" />
@@ -213,10 +213,10 @@ export default function Deals() {
               ))}
             </div>
           </section>
-        )}
+          )}
 
-        {/* All Deals */}
-        <section>
+          {/* All Deals */}
+          <section>
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <Gift className="h-5 w-5 text-blue-400" />
             Todas las Ofertas
@@ -226,15 +226,15 @@ export default function Deals() {
               <AffiliateCard key={affiliate.id} affiliate={affiliate} />
             ))}
           </div>
-        </section>
+          </section>
 
-        {/* SEO Footer */}
-        <div className="text-center py-4 md:py-8 text-muted-foreground px-4">
+          {/* SEO Footer */}
+          <div className="text-center py-4 md:py-8 text-muted-foreground px-4">
           <p className="text-xs md:text-sm">
             💡 Todas las ofertas son verificadas y actualizadas regularmente.
             Los códigos de descuento pueden expirar sin previo aviso.
           </p>
-        </div>
+          </div>
         </div>
       </MobilePullToRefresh>
     </Layout>
