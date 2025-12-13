@@ -157,3 +157,4 @@ echo "  2. Desregistra el Service Worker (DevTools > Application > Service Worke
 echo "  3. Espera unos minutos y recarga"
 echo ""
 
+

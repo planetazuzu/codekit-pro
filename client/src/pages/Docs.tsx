@@ -4,37 +4,34 @@
  */
 
 import { Layout } from "@/layout/Layout";
-import { useRoute } from "wouter";
+import { useLocation } from "wouter";
 import { DocsSidebar } from "@/components/docs/DocsSidebar";
 import { MarkdownRenderer } from "@/components/docs/MarkdownRenderer";
 import { Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { BackButton } from "@/components/common/BackButton";
 
-// Map routes to markdown files
+// Map routes to markdown files (using new public structure)
 const docRoutes: Record<string, string> = {
-  "/docs": "README.md",
-  "/docs/introduccion": "01-introduccion/README.md",
-  "/docs/introduccion/inicio-rapido": "01-introduccion/inicio-rapido.md",
-  "/docs/guias": "02-guias/README.md",
-  "/docs/guias/prompts": "02-guias/prompts.md",
-  "/docs/comparativas": "03-comparativas/README.md",
-  "/docs/comparativas/ia-programacion": "03-comparativas/ia-programacion.md",
-  "/docs/arquitectura": "04-arquitectura/README.md",
-  "/docs/arquitectura/arquitectura-general": "04-arquitectura/arquitectura-general.md",
-  "/docs/buenas-practicas": "05-buenas-practicas/README.md",
-  "/docs/conceptos": "06-conceptos/README.md",
-  "/docs/faq": "07-faq/README.md",
+  "/docs": "public/README.md",
+  "/docs/introduccion": "public/introduccion/README.md",
+  "/docs/introduccion/inicio-rapido": "public/introduccion/inicio-rapido.md",
+  "/docs/guias": "public/guias/README.md",
+  "/docs/guias/prompts": "public/guias/prompts.md",
+  "/docs/comparativas": "public/comparativas/README.md",
+  "/docs/comparativas/ia-programacion": "public/comparativas/ia-programacion.md",
+  "/docs/conceptos": "public/conceptos/README.md",
+  "/docs/faq": "public/faq/README.md",
 };
 
 export default function Docs() {
-  const [match, params] = useRoute("/docs/:path*");
+  const [location] = useLocation();
   const [content, setContent] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Get current path
-  const currentPath = match ? `/docs${params?.path ? `/${params.path}` : ""}` : "/docs";
+  // Get current path - normalize to match docRoutes keys
+  const currentPath = location.startsWith("/docs") ? location : "/docs";
 
   useEffect(() => {
     const loadDoc = async () => {

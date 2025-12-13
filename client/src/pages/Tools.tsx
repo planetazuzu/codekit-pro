@@ -1,6 +1,10 @@
 import { Layout } from "@/layout/Layout";
 import { Link } from "wouter";
 import { BackButton } from "@/components/common/BackButton";
+import { MobileBottomSheet, MobileOnly, DesktopOnly } from "@/components/mobile";
+import { useState, useMemo } from "react";
+import { Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { 
   Image, 
   FileJson, 
@@ -277,7 +281,26 @@ import { useTrackPageView } from "@/hooks/use-track-view";
 
 export default function Tools() {
   useTrackPageView("page", "tools");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   
+  // Agrupar herramientas por categoría para filtros móviles
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    tools.forEach(tool => {
+      // Inferir categoría del ID o descripción
+      if (tool.id.includes('generator') || tool.id.includes('creator')) {
+        cats.add('Generadores');
+      } else if (tool.id.includes('formatter') || tool.id.includes('converter')) {
+        cats.add('Formatters');
+      } else if (tool.id.includes('tester') || tool.id.includes('analyzer')) {
+        cats.add('Utilidades');
+      } else {
+        cats.add('Herramientas');
+      }
+    });
+    return Array.from(cats);
+  }, []);
+
   return (
     <Layout>
       <div className="space-y-8">
@@ -286,14 +309,27 @@ export default function Tools() {
           <BackButton />
         </div>
 
-        <div className="max-w-2xl">
-          <h1 className="text-3xl font-bold tracking-tight">Caja de Herramientas</h1>
-          <p className="text-muted-foreground mt-2 text-lg">
-            Utilidades pequeñas pero poderosas para agilizar tareas repetitivas en tu flujo de desarrollo.
-          </p>
+        <div className="flex items-center justify-between gap-4">
+          <div className="max-w-2xl">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Caja de Herramientas</h1>
+            <p className="text-muted-foreground mt-2 text-sm md:text-lg">
+              Utilidades pequeñas pero poderosas para agilizar tareas repetitivas en tu flujo de desarrollo.
+            </p>
+          </div>
+          
+          <MobileOnly>
+            <Button
+              variant="outline"
+              onClick={() => setFiltersOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Filtros
+            </Button>
+          </MobileOnly>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {tools.map((tool) => (
             <Link key={tool.id} href={tool.href}>
               <a className="group relative overflow-hidden rounded-xl border border-border bg-card p-6 hover:border-primary/50 hover:shadow-lg transition-all duration-300 flex flex-col h-full">
@@ -311,6 +347,32 @@ export default function Tools() {
             </Link>
           ))}
         </div>
+
+        {/* Mobile Bottom Sheet para filtros */}
+        <MobileBottomSheet
+          open={filtersOpen}
+          onOpenChange={setFiltersOpen}
+          title="Filtros"
+        >
+          <div className="space-y-4 p-4">
+            <div>
+              <h3 className="text-sm font-semibold mb-2">Categorías</h3>
+              <div className="space-y-2">
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    className="w-full text-left px-4 py-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {tools.length} herramientas disponibles
+            </div>
+          </div>
+        </MobileBottomSheet>
       </div>
     </Layout>
   );

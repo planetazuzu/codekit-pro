@@ -1,5 +1,5 @@
 import { Layout } from "@/layout/Layout";
-import { ArrowRight, Sparkles, Wrench, Code2, FileCode, Download, Upload, MessageSquare, Link2, BookOpen } from "lucide-react";
+import { ArrowRight, Sparkles, Wrench, Code2, FileCode, Download, Upload, MessageSquare, Link2, BookOpen, Plus } from "lucide-react";
 import { Link } from "wouter";
 import { useTrackPageView } from "@/hooks/use-track-view";
 import { useExportImport } from "@/hooks/use-export-import";
@@ -9,17 +9,30 @@ import { useLinks } from "@/hooks/use-links";
 import { useGuides } from "@/hooks/use-guides";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
+import { MobilePullToRefresh, MobileFloatingButton, MobileOnly, DesktopOnly } from "@/components/mobile";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Dashboard() {
   useTrackPageView("page", "dashboard");
   const { exportData, importData } = useExportImport();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
   
   // Obtener datos reales para estadísticas
-  const { data: prompts = [] } = usePrompts();
-  const { data: snippets = [] } = useSnippets();
-  const { data: links = [] } = useLinks();
-  const { data: guides = [] } = useGuides();
+  const { data: prompts = [], refetch: refetchPrompts } = usePrompts();
+  const { data: snippets = [], refetch: refetchSnippets } = useSnippets();
+  const { data: links = [], refetch: refetchLinks } = useLinks();
+  const { data: guides = [], refetch: refetchGuides } = useGuides();
+
+  const handleRefresh = async () => {
+    await Promise.all([
+      refetchPrompts(),
+      refetchSnippets(),
+      refetchLinks(),
+      refetchGuides(),
+    ]);
+    queryClient.invalidateQueries();
+  };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -229,6 +242,13 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Floating Button */}
+      <MobileFloatingButton
+        icon={Plus}
+        onClick={handleRefresh}
+        title="Actualizar"
+      />
     </Layout>
   );
 }

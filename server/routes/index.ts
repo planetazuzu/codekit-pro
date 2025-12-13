@@ -21,6 +21,7 @@ import webhooksRouter from "./webhooks";
 import deploymentsRouter from "./deployments";
 import adminRouter from "./admin";
 import { docsRouter } from "./docs";
+import { healthRouter } from "./health";
 
 /**
  * Register all routes
@@ -63,5 +64,8 @@ export function registerRoutes(app: Express): void {
   
   // Documentation routes
   app.use("/api/docs", docsRouter);
+  
+  // Health check route
+  app.use("/api/health", healthRouter);
 }
 

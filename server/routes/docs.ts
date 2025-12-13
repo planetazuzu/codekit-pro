@@ -10,8 +10,9 @@ import { logger } from "../utils/logger";
 
 const router = Router();
 
-// Path to docs directory
+// Path to docs directory - prioritize public docs
 const docsPath = path.resolve(__dirname, "../../docs");
+const publicDocsPath = path.resolve(__dirname, "../../docs/public");
 
 /**
  * GET /api/docs/:path*
@@ -20,7 +21,22 @@ const docsPath = path.resolve(__dirname, "../../docs");
 router.get("/:path*", (req: Request, res: Response) => {
   try {
     // Get the requested path
-    const requestedPath = req.params.path || "";
+    let requestedPath = req.params.path || "";
+    
+    // If no path or root, default to public README
+    if (!requestedPath || requestedPath === "" || requestedPath === "README.md") {
+      requestedPath = "public/README.md";
+    } else if (!requestedPath.startsWith("public/") && !requestedPath.startsWith("internal/")) {
+      // If path doesn't specify public/internal, default to public
+      // But check if it's a direct file request first
+      if (requestedPath.endsWith(".md")) {
+        requestedPath = `public/${requestedPath}`;
+      } else {
+        // It's a directory path, try public first
+        requestedPath = `public/${requestedPath}`;
+      }
+    }
+    
     const fullPath = path.join(docsPath, requestedPath);
 
     // Security: Prevent directory traversal
