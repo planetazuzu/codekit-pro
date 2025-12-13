@@ -2,9 +2,12 @@
  * Virtualized List Component
  * Optimized for rendering large lists efficiently
  * Updated for react-window v2.2.3 API
+ * 
+ * CRITICAL: This component ensures renderItem always returns valid React elements
+ * to prevent React error #31 (Objects are not valid as a React child)
  */
 
-import { isValidElement } from "react";
+import { isValidElement, useMemo } from "react";
 import { List, Grid, type ListProps, type RowComponentProps, type CellComponentProps } from "react-window";
 import { cn } from "@/lib/utils";
 
@@ -31,48 +34,69 @@ export function VirtualizedList<T>({
   emptyIcon,
   overscanCount = 5,
 }: VirtualizedListProps<T>) {
-  // Create row component as a function (not memoized) for react-window
-  const Row = ({ index, style }: RowComponentProps) => {
-    const item = items[index];
-    if (!item) return null;
+  // Memoize the Row component to prevent recreation on every render
+  // This ensures react-window receives a stable component reference
+  const Row = useMemo(() => {
+    return ({ index, style }: RowComponentProps) => {
+      const item = items[index];
+      if (!item) return null;
 
-    try {
-      const rendered = renderItem(item, index);
-      // Ensure we return a valid React element
-      if (!rendered) {
+      try {
+        const rendered = renderItem(item, index);
+        
+        // Early return for null/undefined
+        if (rendered == null) {
+          return null;
+        }
+        
+        // Check if it's a valid React element using React's isValidElement
+        if (isValidElement(rendered)) {
+          return (
+            <div style={style} className={cn("px-2", itemClassName)}>
+              {rendered}
+            </div>
+          );
+        }
+        
+        // If it's a string or number, wrap it (valid React children)
+        if (typeof rendered === 'string' || typeof rendered === 'number' || typeof rendered === 'boolean') {
+          return (
+            <div style={style} className={cn("px-2", itemClassName)}>
+              {rendered}
+            </div>
+          );
+        }
+        
+        // If it's a component (function/class), this is an error
+        // Log it and return null to prevent React error #31
+        if (typeof rendered === 'function' || (typeof rendered === 'object' && rendered !== null && ('render' in rendered || '$$typeof' in rendered))) {
+          console.error(
+            "VirtualizedList: renderItem returned a component/object instead of an element.",
+            "Index:", index,
+            "Type:", typeof rendered,
+            "Item:", item
+          );
+          return null;
+        }
+        
+        // For arrays, React can handle them, but we'll wrap for consistency
+        if (Array.isArray(rendered)) {
+          return (
+            <div style={style} className={cn("px-2", itemClassName)}>
+              {rendered}
+            </div>
+          );
+        }
+        
+        // Fallback: log and return null
+        console.warn("VirtualizedList: renderItem returned unexpected type:", typeof rendered, "Index:", index);
+        return null;
+      } catch (error) {
+        console.error("VirtualizedList: Error rendering item at index", index, ":", error);
         return null;
       }
-      
-      // Check if it's a valid React element using React's isValidElement
-      if (isValidElement(rendered)) {
-        return (
-          <div style={style} className={cn("px-2", itemClassName)}>
-            {rendered}
-          </div>
-        );
-      }
-      
-      // If it's a string or number, wrap it
-      if (typeof rendered === 'string' || typeof rendered === 'number') {
-        return (
-          <div style={style} className={cn("px-2", itemClassName)}>
-            {rendered}
-          </div>
-        );
-      }
-      
-      // If it's a component (function/class), log error and return null
-      if (typeof rendered === 'function' || (typeof rendered === 'object' && rendered !== null && 'render' in rendered)) {
-        console.error("VirtualizedList: renderItem returned a component instead of an element. Index:", index, "Item:", item);
-        return null;
-      }
-      
-      return null;
-    } catch (error) {
-      console.error("Error rendering item:", error);
-      return null;
-    }
-  };
+    };
+  }, [items, renderItem, itemClassName]);
 
   if (items.length === 0) {
     const EmptyIcon = emptyIcon;
@@ -126,70 +150,101 @@ export function VirtualizedGrid<T>({
   emptyIcon,
   gap = 16,
 }: VirtualizedGridProps<T>) {
-  // Create cell component as a function (not memoized) for react-window
-  const Cell = ({ columnIndex, rowIndex, style, ariaAttributes }: CellComponentProps) => {
-    const index = rowIndex * columnCount + columnIndex;
-    const item = items[index];
-    
-    if (!item) return null;
+  // Memoize the Cell component to prevent recreation on every render
+  // This ensures react-window receives a stable component reference
+  const Cell = useMemo(() => {
+    return ({ columnIndex, rowIndex, style, ariaAttributes }: CellComponentProps) => {
+      const index = rowIndex * columnCount + columnIndex;
+      const item = items[index];
+      
+      if (!item) return null;
 
-    try {
-      const rendered = renderItem(item, index);
-      // Ensure we return a valid React element
-      if (!rendered) {
+      try {
+        const rendered = renderItem(item, index);
+        
+        // Early return for null/undefined
+        if (rendered == null) {
+          return null;
+        }
+        
+        // Check if it's a valid React element using React's isValidElement
+        if (isValidElement(rendered)) {
+          return (
+            <div
+              {...ariaAttributes}
+              style={{
+                ...style,
+                paddingLeft: columnIndex === 0 ? 0 : gap / 2,
+                paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
+                paddingTop: rowIndex === 0 ? 0 : gap / 2,
+                paddingBottom: gap / 2,
+              }}
+              className={itemClassName}
+            >
+              {rendered}
+            </div>
+          );
+        }
+        
+        // If it's a string or number, wrap it (valid React children)
+        if (typeof rendered === 'string' || typeof rendered === 'number' || typeof rendered === 'boolean') {
+          return (
+            <div
+              {...ariaAttributes}
+              style={{
+                ...style,
+                paddingLeft: columnIndex === 0 ? 0 : gap / 2,
+                paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
+                paddingTop: rowIndex === 0 ? 0 : gap / 2,
+                paddingBottom: gap / 2,
+              }}
+              className={itemClassName}
+            >
+              {rendered}
+            </div>
+          );
+        }
+        
+        // If it's a component (function/class), this is an error
+        // Log it and return null to prevent React error #31
+        if (typeof rendered === 'function' || (typeof rendered === 'object' && rendered !== null && ('render' in rendered || '$$typeof' in rendered))) {
+          console.error(
+            "VirtualizedGrid: renderItem returned a component/object instead of an element.",
+            "Cell:", rowIndex, columnIndex,
+            "Type:", typeof rendered,
+            "Item:", item
+          );
+          return null;
+        }
+        
+        // For arrays, React can handle them, but we'll wrap for consistency
+        if (Array.isArray(rendered)) {
+          return (
+            <div
+              {...ariaAttributes}
+              style={{
+                ...style,
+                paddingLeft: columnIndex === 0 ? 0 : gap / 2,
+                paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
+                paddingTop: rowIndex === 0 ? 0 : gap / 2,
+                paddingBottom: gap / 2,
+              }}
+              className={itemClassName}
+            >
+              {rendered}
+            </div>
+          );
+        }
+        
+        // Fallback: log and return null
+        console.warn("VirtualizedGrid: renderItem returned unexpected type:", typeof rendered, "Cell:", rowIndex, columnIndex);
+        return null;
+      } catch (error) {
+        console.error("VirtualizedGrid: Error rendering cell at", rowIndex, columnIndex, ":", error);
         return null;
       }
-      
-      // Check if it's a valid React element using React's isValidElement
-      if (isValidElement(rendered)) {
-        return (
-          <div
-            {...ariaAttributes}
-            style={{
-              ...style,
-              paddingLeft: columnIndex === 0 ? 0 : gap / 2,
-              paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
-              paddingTop: rowIndex === 0 ? 0 : gap / 2,
-              paddingBottom: gap / 2,
-            }}
-            className={itemClassName}
-          >
-            {rendered}
-          </div>
-        );
-      }
-      
-      // If it's a string or number, wrap it
-      if (typeof rendered === 'string' || typeof rendered === 'number') {
-        return (
-          <div
-            {...ariaAttributes}
-            style={{
-              ...style,
-              paddingLeft: columnIndex === 0 ? 0 : gap / 2,
-              paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
-              paddingTop: rowIndex === 0 ? 0 : gap / 2,
-              paddingBottom: gap / 2,
-            }}
-            className={itemClassName}
-          >
-            {rendered}
-          </div>
-        );
-      }
-      
-      // If it's a component (function/class), log error and return null
-      if (typeof rendered === 'function' || (typeof rendered === 'object' && rendered !== null && 'render' in rendered)) {
-        console.error("VirtualizedGrid: renderItem returned a component instead of an element. Cell:", rowIndex, columnIndex, "Item:", item);
-        return null;
-      }
-      
-      return null;
-    } catch (error) {
-      console.error("Error rendering cell:", error);
-      return null;
-    }
-  };
+    };
+  }, [items, renderItem, itemClassName, columnCount, gap]);
 
   const rowCount = Math.ceil(items.length / columnCount);
   // Calculate column width as percentage (100% / columnCount)
