@@ -157,7 +157,22 @@ export function VirtualizedGrid<T>({
       const index = rowIndex * columnCount + columnIndex;
       const item = items[index];
       
-      if (!item) return null;
+      // Return empty div if no item (react-window requires a valid element)
+      if (!item) {
+        return (
+          <div
+            {...ariaAttributes}
+            style={{
+              ...style,
+              paddingLeft: columnIndex === 0 ? 0 : gap / 2,
+              paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
+              paddingTop: rowIndex === 0 ? 0 : gap / 2,
+              paddingBottom: gap / 2,
+            }}
+            className={itemClassName}
+          />
+        );
+      }
 
       try {
         const rendered = renderItem(item, index);

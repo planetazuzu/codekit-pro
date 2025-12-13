@@ -4,8 +4,14 @@ import App from "./App";
 import "./index.css";
 
 // Register Service Worker for PWA
-if ("serviceWorker" in navigator && import.meta.env.PROD) {
-  window.addEventListener("load", () => {
+// Safe check for browser environment and service worker support
+if (
+  typeof window !== "undefined" &&
+  "serviceWorker" in navigator &&
+  import.meta.env.PROD
+) {
+  // Use requestIdleCallback if available for better performance, otherwise use load event
+  const registerSW = () => {
     navigator.serviceWorker
       .register("/sw.js")
       .then((registration) => {
@@ -25,9 +31,19 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
         });
       })
       .catch((error) => {
-        console.error("Service Worker registration failed:", error);
+        // Silently fail - don't interrupt user experience
+        console.warn("Service Worker registration failed:", error);
       });
-  });
+  };
+
+  if (window.requestIdleCallback) {
+    window.requestIdleCallback(registerSW, { timeout: 2000 });
+  } else if (document.readyState === "complete") {
+    // If already loaded, register immediately
+    registerSW();
+  } else {
+    window.addEventListener("load", registerSW);
+  }
 }
 
 createRoot(document.getElementById("root")!).render(

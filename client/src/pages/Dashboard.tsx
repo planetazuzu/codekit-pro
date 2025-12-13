@@ -25,8 +25,13 @@ export default function Dashboard() {
   const guidesCount = stats?.guides ?? 0;
 
   const handleRefresh = async () => {
-    await refetchStats();
-    queryClient.invalidateQueries();
+    try {
+      await refetchStats();
+      queryClient.invalidateQueries();
+    } catch (error) {
+      // Silently handle refresh errors - don't block UI
+      console.warn("Error refreshing dashboard:", error);
+    }
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,7 +51,8 @@ export default function Dashboard() {
   
   return (
     <Layout>
-      <div className="space-y-4 md:space-y-6">
+      <MobilePullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-4 md:space-y-6">
         {/* Hero Section */}
         <div className="rounded-xl border border-border bg-gradient-to-br from-card via-card to-primary/5 p-4 md:p-8 lg:p-12 shadow-sm">
           <div>
@@ -236,7 +242,8 @@ export default function Dashboard() {
             </Link>
           </div>
         </div>
-      </div>
+        </div>
+      </MobilePullToRefresh>
 
       {/* Mobile Floating Button */}
       <MobileFloatingButton

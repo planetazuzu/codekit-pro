@@ -29,8 +29,15 @@ export function MobilePullToRefresh({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const startY = useRef<number>(0);
   const currentY = useRef<number>(0);
+  const onRefreshRef = useRef(onRefresh);
+
+  // Keep onRefresh ref updated to avoid stale closures
+  useEffect(() => {
+    onRefreshRef.current = onRefresh;
+  }, [onRefresh]);
 
   useEffect(() => {
+    // Don't initialize if not mobile or container not ready
     if (!isMobile || !containerRef.current) return;
 
     const container = containerRef.current;
@@ -70,7 +77,11 @@ export function MobilePullToRefresh({
         setPullDistance(threshold);
         
         try {
-          await onRefresh();
+          // Use ref to avoid stale closure issues
+          await onRefreshRef.current();
+        } catch (error) {
+          // Silently handle errors - don't break the UI
+          console.warn("Pull to refresh error:", error);
         } finally {
           setIsRefreshing(false);
           setPullDistance(0);
@@ -95,7 +106,7 @@ export function MobilePullToRefresh({
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isMobile, pullDistance, threshold, isRefreshing, onRefresh]);
+  }, [isMobile, pullDistance, threshold, isRefreshing]);
 
   if (!isMobile) {
     return <div className={className}>{children}</div>;

@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import NotFound from "@/pages/not-found";
 import { PWAInstallPrompt } from "@/components/mobile";
 
@@ -55,12 +56,24 @@ const TestGenerator = lazy(() => import("@/tools/TestGenerator"));
 const AutoDocumentation = lazy(() => import("@/tools/AutoDocumentation"));
 const UsageExamplesGenerator = lazy(() => import("@/tools/UsageExamplesGenerator"));
 
-// Wrapper component for Suspense
+// Wrapper component for Suspense with Error Boundary
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      {children}
-    </Suspense>
+    <ErrorBoundary
+      fallback={
+        <div className="flex min-h-[400px] items-center justify-center p-8">
+          <div className="text-center space-y-4">
+            <p className="text-muted-foreground">
+              No se pudo cargar este componente. Por favor, recarga la página.
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <Suspense fallback={<LoadingSpinner />}>
+        {children}
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 

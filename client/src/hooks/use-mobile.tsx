@@ -3,43 +3,82 @@ import * as React from "react"
 const MOBILE_BREAKPOINT = 768
 const TABLET_BREAKPOINT = 1024
 
+/**
+ * Hook para detectar si es móvil
+ * Safe para SSR - retorna false inicialmente si window no está disponible
+ */
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
+  // Inicializar con un valor por defecto seguro para SSR
+  // Si estamos en cliente, intentamos detectar inmediatamente
+  const [isMobile, setIsMobile] = React.useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.innerWidth < MOBILE_BREAKPOINT;
+  });
 
   React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    }
-    mql.addEventListener("change", onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    return () => mql.removeEventListener("change", onChange)
-  }, [])
+    // Verificar que window está disponible
+    if (typeof window === "undefined") return;
 
-  return !!isMobile
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    
+    // Función para actualizar estado
+    const updateIsMobile = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+
+    // Actualizar inmediatamente
+    updateIsMobile();
+
+    // Escuchar cambios
+    // Usar addEventListener si está disponible, sino usar el evento deprecated
+    if (mql.addEventListener) {
+      mql.addEventListener("change", updateIsMobile);
+      return () => mql.removeEventListener("change", updateIsMobile);
+    } else {
+      // Fallback para navegadores antiguos
+      mql.addListener(updateIsMobile);
+      return () => mql.removeListener(updateIsMobile);
+    }
+  }, []);
+
+  return isMobile;
 }
 
 /**
  * Hook para detectar si es tablet
+ * Safe para SSR - retorna false inicialmente si window no está disponible
  */
 export function useIsTablet() {
-  const [isTablet, setIsTablet] = React.useState<boolean | undefined>(undefined)
+  const [isTablet, setIsTablet] = React.useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const width = window.innerWidth;
+    return width >= MOBILE_BREAKPOINT && width < TABLET_BREAKPOINT;
+  });
 
   React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const mql = window.matchMedia(
       `(min-width: ${MOBILE_BREAKPOINT}px) and (max-width: ${TABLET_BREAKPOINT - 1}px)`
-    )
-    const onChange = () => {
-      const width = window.innerWidth
-      setIsTablet(width >= MOBILE_BREAKPOINT && width < TABLET_BREAKPOINT)
-    }
-    mql.addEventListener("change", onChange)
-    const width = window.innerWidth
-    setIsTablet(width >= MOBILE_BREAKPOINT && width < TABLET_BREAKPOINT)
-    return () => mql.removeEventListener("change", onChange)
-  }, [])
+    );
+    
+    const updateIsTablet = () => {
+      const width = window.innerWidth;
+      setIsTablet(width >= MOBILE_BREAKPOINT && width < TABLET_BREAKPOINT);
+    };
 
-  return !!isTablet
+    updateIsTablet();
+
+    if (mql.addEventListener) {
+      mql.addEventListener("change", updateIsTablet);
+      return () => mql.removeEventListener("change", updateIsTablet);
+    } else {
+      mql.addListener(updateIsTablet);
+      return () => mql.removeListener(updateIsTablet);
+    }
+  }, []);
+
+  return isTablet;
 }
 
 /**
