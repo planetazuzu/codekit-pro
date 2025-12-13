@@ -35,17 +35,36 @@ export function VirtualizedList<T>({
     const item = items[index];
     if (!item) return null;
 
-    const rendered = renderItem(item, index);
-    // Ensure we return a valid React element
-    if (!rendered || typeof rendered !== 'object' || !('$$typeof' in rendered)) {
+    try {
+      const rendered = renderItem(item, index);
+      // Ensure we return a valid React element
+      if (!rendered) {
+        return null;
+      }
+      
+      // Check if it's a valid React element
+      if (typeof rendered === 'object' && rendered !== null && '$$typeof' in rendered) {
+        return (
+          <div style={style} className={cn("px-2", itemClassName)}>
+            {rendered}
+          </div>
+        );
+      }
+      
+      // If it's a string or number, wrap it
+      if (typeof rendered === 'string' || typeof rendered === 'number') {
+        return (
+          <div style={style} className={cn("px-2", itemClassName)}>
+            {rendered}
+          </div>
+        );
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Error rendering item:", error);
       return null;
     }
-
-    return (
-      <div style={style} className={cn("px-2", itemClassName)}>
-        {rendered}
-      </div>
-    );
   });
 
   Row.displayName = "Row";
@@ -108,27 +127,56 @@ export function VirtualizedGrid<T>({
     
     if (!item) return null;
 
-    const rendered = renderItem(item, index);
-    // Ensure we return a valid React element
-    if (!rendered || typeof rendered !== 'object' || !('$$typeof' in rendered)) {
+    try {
+      const rendered = renderItem(item, index);
+      // Ensure we return a valid React element
+      if (!rendered) {
+        return null;
+      }
+      
+      // Check if it's a valid React element
+      if (typeof rendered === 'object' && rendered !== null && '$$typeof' in rendered) {
+        return (
+          <div
+            {...ariaAttributes}
+            style={{
+              ...style,
+              paddingLeft: columnIndex === 0 ? 0 : gap / 2,
+              paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
+              paddingTop: rowIndex === 0 ? 0 : gap / 2,
+              paddingBottom: gap / 2,
+            }}
+            className={itemClassName}
+          >
+            {rendered}
+          </div>
+        );
+      }
+      
+      // If it's a string or number, wrap it
+      if (typeof rendered === 'string' || typeof rendered === 'number') {
+        return (
+          <div
+            {...ariaAttributes}
+            style={{
+              ...style,
+              paddingLeft: columnIndex === 0 ? 0 : gap / 2,
+              paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
+              paddingTop: rowIndex === 0 ? 0 : gap / 2,
+              paddingBottom: gap / 2,
+            }}
+            className={itemClassName}
+          >
+            {rendered}
+          </div>
+        );
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Error rendering cell:", error);
       return null;
     }
-
-    return (
-      <div
-        {...ariaAttributes}
-        style={{
-          ...style,
-          paddingLeft: columnIndex === 0 ? 0 : gap / 2,
-          paddingRight: columnIndex === columnCount - 1 ? 0 : gap / 2,
-          paddingTop: rowIndex === 0 ? 0 : gap / 2,
-          paddingBottom: gap / 2,
-        }}
-        className={itemClassName}
-      >
-        {rendered}
-      </div>
-    );
   });
 
   Cell.displayName = "Cell";
@@ -155,7 +203,7 @@ export function VirtualizedGrid<T>({
         defaultHeight={height}
         rowCount={rowCount}
         rowHeight={itemHeight + gap}
-        cellComponent={Cell}
+        cellComponent={Cell as any}
         cellProps={{}}
         overscanCount={5}
       />
