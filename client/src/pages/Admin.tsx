@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
+import { MobileOnly, DesktopOnly } from "@/components/mobile";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
@@ -143,69 +144,130 @@ export default function Admin() {
   return (
     <Layout>
       <div className="space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Panel de Administración</h1>
-            <p className="text-muted-foreground mt-1">Estadísticas de vistas y uso de la aplicación</p>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Panel de Administración</h1>
+            <p className="text-muted-foreground mt-1 text-sm md:text-base">Estadísticas de vistas y uso de la aplicación</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Link href="/admin/affiliates">
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
-                Gestionar Afiliados
-              </Button>
-            </Link>
-            <div className="flex gap-2 border-r pr-2 mr-2">
+          
+          <DesktopOnly>
+            <div className="flex items-center gap-2">
+              <Link href="/admin/affiliates">
+                <Button variant="outline" size="sm">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Gestionar Afiliados
+                </Button>
+              </Link>
+              <div className="flex gap-2 border-r pr-2 mr-2">
+                <Button
+                  variant={activeTab === "analytics" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveTab("analytics")}
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Analytics
+                </Button>
+                <Button
+                  variant={activeTab === "github" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveTab("github")}
+                >
+                  <Github className="h-4 w-4 mr-2" />
+                  GitHub Sync
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant={days === 7 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDays(7)}
+                >
+                  7 días
+                </Button>
+                <Button
+                  variant={days === 30 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDays(30)}
+                >
+                  30 días
+                </Button>
+                <Button
+                  variant={days === 90 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDays(90)}
+                >
+                  90 días
+                </Button>
+              </div>
               <Button
-                variant={activeTab === "analytics" ? "default" : "outline"}
+                variant="outline"
                 size="sm"
-                onClick={() => setActiveTab("analytics")}
+                onClick={logout}
+                className="ml-2"
               >
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Analytics
-              </Button>
-              <Button
-                variant={activeTab === "github" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveTab("github")}
-              >
-                <Github className="h-4 w-4 mr-2" />
-                GitHub Sync
+                <LogOut className="h-4 w-4 mr-2" />
+                Salir
               </Button>
             </div>
-          <div className="flex gap-2">
-            <Button
-              variant={days === 7 ? "default" : "outline"}
-              size="sm"
-              onClick={() => setDays(7)}
-            >
-              7 días
-            </Button>
-            <Button
-              variant={days === 30 ? "default" : "outline"}
-              size="sm"
-              onClick={() => setDays(30)}
-            >
-              30 días
-            </Button>
-            <Button
-              variant={days === 90 ? "default" : "outline"}
-              size="sm"
-              onClick={() => setDays(90)}
-            >
-              90 días
-              </Button>
+          </DesktopOnly>
+          
+          <MobileOnly>
+            <div className="flex flex-col gap-2 w-full">
+              <div className="flex gap-2">
+                <Button
+                  variant={activeTab === "analytics" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveTab("analytics")}
+                  className="flex-1"
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Analytics
+                </Button>
+                <Button
+                  variant={activeTab === "github" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveTab("github")}
+                  className="flex-1"
+                >
+                  <Github className="h-4 w-4 mr-2" />
+                  GitHub
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant={days === 7 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDays(7)}
+                  className="flex-1"
+                >
+                  7d
+                </Button>
+                <Button
+                  variant={days === 30 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDays(30)}
+                  className="flex-1"
+                >
+                  30d
+                </Button>
+                <Button
+                  variant={days === 90 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDays(90)}
+                  className="flex-1"
+                >
+                  90d
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={logout}
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={logout}
-              className="ml-2"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Salir
-            </Button>
-          </div>
+          </MobileOnly>
         </div>
 
         {activeTab === "github" && (
@@ -407,76 +469,135 @@ export default function Admin() {
         {/* Charts */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Views Over Time */}
-          <div className="bg-card border border-border rounded-xl p-6">
-            <h2 className="text-xl font-semibold mb-4">Vistas por Fecha</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={statsData?.byDate || []}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
-                  tick={{ fontSize: 12 }}
-                  tickFormatter={(value) => new Date(value).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}
-                />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip 
-                  labelFormatter={(value) => new Date(value).toLocaleDateString('es-ES')}
-                />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="count" 
-                  stroke="#0088FE" 
-                  strokeWidth={2}
-                  name="Vistas"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <DesktopOnly>
+            <div className="bg-card border border-border rounded-xl p-6">
+              <h2 className="text-xl font-semibold mb-4">Vistas por Fecha</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={statsData?.byDate || []}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => new Date(value).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}
+                  />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip 
+                    labelFormatter={(value) => new Date(value).toLocaleDateString('es-ES')}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="count" 
+                    stroke="#0088FE" 
+                    strokeWidth={2}
+                    name="Vistas"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </DesktopOnly>
+
+          {/* Mobile: Simplified Stats */}
+          <MobileOnly>
+            <div className="bg-card border border-border rounded-xl p-4">
+              <h2 className="text-lg font-semibold mb-4">Vistas por Fecha</h2>
+              <div className="space-y-2">
+                {statsData?.byDate.slice(-7).map((item: { date: string; count: number }) => (
+                  <div key={item.date} className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {new Date(item.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}
+                    </span>
+                    <span className="font-medium">{item.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </MobileOnly>
 
           {/* Top Pages */}
-          <div className="bg-card border border-border rounded-xl p-6">
-            <h2 className="text-xl font-semibold mb-4">Páginas Más Visitadas</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topPagesData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="page" 
-                  angle={-45}
-                  textAnchor="end"
-                  height={100}
-                  tick={{ fontSize: 10 }}
-                />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#00C49F" name="Vistas" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <DesktopOnly>
+            <div className="bg-card border border-border rounded-xl p-6">
+              <h2 className="text-xl font-semibold mb-4">Páginas Más Visitadas</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={topPagesData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="page" 
+                    angle={-45}
+                    textAnchor="end"
+                    height={100}
+                    tick={{ fontSize: 10 }}
+                  />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#00C49F" name="Vistas" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </DesktopOnly>
+
+          {/* Mobile: Simplified Top Pages */}
+          <MobileOnly>
+            <div className="bg-card border border-border rounded-xl p-4">
+              <h2 className="text-lg font-semibold mb-4">Páginas Más Visitadas</h2>
+              <div className="space-y-2">
+                {topPagesData.map((item: { page: string; count: number }) => (
+                  <div key={item.page} className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground truncate flex-1">{item.page}</span>
+                    <span className="font-medium ml-2">{item.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </MobileOnly>
 
           {/* Entity Types */}
-          <div className="bg-card border border-border rounded-xl p-6">
-            <h2 className="text-xl font-semibold mb-4">Vistas por Tipo de Entidad</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={entityTypeData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ entityType, percent }) => `${entityType}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="count"
-                  nameKey="entityType"
-                >
-                  {entityTypeData.map((entry: { entityType: string; count: number }, index: number) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+          <DesktopOnly>
+            <div className="bg-card border border-border rounded-xl p-6">
+              <h2 className="text-xl font-semibold mb-4">Vistas por Tipo de Entidad</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={entityTypeData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ entityType, percent }) => `${entityType}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="count"
+                    nameKey="entityType"
+                  >
+                    {entityTypeData.map((entry: { entityType: string; count: number }, index: number) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </DesktopOnly>
+
+          {/* Mobile: Simplified Entity Types */}
+          <MobileOnly>
+            <div className="bg-card border border-border rounded-xl p-4">
+              <h2 className="text-lg font-semibold mb-4">Vistas por Tipo</h2>
+              <div className="space-y-2">
+                {entityTypeData.map((item: { type: string; count: number }, index: number) => (
+                  <div key={item.type} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      />
+                      <span className="text-muted-foreground">{item.type}</span>
+                    </div>
+                    <span className="font-medium">{item.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </MobileOnly>
 
           {/* All Pages */}
           <div className="bg-card border border-border rounded-xl p-6">

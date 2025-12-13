@@ -6,6 +6,8 @@ import { LinkForm } from "@/components/forms";
 import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/common/BackButton";
 import { useFavorites } from "@/hooks/use-favorites";
+import { MobilePullToRefresh, MobileFloatingButton, MobileSwipeActions, MobileOnly, DesktopOnly } from "@/components/mobile";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,8 +45,14 @@ export default function Links() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
-  const { data: links = [], isLoading, error } = useLinks();
+  const { data: links = [], isLoading, error, refetch } = useLinks();
   const deleteLink = useDeleteLink();
+  const queryClient = useQueryClient();
+
+  const handleRefresh = useCallback(async () => {
+    await refetch();
+    queryClient.invalidateQueries({ queryKey: ["links"] });
+  }, [refetch, queryClient]);
 
   const categories = useMemo(() => {
     return Array.from(new Set(links.map(l => l.category)));
@@ -95,7 +103,8 @@ export default function Links() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <MobilePullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-6">
         {/* Back Button */}
         <div className="flex items-center gap-4">
           <BackButton />
@@ -103,26 +112,41 @@ export default function Links() {
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Enlaces Rápidos</h1>
-            <p className="text-muted-foreground mt-1">Acceso directo a las herramientas esenciales del ecosistema.</p>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Enlaces Rápidos</h1>
+            <p className="text-muted-foreground mt-1 text-sm md:text-base">Acceso directo a las herramientas esenciales del ecosistema.</p>
           </div>
           
-          <div className="flex gap-2">
-            <div className="relative">
+          <DesktopOnly>
+            <div className="flex gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input 
+                  type="text" 
+                  placeholder="Buscar enlaces..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 pr-4 py-2 bg-card border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-64"
+                />
+              </div>
+              <Button onClick={handleCreate}>
+                <Plus className="h-4 w-4 mr-2" />
+                Nuevo Enlace
+              </Button>
+            </div>
+          </DesktopOnly>
+          
+          <MobileOnly>
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input 
                 type="text" 
                 placeholder="Buscar enlaces..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 bg-card border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-64"
+                className="pl-9 pr-4 py-2 bg-card border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-full"
               />
             </div>
-            <Button onClick={handleCreate}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo Enlace
-            </Button>
-          </div>
+          </MobileOnly>
         </div>
 
         {/* Loading State */}
@@ -220,12 +244,29 @@ export default function Links() {
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {filteredLinks.map((link) => (
-                  <LinkCard 
-                    key={link.id} 
-                    link={link}
-                    onEdit={() => handleEdit(link)}
-                    onDelete={() => handleDeleteClick(link)}
-                  />
+                  <MobileSwipeActions
+                    key={link.id}
+                    rightActions={[
+                      {
+                        label: "Editar",
+                        icon: <Edit2 className="h-4 w-4" />,
+                        bgColor: "bg-blue-500",
+                        onAction: () => handleEdit(link),
+                      },
+                      {
+                        label: "Eliminar",
+                        icon: <Trash2 className="h-4 w-4" />,
+                        bgColor: "bg-destructive",
+                        onAction: () => handleDeleteClick(link),
+                      },
+                    ]}
+                  >
+                    <LinkCard 
+                      link={link}
+                      onEdit={() => handleEdit(link)}
+                      onDelete={() => handleDeleteClick(link)}
+                    />
+                  </MobileSwipeActions>
                 ))}
               </div>
             )}
@@ -259,7 +300,15 @@ export default function Links() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </div>
+        </div>
+
+        {/* Mobile Floating Button */}
+        <MobileFloatingButton
+          icon={Plus}
+          onClick={handleCreate}
+          title="Nuevo Enlace"
+        />
+      </MobilePullToRefresh>
     </Layout>
   );
 }

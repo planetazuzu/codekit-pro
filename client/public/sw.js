@@ -1,6 +1,7 @@
-// Service Worker para CodeKit Pro PWA - Optimizado para móvil
-const CACHE_NAME = 'codekit-pro-v2-mobile';
-const STATIC_CACHE = 'codekit-pro-static-v2';
+// Service Worker para CodeKit Pro PWA - Optimizado para móvil y offline
+const CACHE_NAME = 'codekit-pro-v3-mobile';
+const STATIC_CACHE = 'codekit-pro-static-v3';
+const API_CACHE = 'codekit-pro-api-v3';
 const urlsToCache = [
   '/',
   '/prompts',
@@ -8,7 +9,11 @@ const urlsToCache = [
   '/tools',
   '/guides',
   '/links',
-  '/resources'
+  '/resources',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/favicon.svg'
 ];
 
 // Assets críticos para carga rápida en móvil

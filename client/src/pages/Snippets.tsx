@@ -8,6 +8,8 @@ import { DetailView } from "@/components/DetailView";
 import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/common/BackButton";
 import { useFavorites } from "@/hooks/use-favorites";
+import { MobilePullToRefresh, MobileFloatingButton, MobileSwipeActions, MobileOnly, DesktopOnly } from "@/components/mobile";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,8 +38,14 @@ export default function Snippets() {
   const [editingSnippet, setEditingSnippet] = useState<Snippet | null>(null);
   const [deletingSnippet, setDeletingSnippet] = useState<Snippet | null>(null);
   const { toast } = useToast();
-  const { data: snippets = [], isLoading, error } = useSnippets();
+  const { data: snippets = [], isLoading, error, refetch } = useSnippets();
   const deleteSnippet = useDeleteSnippet();
+  const queryClient = useQueryClient();
+
+  const handleRefresh = useCallback(async () => {
+    await refetch();
+    queryClient.invalidateQueries({ queryKey: ["snippets"] });
+  }, [refetch, queryClient]);
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -100,12 +108,16 @@ export default function Snippets() {
     if (!deletingSnippet) return;
     try {
       await deleteSnippet.mutateAsync(deletingSnippet.id);
+      const { hapticSuccess } = await import("@/utils/haptic-feedback");
+      hapticSuccess();
       toast({
         title: "Snippet eliminado",
         description: "El snippet ha sido eliminado correctamente.",
       });
       setDeletingSnippet(null);
     } catch (error: any) {
+      const { hapticError } = await import("@/utils/haptic-feedback");
+      hapticError();
       toast({
         title: "Error",
         description: error.message || "Hubo un error al eliminar el snippet.",
@@ -125,7 +137,8 @@ export default function Snippets() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <MobilePullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-6">
         {/* Back Button */}
         <div className="flex items-center gap-4">
           <BackButton />
@@ -133,26 +146,41 @@ export default function Snippets() {
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Snippets de Código</h1>
-            <p className="text-muted-foreground mt-1">Trozos de código reutilizables para acelerar tu desarrollo.</p>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Snippets de Código</h1>
+            <p className="text-muted-foreground mt-1 text-sm md:text-base">Trozos de código reutilizables para acelerar tu desarrollo.</p>
           </div>
           
-          <div className="flex gap-2">
-            <div className="relative">
+          <DesktopOnly>
+            <div className="flex gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input 
+                  type="text" 
+                  placeholder="Buscar snippets..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 pr-4 py-2 bg-card border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-64"
+                />
+              </div>
+              <Button onClick={handleCreate}>
+                <Plus className="h-4 w-4 mr-2" />
+                Nuevo Snippet
+              </Button>
+            </div>
+          </DesktopOnly>
+          
+          <MobileOnly>
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input 
                 type="text" 
                 placeholder="Buscar snippets..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 bg-card border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-64"
+                className="pl-9 pr-4 py-2 bg-card border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-full"
               />
             </div>
-            <Button onClick={handleCreate}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo Snippet
-            </Button>
-          </div>
+          </MobileOnly>
         </div>
 
         {/* Filters */}
@@ -274,14 +302,31 @@ export default function Snippets() {
         {!isLoading && !error && filteredSnippets.length > 0 && (
           <div className="grid gap-6 lg:grid-cols-2">
             {filteredSnippets.map((snippet) => (
-              <SnippetCard 
-                key={snippet.id} 
-                snippet={snippet} 
-                onView={() => handleView(snippet)}
-                onCopy={() => copyToClipboard(snippet.code)}
-                onEdit={() => handleEdit(snippet)}
-                onDelete={() => handleDeleteClick(snippet)}
-              />
+              <MobileSwipeActions
+                key={snippet.id}
+                rightActions={[
+                  {
+                    label: "Editar",
+                    icon: <Edit2 className="h-4 w-4" />,
+                    bgColor: "bg-blue-500",
+                    onAction: () => handleEdit(snippet),
+                  },
+                  {
+                    label: "Eliminar",
+                    icon: <Trash2 className="h-4 w-4" />,
+                    bgColor: "bg-destructive",
+                    onAction: () => handleDeleteClick(snippet),
+                  },
+                ]}
+              >
+                <SnippetCard 
+                  snippet={snippet} 
+                  onView={() => handleView(snippet)}
+                  onCopy={() => copyToClipboard(snippet.code)}
+                  onEdit={() => handleEdit(snippet)}
+                  onDelete={() => handleDeleteClick(snippet)}
+                />
+              </MobileSwipeActions>
             ))}
           </div>
         )}
@@ -321,7 +366,15 @@ export default function Snippets() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </div>
+        </div>
+
+        {/* Mobile Floating Button */}
+        <MobileFloatingButton
+          icon={Plus}
+          onClick={handleCreate}
+          title="Nuevo Snippet"
+        />
+      </MobilePullToRefresh>
     </Layout>
   );
 }

@@ -8,11 +8,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { hapticPress } from "@/utils/haptic-feedback";
 
 interface MobileBottomSheetProps {
   children: ReactNode;
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   title?: string;
   showCloseButton?: boolean;
   className?: string;
@@ -20,8 +21,8 @@ interface MobileBottomSheetProps {
 
 export function MobileBottomSheet({
   children,
-  isOpen,
-  onClose,
+  open,
+  onOpenChange,
   title,
   showCloseButton = true,
   className,
@@ -29,9 +30,10 @@ export function MobileBottomSheet({
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    if (isOpen && isMobile) {
+    if (open && isMobile) {
       // Prevent body scroll when sheet is open
       document.body.style.overflow = "hidden";
+      hapticPress();
     } else {
       document.body.style.overflow = "";
     }
@@ -39,13 +41,18 @@ export function MobileBottomSheet({
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen, isMobile]);
+  }, [open, isMobile]);
+
+  const handleClose = () => {
+    hapticPress();
+    onOpenChange(false);
+  };
 
   if (!isMobile) {
     return null;
   }
 
-  if (!isOpen) {
+  if (!open) {
     return null;
   }
 
@@ -54,7 +61,7 @@ export function MobileBottomSheet({
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 z-50 animate-in fade-in duration-200"
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       {/* Bottom Sheet */}
@@ -81,7 +88,7 @@ export function MobileBottomSheet({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={onClose}
+                onClick={handleClose}
                 className="h-8 w-8"
               >
                 <X className="h-4 w-4" />

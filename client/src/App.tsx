@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import NotFound from "@/pages/not-found";
+import { PWAInstallPrompt } from "@/components/mobile";
 
 // Lazy load pages - Main pages
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
@@ -297,6 +298,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <PWAInstallPrompt />
       </TooltipProvider>
     </QueryClientProvider>
   );

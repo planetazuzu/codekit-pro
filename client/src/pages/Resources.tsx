@@ -29,11 +29,14 @@ import { useAffiliates } from "@/hooks/use-affiliates";
 import { useGuides } from "@/hooks/use-guides";
 import { useLinks } from "@/hooks/use-links";
 import { useQueryClient } from "@tanstack/react-query";
+import { MobilePullToRefresh, MobileSwipeActions, MobileOnly, DesktopOnly, MobileShareSheet } from "@/components/mobile";
+import { useFavorites } from "@/hooks/use-favorites";
 
 export default function Resources() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const queryClient = useQueryClient();
+  const { toggleFavorite } = useFavorites();
   
   // Fetch resources with auto-refresh
   const { data: affiliates, isLoading: affiliatesLoading, refetch: refetchAffiliates } = useAffiliates();
@@ -52,13 +55,15 @@ export default function Resources() {
   }, [refetchAffiliates, refetchGuides, refetchLinks]);
 
   // Manual refresh function
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     queryClient.invalidateQueries({ queryKey: ["/api/affiliates"] });
     queryClient.invalidateQueries({ queryKey: ["guides"] });
     queryClient.invalidateQueries({ queryKey: ["links"] });
-    refetchAffiliates();
-    refetchGuides();
-    refetchLinks();
+    await Promise.all([
+      refetchAffiliates(),
+      refetchGuides(),
+      refetchLinks(),
+    ]);
   };
 
   // Filter all resources by search
@@ -107,7 +112,8 @@ export default function Resources() {
         />
       </Helmet>
 
-      <div className="space-y-8">
+      <MobilePullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-8">
         {/* Back Button */}
         <div className="flex items-center gap-4">
           <BackButton />
@@ -116,19 +122,39 @@ export default function Resources() {
         {/* Hero Section */}
         <div className="text-center space-y-4 py-8">
           <div className="flex items-center justify-center gap-3">
-            <h1 className="text-4xl font-bold text-foreground">
+            <h1 className="text-2xl md:text-4xl font-bold text-foreground">
               Recursos para Desarrolladores
             </h1>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="h-8 w-8"
-              title="Actualizar recursos"
-            >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            </Button>
+            <DesktopOnly>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleRefresh}
+                disabled={isLoading}
+                className="h-8 w-8"
+                title="Actualizar recursos"
+              >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </Button>
+            </DesktopOnly>
+            <MobileOnly>
+              <MobileShareSheet
+                title="Recursos para Desarrolladores"
+                text="Descubre las mejores herramientas, guías y recursos para desarrolladores"
+                url={window.location.href}
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleRefresh}
+                  disabled={isLoading}
+                  className="h-8 w-8"
+                  title="Actualizar recursos"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                </Button>
+              </MobileShareSheet>
+            </MobileOnly>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Encuentra las mejores herramientas, guías y recursos para potenciar tu
@@ -238,7 +264,19 @@ export default function Resources() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredResources.affiliates.slice(0, 6).map((affiliate) => (
-                    <AffiliateCard key={affiliate.id} affiliate={affiliate} />
+                    <MobileSwipeActions
+                      key={affiliate.id}
+                      rightActions={[
+                        {
+                          label: "Favorito",
+                          icon: <Star className="h-4 w-4" />,
+                          bgColor: "bg-yellow-500",
+                          onAction: () => toggleFavorite("affiliate", affiliate.id),
+                        },
+                      ]}
+                    >
+                      <AffiliateCard affiliate={affiliate} />
+                    </MobileSwipeActions>
                   ))}
                 </div>
               </section>
@@ -285,7 +323,19 @@ export default function Resources() {
           <TabsContent value="tools" className="mt-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredResources.affiliates.map((affiliate) => (
-                <AffiliateCard key={affiliate.id} affiliate={affiliate} />
+                <MobileSwipeActions
+                  key={affiliate.id}
+                  rightActions={[
+                    {
+                      label: "Favorito",
+                      icon: <Star className="h-4 w-4" />,
+                      bgColor: "bg-yellow-500",
+                      onAction: () => toggleFavorite("affiliate", affiliate.id),
+                    },
+                  ]}
+                >
+                  <AffiliateCard affiliate={affiliate} />
+                </MobileSwipeActions>
               ))}
             </div>
             {filteredResources.affiliates.length === 0 && (
@@ -335,34 +385,45 @@ export default function Resources() {
           <TabsContent value="links" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredResources.links.map((link) => (
-                <a
+                <MobileSwipeActions
                   key={link.id}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
+                  rightActions={[
+                    {
+                      label: "Favorito",
+                      icon: <Star className="h-4 w-4" />,
+                      bgColor: "bg-yellow-500",
+                      onAction: () => toggleFavorite("link", link.id),
+                    },
+                  ]}
                 >
-                  <Card className="h-full hover:border-primary/50 transition-colors">
-                    <CardContent className="pt-6">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <ExternalLink className="h-4 w-4 text-primary" />
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <Card className="h-full hover:border-primary/50 transition-colors">
+                      <CardContent className="pt-6">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <ExternalLink className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-foreground truncate">
+                              {link.title}
+                            </h3>
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {link.description}
+                            </p>
+                            <Badge variant="secondary" className="mt-2 text-xs">
+                              {link.category}
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-foreground truncate">
-                            {link.title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {link.description}
-                          </p>
-                          <Badge variant="secondary" className="mt-2 text-xs">
-                            {link.category}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </a>
+                      </CardContent>
+                    </Card>
+                  </a>
+                </MobileSwipeActions>
               ))}
             </div>
             {filteredResources.links.length === 0 && (
@@ -372,7 +433,8 @@ export default function Resources() {
             )}
           </TabsContent>
         </Tabs>
-      </div>
+        </div>
+      </MobilePullToRefresh>
     </Layout>
   );
 }

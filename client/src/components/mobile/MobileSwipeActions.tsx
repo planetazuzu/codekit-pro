@@ -6,6 +6,7 @@
 import { ReactNode, useRef, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { hapticPress, hapticSuccess } from "@/utils/haptic-feedback";
 
 interface SwipeAction {
   label: string;
@@ -75,8 +76,13 @@ export function MobileSwipeActions({
       const actions = swipeDirection === "left" ? rightActions : leftActions;
 
       if (absDistance >= threshold && actions.length > 0) {
+        // Trigger haptic feedback
+        hapticSuccess();
         // Trigger first action
         actions[0].onAction();
+      } else if (absDistance > 10) {
+        // Light haptic feedback during swipe
+        hapticPress();
       }
 
       // Reset

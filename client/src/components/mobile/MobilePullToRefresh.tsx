@@ -7,6 +7,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { hapticPress, hapticSuccess } from "@/utils/haptic-feedback";
 
 interface MobilePullToRefreshProps {
   children: ReactNode;
@@ -64,6 +65,7 @@ export function MobilePullToRefresh({
       isDragging = false;
 
       if (pullDistance >= threshold && !isRefreshing) {
+        hapticSuccess();
         setIsRefreshing(true);
         setPullDistance(threshold);
         
@@ -74,6 +76,10 @@ export function MobilePullToRefresh({
           setPullDistance(0);
           setIsPulling(false);
         }
+      } else if (pullDistance > 20) {
+        hapticPress();
+        setPullDistance(0);
+        setIsPulling(false);
       } else {
         setPullDistance(0);
         setIsPulling(false);

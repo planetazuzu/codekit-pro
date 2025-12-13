@@ -49,6 +49,38 @@ package.json
 tsconfig.json
 README.md`,
   },
+  angular: {
+    name: "Angular App",
+    structure: `src/
+  app/
+    components/
+    services/
+    models/
+    guards/
+    interceptors/
+  assets/
+  environments/
+  styles/
+angular.json
+package.json
+tsconfig.json
+README.md`,
+  },
+  svelte: {
+    name: "Svelte App",
+    structure: `src/
+  lib/
+    components/
+    stores/
+    utils/
+  routes/
+  app.html
+static/
+  favicon.ico
+vite.config.js
+package.json
+README.md`,
+  },
   express: {
     name: "Express API",
     structure: `src/
@@ -64,6 +96,233 @@ tests/
   unit/
   integration/
 .env
+package.json
+tsconfig.json
+README.md`,
+  },
+  nestjs: {
+    name: "NestJS API",
+    structure: `src/
+  modules/
+    users/
+      users.controller.ts
+      users.service.ts
+      users.module.ts
+      dto/
+  common/
+    filters/
+    guards/
+    interceptors/
+  config/
+test/
+  unit/
+  e2e/
+nest-cli.json
+package.json
+tsconfig.json
+README.md`,
+  },
+  django: {
+    name: "Django Project",
+    structure: `project_name/
+  settings/
+    __init__.py
+    base.py
+    development.py
+    production.py
+  urls.py
+  wsgi.py
+apps/
+  app1/
+    models.py
+    views.py
+    urls.py
+    admin.py
+static/
+templates/
+manage.py
+requirements.txt
+README.md`,
+  },
+  flask: {
+    name: "Flask App",
+    structure: `app/
+  __init__.py
+  models/
+  views/
+  templates/
+  static/
+    css/
+    js/
+    images/
+  config.py
+migrations/
+tests/
+  unit/
+  integration/
+run.py
+requirements.txt
+README.md`,
+  },
+  laravel: {
+    name: "Laravel App",
+    structure: `app/
+  Http/
+    Controllers/
+    Middleware/
+  Models/
+  Services/
+database/
+  migrations/
+  seeders/
+resources/
+  views/
+  js/
+  css/
+routes/
+  web.php
+  api.php
+public/
+.env
+composer.json
+README.md`,
+  },
+  springboot: {
+    name: "Spring Boot",
+    structure: `src/
+  main/
+    java/
+      com/
+        example/
+          controller/
+          service/
+          repository/
+          model/
+          config/
+    resources/
+      application.yml
+      static/
+      templates/
+  test/
+    java/
+pom.xml
+README.md`,
+  },
+  go: {
+    name: "Go Project",
+    structure: `cmd/
+  app/
+    main.go
+internal/
+  handler/
+  service/
+  repository/
+  model/
+pkg/
+  utils/
+  middleware/
+config/
+  config.yaml
+go.mod
+go.sum
+README.md`,
+  },
+  python: {
+    name: "Python Package",
+    structure: `package_name/
+  __init__.py
+  core/
+  utils/
+  tests/
+    __init__.py
+    test_core.py
+docs/
+  conf.py
+  index.rst
+setup.py
+requirements.txt
+README.md
+LICENSE`,
+  },
+  typescript: {
+    name: "TypeScript Library",
+    structure: `src/
+  index.ts
+  lib/
+  types/
+  utils/
+tests/
+  unit/
+  integration/
+dist/
+tsconfig.json
+package.json
+README.md
+LICENSE`,
+  },
+  monorepo: {
+    name: "Monorepo",
+    structure: `packages/
+  web/
+    src/
+    package.json
+  api/
+    src/
+    package.json
+  shared/
+    src/
+    package.json
+apps/
+  admin/
+  client/
+package.json
+pnpm-workspace.yaml
+README.md`,
+  },
+  remix: {
+    name: "Remix App",
+    structure: `app/
+  routes/
+    _index.tsx
+    about.tsx
+  components/
+  lib/
+  styles/
+public/
+  favicon.ico
+remix.config.js
+package.json
+tsconfig.json
+README.md`,
+  },
+  sveltekit: {
+    name: "SvelteKit App",
+    structure: `src/
+  routes/
+    +page.svelte
+    +layout.svelte
+  lib/
+    components/
+    utils/
+  app.html
+static/
+  favicon.ico
+vite.config.js
+package.json
+README.md`,
+  },
+  astro: {
+    name: "Astro App",
+    structure: `src/
+  pages/
+    index.astro
+    about.astro
+  components/
+  layouts/
+  styles/
+public/
+  favicon.ico
+astro.config.mjs
 package.json
 tsconfig.json
 README.md`,

@@ -12,10 +12,13 @@ import {
   Gift,
   TrendingUp,
   X,
-  FileText
+  FileText as FileTextIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+
+// Asegurar que FileText se incluya en el bundle
+const FileText = FileTextIcon;
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
@@ -29,7 +32,7 @@ const menuItems = [
   { icon: TrendingUp, label: "Recursos", href: "/resources" },
   { icon: Gift, label: "Ofertas", href: "/deals" },
   // Admin oculto - acceso directo por URL /admin con contraseña
-];
+] as const;
 
 interface SidebarContentProps {
   onLinkClick?: () => void;
