@@ -71,9 +71,10 @@ export default defineConfig({
             if (id.includes('wouter')) {
               return 'router-vendor';
             }
-            // Icons (puede ser grande)
+            // Icons - incluir en react-vendor para evitar problemas de inicialización
+            // lucide-react puede tener problemas si se carga antes que React
             if (id.includes('lucide-react')) {
-              return 'icons-vendor';
+              return 'react-vendor'; // Incluir en mismo chunk que React
             }
             // Framer motion (si se usa, depende de React)
             if (id.includes('framer-motion')) {
