@@ -241,12 +241,12 @@ Si alguna tiene problemas específicos, se puede migrar individualmente:
 ## 📊 Resumen de Migración
 
 ### Total de Páginas Principales: 16
-- ✅ **Completadas:** 1 (Dashboard)
-- 🔴 **Prioridad Alta:** 4 (Prompts, Snippets, Tools, Guides)
-- 🟡 **Prioridad Media:** 4 (Links, Resources, APIGuides, Docs)
-- 🟢 **Prioridad Baja:** 4 (Deals, Legal, Privacy, AffiliateLanding)
-- 🔵 **Admin (Opcional):** 4 (Admin, AdminAffiliates, AffiliateProgramsTracker, AffiliateProgramsDashboard)
-- 🛠️ **Tools Individuales (Opcional):** 25+ (solo si hay problemas)
+- ✅ **Completadas:** 13 páginas principales
+  - 🔴 **Prioridad Alta:** 5/5 (Dashboard, Prompts, Snippets, Tools, Guides)
+  - 🟡 **Prioridad Media:** 4/4 (Links, Resources, APIGuides, Docs)
+  - 🟢 **Prioridad Baja:** 4/4 (Deals, Legal, Privacy, AffiliateLanding)
+- 🔵 **Admin (Opcional):** 0/4 (Admin, AdminAffiliates, AffiliateProgramsTracker, AffiliateProgramsDashboard)
+- 🛠️ **Tools Individuales (Opcional):** 0/25+ (solo si hay problemas)
 
 ### Plan de Ejecución Sugerido
 

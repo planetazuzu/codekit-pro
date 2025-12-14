@@ -64,10 +64,22 @@ const AffiliateLanding = createAdaptivePage(
   () => import("@/pages/AffiliateLanding"),
   () => import("@/pages/mobile/AffiliateLanding")
 );
-const Admin = lazy(() => import("@/pages/Admin"));
-const AdminAffiliates = lazy(() => import("@/pages/AdminAffiliates"));
-const AffiliateProgramsTracker = lazy(() => import("@/pages/AffiliateProgramsTracker"));
-const AffiliateProgramsDashboard = lazy(() => import("@/pages/AffiliateProgramsDashboard"));
+const Admin = createAdaptivePage(
+  () => import("@/pages/Admin"),
+  () => import("@/pages/mobile/Admin")
+);
+const AdminAffiliates = createAdaptivePage(
+  () => import("@/pages/AdminAffiliates"),
+  () => import("@/pages/mobile/AdminAffiliates")
+);
+const AffiliateProgramsTracker = createAdaptivePage(
+  () => import("@/pages/AffiliateProgramsTracker"),
+  () => import("@/pages/mobile/AffiliateProgramsTracker")
+);
+const AffiliateProgramsDashboard = createAdaptivePage(
+  () => import("@/pages/AffiliateProgramsDashboard"),
+  () => import("@/pages/mobile/AffiliateProgramsDashboard")
+);
 
 // Lazy load tools - Heavy components
 const ReadmeGenerator = lazy(() => import("@/tools/ReadmeGenerator"));
