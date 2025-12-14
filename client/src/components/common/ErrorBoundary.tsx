@@ -21,9 +21,20 @@ interface ErrorBoundaryState {
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  private reloadTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private hasAttemptedReload = false;
+
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null, isChunkError: false };
+  }
+
+  componentWillUnmount() {
+    // Clean up timeout if component unmounts
+    if (this.reloadTimeoutId) {
+      clearTimeout(this.reloadTimeoutId);
+      this.reloadTimeoutId = null;
+    }
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
@@ -50,6 +61,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     this.props.onError?.(error, errorInfo);
     
     // CRITICAL: Auto-reload on React Error #31 (invalid component rendering)
+    // Only attempt reload once to prevent infinite loops
+    if (this.hasAttemptedReload) {
+      console.warn('Reload already attempted, skipping to prevent infinite loop');
+      return;
+    }
+
     const errorMessage = error.message || String(error);
     const isReactError31 = errorMessage.includes('react error #31') ||
       errorMessage.includes('$$typeof') ||
@@ -57,22 +74,60 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       errorMessage.includes('Objects are not valid');
     
     if (isReactError31) {
-      console.warn('React Error #31 detected, auto-reloading page in 1 second...');
-      // Auto-reload after a short delay to allow user to see the error message
-      setTimeout(() => {
-        // Clear caches and reload
-        if (typeof window !== 'undefined' && 'caches' in window) {
-          caches.keys().then(cacheNames => {
-            cacheNames.forEach(cacheName => {
-              caches.delete(cacheName).catch(() => {});
+      this.hasAttemptedReload = true;
+      console.warn('React Error #31 detected, auto-reloading page immediately...');
+      
+      // Clear any existing timeout
+      if (this.reloadTimeoutId) {
+        clearTimeout(this.reloadTimeoutId);
+      }
+      
+      // Immediate reload to break the error loop
+      // Use a small timeout to allow React to finish error handling
+      this.reloadTimeoutId = setTimeout(() => {
+        try {
+          // Unregister service worker first to prevent serving stale chunks
+          if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+              registrations.forEach(reg => {
+                reg.unregister().catch(() => {});
+              });
+              // Clear caches and reload
+              if ('caches' in window) {
+                caches.keys().then(cacheNames => {
+                  cacheNames.forEach(cacheName => {
+                    caches.delete(cacheName).catch(() => {});
+                  });
+                }).finally(() => {
+                  window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
+                });
+              } else {
+                window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
+              }
+            }).catch(() => {
+              // If SW unregister fails, just reload
+              window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
             });
-          }).finally(() => {
-            window.location.reload();
-          });
-        } else {
+          } else {
+            // No SW, just clear cache and reload
+            if ('caches' in window) {
+              caches.keys().then(cacheNames => {
+                cacheNames.forEach(cacheName => {
+                  caches.delete(cacheName).catch(() => {});
+                });
+              }).finally(() => {
+                window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
+              });
+            } else {
+              window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
+            }
+          }
+        } catch (reloadError) {
+          console.error('Failed to reload:', reloadError);
+          // Force reload as last resort
           window.location.reload();
         }
-      }, 1000);
+      }, 100);
     }
   }
 
@@ -81,17 +136,53 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   };
 
   handleReload = () => {
-    // Clear caches and reload page for chunk errors
-    if (this.state.isChunkError && typeof window !== 'undefined' && 'caches' in window) {
-      caches.keys().then(cacheNames => {
-        cacheNames.forEach(cacheName => {
-          caches.delete(cacheName).catch(() => {});
+    // Prevent multiple reload attempts
+    if (this.hasAttemptedReload) {
+      return;
+    }
+    this.hasAttemptedReload = true;
+
+    // Clear timeout if exists
+    if (this.reloadTimeoutId) {
+      clearTimeout(this.reloadTimeoutId);
+      this.reloadTimeoutId = null;
+    }
+
+    // Unregister service worker and clear caches
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(reg => {
+          reg.unregister().catch(() => {});
         });
-      }).finally(() => {
-        window.location.reload();
+        // Clear caches and reload
+        if ('caches' in window) {
+          caches.keys().then(cacheNames => {
+            cacheNames.forEach(cacheName => {
+              caches.delete(cacheName).catch(() => {});
+            });
+          }).finally(() => {
+            window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
+          });
+        } else {
+          window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
+        }
+      }).catch(() => {
+        // If SW unregister fails, just reload
+        window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
       });
     } else {
-      window.location.reload();
+      // No SW, just clear cache and reload
+      if ('caches' in window) {
+        caches.keys().then(cacheNames => {
+          cacheNames.forEach(cacheName => {
+            caches.delete(cacheName).catch(() => {});
+          });
+        }).finally(() => {
+          window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
+        });
+      } else {
+        window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
+      }
     }
   };
 
