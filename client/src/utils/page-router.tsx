@@ -17,30 +17,72 @@ export function createAdaptivePage<T extends ComponentType<any>>(
   desktopImport: () => Promise<{ default: T }>,
   mobileImport?: () => Promise<{ default: T }>
 ) {
-  // Wrap imports with error handling for chunk errors
+  // Wrap imports with error handling and validation
+  // CRITICAL: Ensure imports always resolve to valid React components
   const safeDesktopImport = async () => {
     try {
-      return await desktopImport();
+      const module = await desktopImport();
+      
+      // Validate that we got a valid module with a default export
+      if (!module || typeof module !== 'object') {
+        throw new Error('Desktop import returned invalid module');
+      }
+      
+      // Validate default export exists and is a function (component)
+      if (!module.default) {
+        throw new Error('Desktop import missing default export');
+      }
+      
+      if (typeof module.default !== 'function') {
+        throw new Error('Desktop import default export is not a component');
+      }
+      
+      return module;
     } catch (error) {
+      console.error('Failed to load desktop page:', error);
+      
       const chunkError = isChunkLoadError(error);
       if (chunkError.isChunkError) {
         handleChunkLoadError(error);
-        throw error; // Re-throw if handleChunkLoadError didn't reload
+        // Re-throw to let ErrorBoundary handle it
+        throw error;
       }
-      throw error;
+      
+      // For other errors, throw with context
+      throw new Error(`Failed to load desktop page: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
   const safeMobileImport = mobileImport ? async () => {
     try {
-      return await mobileImport();
+      const module = await mobileImport();
+      
+      // Validate that we got a valid module with a default export
+      if (!module || typeof module !== 'object') {
+        throw new Error('Mobile import returned invalid module');
+      }
+      
+      if (!module.default) {
+        throw new Error('Mobile import missing default export');
+      }
+      
+      if (typeof module.default !== 'function') {
+        throw new Error('Mobile import default export is not a component');
+      }
+      
+      return module;
     } catch (error) {
+      console.error('Failed to load mobile page:', error);
+      
       const chunkError = isChunkLoadError(error);
       if (chunkError.isChunkError) {
         handleChunkLoadError(error);
         throw error;
       }
-      throw error;
+      
+      // If mobile fails, fallback to desktop
+      console.warn('Mobile page failed to load, falling back to desktop');
+      return await safeDesktopImport();
     }
   } : undefined;
 
@@ -49,29 +91,30 @@ export function createAdaptivePage<T extends ComponentType<any>>(
 
   return function AdaptivePage(props: any) {
     const isMobile = useIsMobile();
-    const [PageComponent, setPageComponent] = useState<typeof DesktopPage | typeof MobilePage | null>(null);
-    const [loadError, setLoadError] = useState<Error | null>(null);
+    const [mounted, setMounted] = useState(false);
+    const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
-      // Only set component after we know if it's mobile or not
+      // Only render after mount and when we know device type
       if (isMobile !== undefined) {
-        setPageComponent(isMobile ? MobilePage : DesktopPage);
-        setLoadError(null); // Reset error when component changes
+        setMounted(true);
+        setHasError(false);
       }
     }, [isMobile]);
 
-    // Show loading state while determining device type or loading component
-    if (isMobile === undefined || PageComponent === null) {
+    // Show loading state while determining device type
+    if (isMobile === undefined || !mounted) {
       return <LoadingSpinner />;
     }
 
+    // Select the correct component based on device
+    const SelectedPage = isMobile ? MobilePage : DesktopPage;
+
+    // CRITICAL: Always wrap in Suspense to catch loading errors
+    // And ensure we never try to render an undefined component
     return (
-      <Suspense 
-        fallback={<LoadingSpinner />}
-        // Error fallback for chunk errors
-        // This will be caught by ErrorBoundary in App.tsx
-      >
-        <PageComponent {...props} />
+      <Suspense fallback={<LoadingSpinner />}>
+        <SelectedPage {...props} />
       </Suspense>
     );
   };

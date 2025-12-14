@@ -27,11 +27,19 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    // Check for chunk errors and React Error #31
     const chunkError = isChunkLoadError(error);
+    
+    // Also check error message for React Error #31 patterns
+    const errorMessage = error.message || String(error);
+    const isReactError31 = errorMessage.includes('react error #31') ||
+      errorMessage.includes('$$typeof') ||
+      (errorMessage.includes('displayName') && errorMessage.includes('render'));
+    
     return { 
       hasError: true, 
       error,
-      isChunkError: chunkError.isChunkError,
+      isChunkError: chunkError.isChunkError || isReactError31,
     };
   }
 
@@ -67,21 +75,30 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         return this.props.fallback;
       }
 
-      // Special handling for ChunkLoadError
+      // Special handling for ChunkLoadError and React Error #31
       if (this.state.isChunkError) {
+        const isReactError31 = this.state.error?.message?.includes('react error #31') ||
+          this.state.error?.message?.includes('$$typeof') ||
+          this.state.error?.message?.includes('Objects are not valid');
+        
         return (
           <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 p-8">
             <div className="rounded-full bg-yellow-500/10 p-4">
               <RefreshCw className="h-8 w-8 text-yellow-500" />
             </div>
             <div className="space-y-2 text-center max-w-md">
-              <h2 className="text-xl font-semibold">Actualización Disponible</h2>
+              <h2 className="text-xl font-semibold">
+                {isReactError31 ? 'Error de Carga del Componente' : 'Actualización Disponible'}
+              </h2>
               <p className="text-sm text-muted-foreground">
-                Se ha detectado una nueva versión de la aplicación. Por favor, recarga la página para obtener la última versión.
+                {isReactError31 
+                  ? 'El componente no se pudo cargar correctamente. Esto suele ocurrir después de una actualización. Por favor, recarga la página.'
+                  : 'Se ha detectado una nueva versión de la aplicación. Por favor, recarga la página para obtener la última versión.'}
               </p>
               {this.state.error?.message && (
-                <p className="text-xs text-muted-foreground mt-2 font-mono">
-                  {this.state.error.message}
+                <p className="text-xs text-muted-foreground mt-2 font-mono break-all">
+                  {this.state.error.message.substring(0, 200)}
+                  {this.state.error.message.length > 200 ? '...' : ''}
                 </p>
               )}
             </div>

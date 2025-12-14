@@ -11,12 +11,13 @@ export interface ChunkError {
 }
 
 /**
- * Detects if an error is a ChunkLoadError
+ * Detects if an error is a ChunkLoadError or React Error #31
  * Common patterns:
  * - "Failed to fetch dynamically imported module"
  * - "Loading chunk X failed"
  * - "ChunkLoadError"
  * - Network errors when loading .js files
+ * - React Error #31 (objects with $$typeof, render, displayName)
  */
 export function isChunkLoadError(error: unknown): ChunkError {
   if (!error) {
@@ -26,7 +27,7 @@ export function isChunkLoadError(error: unknown): ChunkError {
   const errorMessage = error instanceof Error ? error.message : String(error);
   const errorString = String(error).toLowerCase();
 
-  // Patterns that indicate chunk loading errors
+  // Patterns that indicate chunk loading errors or React Error #31
   const chunkErrorPatterns = [
     'failed to fetch dynamically imported module',
     'loading chunk',
@@ -36,6 +37,15 @@ export function isChunkLoadError(error: unknown): ChunkError {
     'importing a module script failed',
     'net::err_failed',
     'networkerror',
+    'minified react error #31',
+    'react error #31',
+    'objects are not valid as a react child',
+    '$$typeof',
+    'render',
+    'displayName',
+    'missing default export',
+    'default export is not a component',
+    'invalid module',
   ];
 
   // Check if error matches chunk error patterns
@@ -43,7 +53,11 @@ export function isChunkLoadError(error: unknown): ChunkError {
     errorString.includes(pattern) || errorMessage.toLowerCase().includes(pattern)
   );
 
-  if (!isChunkError) {
+  // Also check for React Error #31 specifically
+  const isReactError31 = errorString.includes('react error #31') ||
+    (errorString.includes('$$typeof') && errorString.includes('displayname'));
+
+  if (!isChunkError && !isReactError31) {
     return { isChunkError: false, shouldReload: false };
   }
 
@@ -55,7 +69,7 @@ export function isChunkLoadError(error: unknown): ChunkError {
   return {
     isChunkError: true,
     chunkName,
-    shouldReload: true, // Chunk errors require page reload to get new chunks
+    shouldReload: true, // Chunk errors and React Error #31 require page reload
   };
 }
 
