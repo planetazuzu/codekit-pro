@@ -28,39 +28,31 @@ export function useStats() {
     queryKey: ["/api/stats"],
     queryFn: async () => {
       try {
-        // Add timeout to prevent hanging
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        // Use Promise.race to implement timeout since get() doesn't accept AbortSignal
+        const statsPromise = get<Stats>("/api/stats").then(response => response.data || DEFAULT_STATS);
+        
+        const timeoutPromise = new Promise<Stats>((_, reject) => {
+          setTimeout(() => reject(new Error("Stats fetch timeout")), 5000); // 5 second timeout (shorter for mobile)
+        });
 
-        try {
-          const response = await get<Stats>("/api/stats");
-          clearTimeout(timeoutId);
-          return response.data || DEFAULT_STATS;
-        } catch (fetchError) {
-          clearTimeout(timeoutId);
-          
-          // If aborted, it's a timeout
-          if (fetchError instanceof Error && fetchError.name === "AbortError") {
-            console.warn("Stats fetch timed out, using defaults");
-            return DEFAULT_STATS;
-          }
-          
-          throw fetchError;
-        }
+        return await Promise.race([statsPromise, timeoutPromise]);
       } catch (error) {
-        // Si falla, devolver valores por defecto en lugar de lanzar error
+        // Si falla o timeout, devolver valores por defecto en lugar de lanzar error
         console.warn("Error fetching stats, using defaults:", error);
         return DEFAULT_STATS;
       }
     },
     staleTime: 30000, // Cache for 30 seconds
     refetchOnWindowFocus: false,
-    retry: 1, // Solo reintentar una vez
-    retryDelay: 1000, // Esperar 1 segundo antes de reintentar
+    retry: false, // No retry - if it fails, use defaults
     // No bloquear render si falla - CRITICAL for mobile
     throwOnError: false,
-    // Always return default stats, even if query fails
+    // Always return default stats immediately, even if query is pending or fails
     placeholderData: DEFAULT_STATS,
+    // Use initialData to ensure immediate render
+    initialData: DEFAULT_STATS,
+    // Don't refetch on mount if we have cached data
+    refetchOnMount: "always", // But still try to fetch fresh data
   });
 }
 
