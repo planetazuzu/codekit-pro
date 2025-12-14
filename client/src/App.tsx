@@ -110,18 +110,14 @@ const AutoDocumentation = lazy(() => import("@/tools/AutoDocumentation"));
 const UsageExamplesGenerator = lazy(() => import("@/tools/UsageExamplesGenerator"));
 
 // Wrapper component for Suspense with Error Boundary
+// Enhanced to properly catch chunk loading errors
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary
-      fallback={
-        <div className="flex min-h-[400px] items-center justify-center p-8">
-          <div className="text-center space-y-4">
-            <p className="text-muted-foreground">
-              No se pudo cargar este componente. Por favor, recarga la página.
-            </p>
-          </div>
-        </div>
-      }
+      onError={(error, errorInfo) => {
+        // Log chunk errors for debugging
+        console.error("SuspenseWrapper caught error:", error, errorInfo);
+      }}
     >
       <Suspense fallback={<LoadingSpinner />}>
         {children}

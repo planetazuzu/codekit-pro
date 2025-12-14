@@ -125,26 +125,63 @@ self.addEventListener('fetch', (event) => {
   const isAPI = url.pathname.startsWith('/api/');
   
   if (isStaticAsset) {
-    // Cache First para assets estáticos (más rápido en móvil)
-    event.respondWith(
-      caches.match(request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        return fetch(request).then((response) => {
-          if (response.status === 200 && response.type === 'basic') {
-            const responseToCache = response.clone();
-            const cacheToUse = criticalAssets.some(asset => request.url.includes(asset)) 
-              ? STATIC_CACHE 
-              : CACHE_NAME;
-            caches.open(cacheToUse).then((cache) => {
-              cache.put(request, responseToCache).catch(() => {});
+    // CRITICAL FIX: Network First para JS/CSS chunks
+    // Esto evita ChunkLoadError después de redeploys
+    // Los chunks JS/CSS deben obtenerse del servidor primero para evitar servir versiones antiguas
+    
+    const isJSOrCSS = url.pathname.match(/\.(js|css|mjs)$/);
+    
+    if (isJSOrCSS) {
+      // Network First para JS/CSS - Prioriza obtener la versión más reciente del servidor
+      event.respondWith(
+        fetch(request)
+          .then((response) => {
+            // Si la respuesta es exitosa, cachear y servir
+            if (response.status === 200 && response.type === "basic") {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, responseToCache).catch(() => {});
+              });
+            }
+            return response;
+          })
+          .catch(() => {
+            // Si falla la red, intentar desde caché (útil offline)
+            return caches.match(request).then((cachedResponse) => {
+              if (cachedResponse) {
+                // Si tenemos cache, servirla pero el siguiente request intentará actualizar
+                return cachedResponse;
+              }
+              // Si no hay cache ni red, devolver error
+              return new Response('Chunk not available', { 
+                status: 404, 
+                statusText: 'Chunk not found' 
+              });
             });
+          })
+      );
+    } else {
+      // Para otros assets (imágenes, fuentes): Cache First (estos no cambian tanto)
+      event.respondWith(
+        caches.match(request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
           }
-          return response;
-        });
-      })
-    );
+          return fetch(request).then((response) => {
+            if (response.status === 200 && response.type === 'basic') {
+              const responseToCache = response.clone();
+              const cacheToUse = criticalAssets.some(asset => request.url.includes(asset)) 
+                ? STATIC_CACHE 
+                : CACHE_NAME;
+              caches.open(cacheToUse).then((cache) => {
+                cache.put(request, responseToCache).catch(() => {});
+              });
+            }
+            return response;
+          });
+        })
+      );
+    }
   } else if (isAPI) {
     // Network First para API (siempre datos frescos)
     event.respondWith(
