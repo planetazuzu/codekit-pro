@@ -23,11 +23,38 @@ if (
           if (newWorker) {
             newWorker.addEventListener("statechange", () => {
               if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-                // New service worker available, prompt user to refresh
-                console.log("New service worker available");
+                // New service worker available
+                console.log("New service worker available, clearing old caches and activating...");
+                
+                // Clear all old caches to avoid serving stale chunks
+                if ('caches' in window) {
+                  caches.keys().then(cacheNames => {
+                    cacheNames.forEach(cacheName => {
+                      // Only delete old caches (not the current one)
+                      if (!cacheName.includes(registration.scope.replace(window.location.origin, ''))) {
+                        caches.delete(cacheName).catch(() => {});
+                      }
+                    });
+                  });
+                }
+                
+                // Activate new service worker immediately
+                // This ensures users get the latest chunks after redeploy
+                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                
+                // Reload page after a short delay to activate new SW
+                setTimeout(() => {
+                  window.location.reload();
+                }, 500);
               }
             });
           }
+        });
+        
+        // Listen for controller change (when new SW takes control)
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          console.log("Service worker controller changed, reloading page...");
+          window.location.reload();
         });
       })
       .catch((error) => {

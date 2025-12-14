@@ -1,7 +1,10 @@
 // Service Worker para CodeKit Pro PWA - Optimizado para móvil y offline
-const CACHE_NAME = 'codekit-pro-v3-mobile';
-const STATIC_CACHE = 'codekit-pro-static-v3';
-const API_CACHE = 'codekit-pro-api-v3';
+// IMPORTANTE: La versión se actualiza automáticamente con cada build
+// Esto asegura que los usuarios obtengan la versión más reciente después de un deploy
+const SW_VERSION = 'v4'; // Incrementar manualmente después de cambios importantes en el SW
+const CACHE_NAME = `codekit-pro-${SW_VERSION}-mobile`;
+const STATIC_CACHE = `codekit-pro-static-${SW_VERSION}`;
+const API_CACHE = `codekit-pro-api-${SW_VERSION}`;
 const urlsToCache = [
   '/',
   '/prompts',
@@ -50,17 +53,43 @@ self.addEventListener('activate', (event) => {
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME && cacheName !== STATIC_CACHE) {
+            // Delete all caches that don't match current version
+            // This ensures old chunks are removed after redeploy
+            if (cacheName !== CACHE_NAME && 
+                cacheName !== STATIC_CACHE && 
+                cacheName !== API_CACHE &&
+                cacheName.startsWith('codekit-pro')) {
               console.log('Eliminando cache antiguo:', cacheName);
               return caches.delete(cacheName);
             }
+            return Promise.resolve();
           })
         );
       }),
-      // Tomar control de todas las páginas
+      // Tomar control de todas las páginas inmediatamente
+      // Esto asegura que el nuevo SW controle todas las pestañas
       self.clients.claim()
     ])
   );
+  
+  // Notificar a todas las pestañas que el nuevo SW está activo
+  event.waitUntil(
+    self.clients.matchAll().then((clients) => {
+      clients.forEach((client) => {
+        client.postMessage({
+          type: 'SW_ACTIVATED',
+          version: SW_VERSION
+        });
+      });
+    })
+  );
+});
+
+// Listen for skip waiting message from main thread
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Estrategia optimizada para móvil: Cache First para assets, Network First para HTML/API
