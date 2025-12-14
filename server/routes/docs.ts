@@ -44,16 +44,33 @@ if (!docsPath) {
   docsPath = possiblePaths[0];
 }
 
+// Verify that docs/public/README.md exists
 const publicDocsPath = path.join(docsPath, "public");
+const defaultReadmePath = path.join(publicDocsPath, "README.md");
+if (fs.existsSync(defaultReadmePath)) {
+  logger.info(`Default README found at: ${defaultReadmePath}`);
+} else {
+  logger.warn(`Default README not found at: ${defaultReadmePath}`, {
+    docsPath,
+    publicDocsPath,
+    exists: fs.existsSync(docsPath),
+    publicExists: fs.existsSync(publicDocsPath),
+  });
+}
 
 /**
- * GET /api/docs/:path*
+ * GET /api/docs/*
  * Serves Markdown documentation files
+ * Note: We use a wildcard route to capture paths with slashes
  */
-router.get("/:path*", (req: Request, res: Response) => {
+router.get("*", (req: Request, res: Response) => {
   try {
-    // Get the requested path
-    let requestedPath = req.params.path || "";
+    // Get the requested path from the URL, removing /api/docs prefix
+    // req.path includes everything after /api/docs, req.originalUrl includes the full path
+    let requestedPath = req.path || "";
+    
+    // Remove leading slash from req.path (Express includes it)
+    requestedPath = requestedPath.replace(/^\/+/, "");
     
     // Normalize path: remove leading/trailing slashes
     requestedPath = requestedPath.replace(/^\/+|\/+$/g, "");
