@@ -13,17 +13,23 @@ export function useTrackPageView(entityType?: string, entityId?: string) {
   const trackView = useTrackView();
   const lastTrackedRef = useRef<string>("");
   const isTrackingRef = useRef<boolean>(false);
+  const trackingKeyRef = useRef<string>("");
+  const mutateRef = useRef(trackView.mutate);
+
+  // Keep mutate ref updated
+  useEffect(() => {
+    mutateRef.current = trackView.mutate;
+  }, [trackView.mutate]);
 
   useEffect(() => {
-    // Prevent duplicate tracking if location hasn't changed
     const trackingKey = `${location}-${entityType}-${entityId}`;
     
-    // Check if we've already successfully tracked this key
+    // Early return if already tracked successfully
     if (lastTrackedRef.current === trackingKey) {
       return;
     }
 
-    // Check if there's already a request in-flight for this key
+    // Early return if already tracking
     if (isTrackingRef.current) {
       return;
     }
@@ -44,55 +50,84 @@ export function useTrackPageView(entityType?: string, entityId?: string) {
       }
     }
 
-    // Mark as tracking to prevent duplicate requests
+    // Mark as tracking IMMEDIATELY to prevent duplicate requests
     isTrackingRef.current = true;
+    trackingKeyRef.current = trackingKey;
     
-    // Update global state
+    // Update global state IMMEDIATELY
     globalTrackingState.set(trackingKey, {
       lastAttempt: now,
     });
 
-    // Track page view with error handling - don't block render if tracking fails
-    trackView.mutate(
-      {
-        page: location,
-        entityType,
-        entityId,
-      },
-      {
-        onError: (error: unknown) => {
-          // Check if it's a 429 (rate limit) error
-          const isRateLimit = error instanceof Error && 
-            (error.message.includes("429") || error.message.includes("Too Many Requests"));
-          
-          if (isRateLimit) {
-            // Set cooldown period after rate limit error
-            const cooldownUntil = now + RATE_LIMIT_COOLDOWN;
-            globalTrackingState.set(trackingKey, {
-              lastAttempt: now,
-              cooldownUntil,
-            });
-            console.warn("Rate limited on analytics tracking, cooldown active:", trackingKey);
-          } else {
-            // For other errors, update last attempt but don't set cooldown
-            globalTrackingState.set(trackingKey, {
-              lastAttempt: now,
-            });
-            console.warn("Failed to track page view:", error);
-          }
-          
-          // Mark as attempted even on error to prevent immediate retries
-          // But don't update lastTrackedRef so it will retry on next navigation
-          isTrackingRef.current = false;
-        },
-        onSuccess: () => {
-          // Success - mark as tracked
-          lastTrackedRef.current = trackingKey;
-          globalTrackingState.delete(trackingKey); // Clean up global state on success
-          isTrackingRef.current = false;
-        },
+    // Track page view - defer to next tick to avoid render loops
+    // Store values in refs to avoid closure issues
+    const page = location;
+    const et = entityType;
+    const eid = entityId;
+
+    const executeTracking = () => {
+      // Double-check we're still tracking the same key
+      if (trackingKeyRef.current !== trackingKey) {
+        isTrackingRef.current = false;
+        return;
       }
-    );
-  }, [location, entityType, entityId]); // Removed trackView from dependencies - use mutation directly
+
+      mutateRef.current(
+        {
+          page,
+          entityType: et,
+          entityId: eid,
+        },
+        {
+          onError: (error: unknown) => {
+            const currentKey = trackingKeyRef.current;
+            
+            // Only update if this is still the current tracking key
+            if (currentKey !== trackingKey) {
+              return;
+            }
+
+            const isRateLimit = error instanceof Error && 
+              (error.message.includes("429") || error.message.includes("Too Many Requests"));
+            
+            if (isRateLimit) {
+              const cooldownUntil = Date.now() + RATE_LIMIT_COOLDOWN;
+              globalTrackingState.set(currentKey, {
+                lastAttempt: Date.now(),
+                cooldownUntil,
+              });
+              console.warn("Rate limited on analytics tracking, cooldown active:", currentKey);
+            } else {
+              globalTrackingState.set(currentKey, {
+                lastAttempt: Date.now(),
+              });
+              console.warn("Failed to track page view:", error);
+            }
+            
+            isTrackingRef.current = false;
+          },
+          onSuccess: () => {
+            const currentKey = trackingKeyRef.current;
+            
+            // Only update if this is still the current tracking key
+            if (currentKey !== trackingKey) {
+              return;
+            }
+
+            lastTrackedRef.current = currentKey;
+            globalTrackingState.delete(currentKey);
+            isTrackingRef.current = false;
+          },
+        }
+      );
+    };
+
+    // Defer execution to prevent render loops
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      window.requestIdleCallback(executeTracking, { timeout: 200 });
+    } else {
+      setTimeout(executeTracking, 200);
+    }
+  }, [location, entityType, entityId]); // Only depend on location/entity, not trackView
 }
 

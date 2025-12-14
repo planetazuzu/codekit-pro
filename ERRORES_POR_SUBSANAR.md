@@ -78,6 +78,83 @@ curl http://localhost:8604/api/docs/public/README.md
 
 ---
 
+### ❌ 2. Error React: `NotFoundError: Failed to execute 'removeChild' on 'Node'` (Bucle infinito de renderizado)
+
+**Descripción:**
+Se está produciendo un bucle infinito de renderizado que causa que React intente remover nodos que ya no son hijos del padre, resultando en cientos de errores `removeChild`.
+
+**Errores relacionados:**
+- `NotFoundError: Failed to execute 'removeChild' on 'Node'`
+- `React error #185` - Error de renderizado
+- `React error #31` - Objeto retornado en lugar de componente válido
+
+**Ubicación del problema:**
+- **Hook:** `client/src/hooks/use-track-view.ts`
+- **Stack trace:** Indica que el error se origina desde `use-track-view` cuando se ejecuta la mutación
+
+**Causa raíz:**
+- La mutación `trackView.mutate` está causando re-renders que disparan el `useEffect` nuevamente
+- `queryClient.invalidateQueries` en `onSuccess` está causando re-renders en cascada
+- El hook podría estar ejecutándose múltiples veces antes de que se complete la mutación
+
+**Solución aplicada:**
+1. ✅ Usar `useRef` para mantener referencia estable de `mutate`
+2. ✅ Defer ejecución de tracking con `requestIdleCallback` o `setTimeout`
+3. ✅ Defer `invalidateQueries` con `setTimeout` para evitar re-renders inmediatos
+4. ✅ Verificar `trackingKeyRef` en callbacks para asegurar que aún es el key correcto
+5. ✅ Marcar `isTrackingRef` inmediatamente antes de ejecutar para prevenir duplicados
+
+**Estado:** ✅ Resuelto (pendiente de deploy)
+
+---
+
+### ❌ 3. Favicon.ico 404 Not Found
+
+**Descripción:**
+El navegador intenta cargar `/favicon.ico` pero el archivo no existe, causando un 404.
+
+**Error:**
+```
+GET https://codekitpro.app/favicon.ico 404 (Not Found)
+```
+
+**Ubicación del problema:**
+- **Archivos:** `client/public/` - falta `favicon.ico`
+- **HTML:** `client/index.html` - referencia a favicon
+
+**Solución aplicada:**
+1. ✅ Copiado `favicon.png` a `favicon.ico` como fallback
+2. ✅ Agregado `<link rel="icon" type="image/x-icon" href="/favicon.ico" />` en `index.html`
+
+**Estado:** ✅ Resuelto
+
+---
+
+### ❌ 4. React Error #31: Invalid component return (object with $$typeof, render, displayName)
+
+**Descripción:**
+React está recibiendo un objeto en lugar de un componente válido, causando errores de renderizado.
+
+**Error:**
+```
+Error: Minified React error #31; visit https://react.dev/errors/31?args[]=object%20with%20keys%20%7B%24%24typeof%2C%20render%2C%20displayName%7D
+```
+
+**Posible causa:**
+- Algún componente lazy-loaded está retornando un objeto en lugar de un componente válido
+- Problema con cómo se están importando componentes lazy
+
+**Ubicación del problema:**
+- Probablemente en algún componente lazy-loaded en `client/src/App.tsx`
+
+**Estado:** 🔴 Pendiente - Necesita investigación más profunda
+
+**Notas:**
+- Podría estar relacionado con el bucle de renderizado del error #2
+- Si el error #2 se resuelve, este podría desaparecer también
+
+---
+
 ## 🔄 Código Redundante
 
 _(Añadir aquí código duplicado, funciones no usadas, etc.)_

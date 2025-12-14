@@ -31,9 +31,14 @@ export function useTrackView() {
       return response.data;
     },
     onSuccess: () => {
-      // Only invalidate stats queries on success to refresh data
-      // Don't invalidate on error to avoid cascading re-renders
-      queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      // Defer query invalidation to avoid immediate re-renders
+      // Only invalidate analytics stats queries, not all queries
+      setTimeout(() => {
+        queryClient.invalidateQueries({ 
+          queryKey: ["analytics", "stats"],
+          exact: false,
+        });
+      }, 0);
     },
     // Prevent automatic retries for mutations - we handle retries in the hook
     retry: false,
