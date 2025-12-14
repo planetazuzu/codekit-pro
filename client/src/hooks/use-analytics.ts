@@ -31,9 +31,12 @@ export function useTrackView() {
       return response.data;
     },
     onSuccess: () => {
-      // Invalidate stats queries to refresh data
+      // Only invalidate stats queries on success to refresh data
+      // Don't invalidate on error to avoid cascading re-renders
       queryClient.invalidateQueries({ queryKey: ["analytics"] });
     },
+    // Prevent automatic retries for mutations - we handle retries in the hook
+    retry: false,
   });
 }
 
