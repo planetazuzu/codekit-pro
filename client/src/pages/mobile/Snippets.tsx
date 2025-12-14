@@ -13,7 +13,7 @@ import { DetailView } from "@/components/DetailView";
 import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/common/BackButton";
 import { useFavorites } from "@/hooks/use-favorites";
-import { MobilePullToRefresh, MobileFloatingButton, MobileSwipeActions } from "@/components/mobile";
+import { MobilePullToRefresh, MobileFloatingButton, MobileSwipeActions, MobileBottomSheet } from "@/components/mobile";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,

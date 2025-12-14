@@ -32,18 +32,42 @@ const Guides = createAdaptivePage(
   () => import("@/pages/Guides"),
   () => import("@/pages/mobile/Guides")
 );
-const Links = lazy(() => import("@/pages/Links"));
-const APIGuides = lazy(() => import("@/pages/APIGuides"));
+const Links = createAdaptivePage(
+  () => import("@/pages/Links"),
+  () => import("@/pages/mobile/Links")
+);
+const APIGuides = createAdaptivePage(
+  () => import("@/pages/APIGuides"),
+  () => import("@/pages/mobile/APIGuides")
+);
+const Resources = createAdaptivePage(
+  () => import("@/pages/Resources"),
+  () => import("@/pages/mobile/Resources")
+);
+const Docs = createAdaptivePage(
+  () => import("@/pages/Docs"),
+  () => import("@/pages/mobile/Docs")
+);
+const Deals = createAdaptivePage(
+  () => import("@/pages/Deals"),
+  () => import("@/pages/mobile/Deals")
+);
+const Legal = createAdaptivePage(
+  () => import("@/pages/Legal"),
+  () => import("@/pages/mobile/Legal")
+);
+const Privacy = createAdaptivePage(
+  () => import("@/pages/Privacy"),
+  () => import("@/pages/mobile/Privacy")
+);
+const AffiliateLanding = createAdaptivePage(
+  () => import("@/pages/AffiliateLanding"),
+  () => import("@/pages/mobile/AffiliateLanding")
+);
 const Admin = lazy(() => import("@/pages/Admin"));
-const Resources = lazy(() => import("@/pages/Resources"));
-const AffiliateLanding = lazy(() => import("@/pages/AffiliateLanding"));
 const AdminAffiliates = lazy(() => import("@/pages/AdminAffiliates"));
 const AffiliateProgramsTracker = lazy(() => import("@/pages/AffiliateProgramsTracker"));
 const AffiliateProgramsDashboard = lazy(() => import("@/pages/AffiliateProgramsDashboard"));
-const Deals = lazy(() => import("@/pages/Deals"));
-const Legal = lazy(() => import("@/pages/Legal"));
-const Privacy = lazy(() => import("@/pages/Privacy"));
-const Docs = lazy(() => import("@/pages/Docs"));
 
 // Lazy load tools - Heavy components
 const ReadmeGenerator = lazy(() => import("@/tools/ReadmeGenerator"));
