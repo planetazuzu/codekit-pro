@@ -85,33 +85,55 @@ router.get("/:path*", (req: Request, res: Response) => {
 
     // Check if file exists
     if (!fs.existsSync(normalizedFullPath)) {
-      // Try alternative: if public/README.md not found, try docs/public/README.md directly
+      // Try alternative paths if the default doesn't work (especially for production)
+      let foundPath: string | null = null;
+      
       if (requestedPath === "public/README.md") {
-        const alternativePath = path.join(normalizedDocsPath, "public", "README.md");
-        if (fs.existsSync(alternativePath)) {
-          const content = fs.readFileSync(alternativePath, "utf-8");
-          return res.setHeader("Content-Type", "text/markdown; charset=utf-8").send(content);
+        // Try different path constructions
+        const alternatives = [
+          path.join(normalizedDocsPath, "public", "README.md"),
+          path.join(process.cwd(), "docs", "public", "README.md"),
+          path.join("/app", "docs", "public", "README.md"),
+        ];
+        
+        for (const altPath of alternatives) {
+          const normalizedAlt = path.normalize(altPath);
+          if (fs.existsSync(normalizedAlt) && normalizedAlt.startsWith(normalizedDocsPath)) {
+            foundPath = normalizedAlt;
+            break;
+          }
         }
       }
       
-      logger.warn(`Document not found: ${requestedPath}`, {
+      if (foundPath) {
+        const content = fs.readFileSync(foundPath, "utf-8");
+        logger.info(`Served document from alternative path: ${foundPath}`);
+        return res.setHeader("Content-Type", "text/markdown; charset=utf-8").send(content);
+      }
+      
+      // Log detailed error information for debugging
+      const debugInfo = {
         fullPath: normalizedFullPath,
         docsPath: normalizedDocsPath,
         requestedPath,
-        exists: fs.existsSync(normalizedDocsPath),
+        cwd: process.cwd(),
+        __dirname,
+        docsPathExists: fs.existsSync(normalizedDocsPath),
         publicExists: fs.existsSync(publicDocsPath),
         publicReadmeExists: fs.existsSync(path.join(normalizedDocsPath, "public", "README.md")),
-      });
+        triedPaths: isProduction ? undefined : [
+          normalizedFullPath,
+          path.join(normalizedDocsPath, "public", "README.md"),
+          path.join(process.cwd(), "docs", "public", "README.md"),
+        ],
+      };
+      
+      logger.warn(`Document not found: ${requestedPath}`, debugInfo);
       
       return res.status(404).json({ 
         error: `Documento no encontrado: ${requestedPath}`,
         message: "El documento no está disponible. Verifica que el archivo existe.",
-        debug: isProduction ? undefined : { 
-          fullPath: normalizedFullPath, 
-          docsPath: normalizedDocsPath, 
-          requestedPath,
-          publicReadmePath: path.join(normalizedDocsPath, "public", "README.md"),
-        }
+        debug: isProduction ? undefined : debugInfo
       });
     }
 

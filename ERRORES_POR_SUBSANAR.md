@@ -42,7 +42,11 @@ if (!requestedPath || requestedPath === "" || requestedPath === "README.md") {
 - Fallback para rutas alternativas cuando el archivo por defecto no se encuentra
 - Mejor logging para debugging
 
-**Estado:** ✅ Resuelto
+**Estado:** ⚠️ Parcialmente resuelto - Necesita testing en producción
+**Notas adicionales:**
+- El archivo existe localmente pero puede fallar en Docker si los paths no se resuelven correctamente
+- Agregado logging detallado para debugging
+- Agregados múltiples paths alternativos para encontrar el archivo en diferentes entornos
 **Prioridad:** Media
 **Asignado:** -
 
