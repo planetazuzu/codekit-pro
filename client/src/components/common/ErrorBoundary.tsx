@@ -48,6 +48,32 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     // In production, this should be sent to an error tracking service
     console.error("ErrorBoundary caught error:", error, errorInfo);
     this.props.onError?.(error, errorInfo);
+    
+    // CRITICAL: Auto-reload on React Error #31 (invalid component rendering)
+    const errorMessage = error.message || String(error);
+    const isReactError31 = errorMessage.includes('react error #31') ||
+      errorMessage.includes('$$typeof') ||
+      (errorMessage.includes('displayName') && errorMessage.includes('render')) ||
+      errorMessage.includes('Objects are not valid');
+    
+    if (isReactError31) {
+      console.warn('React Error #31 detected, auto-reloading page in 1 second...');
+      // Auto-reload after a short delay to allow user to see the error message
+      setTimeout(() => {
+        // Clear caches and reload
+        if (typeof window !== 'undefined' && 'caches' in window) {
+          caches.keys().then(cacheNames => {
+            cacheNames.forEach(cacheName => {
+              caches.delete(cacheName).catch(() => {});
+            });
+          }).finally(() => {
+            window.location.reload();
+          });
+        } else {
+          window.location.reload();
+        }
+      }, 1000);
+    }
   }
 
   handleReset = () => {

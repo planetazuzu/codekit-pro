@@ -86,19 +86,47 @@ export function createAdaptivePage<T extends ComponentType<any>>(
     }
   } : undefined;
 
-  const DesktopPage = lazy(safeDesktopImport);
-  const MobilePage = safeMobileImport ? lazy(safeMobileImport) : DesktopPage;
+  // Wrap lazy components with additional validation
+  // This ensures React.lazy never returns an invalid component
+  const createSafeLazy = (importFn: () => Promise<{ default: T }>) => {
+    return lazy(async () => {
+      try {
+        const module = await importFn();
+        
+        // Double-check that we have a valid component before returning
+        if (!module?.default || typeof module.default !== 'function') {
+          throw new Error(`Invalid component: ${module?.default ? typeof module.default : 'undefined'}`);
+        }
+        
+        // Ensure the default export is actually a React component
+        // React components are functions that can be called with props
+        if (typeof module.default !== 'function') {
+          throw new Error('Component export is not a function');
+        }
+        
+        return module;
+      } catch (error) {
+        console.error('SafeLazy import failed:', error);
+        // Re-throw to let ErrorBoundary handle it
+        throw error;
+      }
+    });
+  };
+
+  const DesktopPage = createSafeLazy(safeDesktopImport);
+  const MobilePage = safeMobileImport ? createSafeLazy(safeMobileImport) : DesktopPage;
 
   return function AdaptivePage(props: any) {
     const isMobile = useIsMobile();
     const [mounted, setMounted] = useState(false);
-    const [hasError, setHasError] = useState(false);
+    const [componentKey, setComponentKey] = useState(0);
 
     useEffect(() => {
       // Only render after mount and when we know device type
       if (isMobile !== undefined) {
         setMounted(true);
-        setHasError(false);
+        // Reset component key when device type changes to force re-mount
+        setComponentKey(prev => prev + 1);
       }
     }, [isMobile]);
 
@@ -108,13 +136,18 @@ export function createAdaptivePage<T extends ComponentType<any>>(
     }
 
     // Select the correct component based on device
+    // Use key to force re-mount and prevent stale component references
     const SelectedPage = isMobile ? MobilePage : DesktopPage;
 
     // CRITICAL: Always wrap in Suspense to catch loading errors
-    // And ensure we never try to render an undefined component
+    // Key ensures component is re-created if device type changes
+    // This prevents React from trying to render a stale lazy component
     return (
-      <Suspense fallback={<LoadingSpinner />}>
-        <SelectedPage {...props} />
+      <Suspense 
+        fallback={<LoadingSpinner />}
+        key={`adaptive-${isMobile ? 'mobile' : 'desktop'}-${componentKey}`}
+      >
+        <SelectedPage key={`page-${componentKey}`} {...props} />
       </Suspense>
     );
   };
