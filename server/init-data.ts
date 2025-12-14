@@ -2094,6 +2094,13 @@ const staticLinks = [
     description: 'The AI-first Code Editor'
   },
   {
+    title: 'React Grab',
+    url: 'https://www.react-grab.com/',
+    icon: 'Code2',
+    category: 'Dev',
+    description: 'Enhance AI coding assistants when working with React apps. Select any element to capture context for precise edits.'
+  },
+  {
     title: 'GitHub Copilot',
     url: 'https://github.com/features/copilot',
     icon: 'Code2',
