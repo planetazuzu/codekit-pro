@@ -42,11 +42,37 @@ if (!requestedPath || requestedPath === "" || requestedPath === "README.md") {
 - Fallback para rutas alternativas cuando el archivo por defecto no se encuentra
 - Mejor logging para debugging
 
-**Estado:** ⚠️ Parcialmente resuelto - Necesita testing en producción
+**Estado:** ✅ Resuelto (pendiente de deploy)
+
+**Solución implementada:**
+1. ✅ **Cambiado el patrón de ruta**: De `/:path*` a `*` para capturar correctamente paths con barras
+2. ✅ **Uso de `req.path`**: Ahora usa `req.path` que ya viene sin el prefijo `/api/docs` cuando el router está montado
+3. ✅ Mejorado path resolution con múltiples fallbacks
+4. ✅ Agregado logging detallado al iniciar el servidor para verificar que encuentra el README
+5. ✅ Agregados paths alternativos para diferentes entornos (local, Docker, producción)
+6. ✅ Mejor manejo de errores con información de debugging
+
+**Root cause identificado:**
+- El patrón `/:path*` en Express no captura correctamente paths con barras como `public/README.md`
+- Cambiado a `router.get("*")` que captura todo el path correctamente
+
 **Notas adicionales:**
-- El archivo existe localmente pero puede fallar en Docker si los paths no se resuelven correctamente
-- Agregado logging detallado para debugging
-- Agregados múltiples paths alternativos para encontrar el archivo en diferentes entornos
+- El archivo existe localmente (`docs/public/README.md`)
+- El Dockerfile copia la carpeta `docs` al contenedor (línea 38)
+- Después del deploy, verificar los logs del servidor para ver si encuentra el path correcto
+- Si persiste el error, revisar los logs del servidor para ver qué path está usando y por qué no encuentra el archivo
+
+**Verificación post-deploy:**
+```bash
+# En el servidor, verificar logs
+docker compose logs app | grep -i "docs path\|README found"
+
+# Verificar que el archivo existe en el contenedor
+docker compose exec app ls -la /app/docs/public/README.md
+
+# Probar el endpoint directamente
+curl http://localhost:8604/api/docs/public/README.md
+```
 **Prioridad:** Media
 **Asignado:** -
 
