@@ -1,0 +1,23 @@
+[2025-12-13T20:13:21.921Z] [INFO] Using docs path: /home/planetazuzu/CodeKit Pro/docs
+[dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[2025-12-13T20:13:26.733Z] [INFO] Environment variables validated successfully
+[2025-12-13T20:13:26.734Z] [INFO] Environment variables validated
+[2025-12-13T20:13:26.735Z] [INFO] Configuring PostgreSQL session store
+[2025-12-13T20:13:27.137Z] [INFO] Session management configured
+[2025-12-13T20:13:27.164Z] [INFO] Initializing PostgreSQL storage...
+[2025-12-13T20:13:27.168Z] [INFO] Detected local PostgreSQL connection, using pg client
+[2025-12-13T20:13:27.812Z] [INFO] Local PostgreSQL connection initialized successfully
+[2025-12-13T20:13:27.816Z] [INFO] PostgreSQL storage initialized successfully
+[2025-12-13T20:13:27.817Z] [INFO] Storage initialized
+[2025-12-13T20:13:28.445Z] [INFO] Added 51 new prompts
+{
+  "source": "init"
+}
+[2025-12-13T20:13:28.571Z] [INFO] serving on port 8604
+{
+  "source": "express"
+}
+[2025-12-13T20:13:43.148Z] [INFO] GET /api/health 200 in 63ms :: {"success":true,"status":"healthy","timestamp":"2025-12-13T20:13:43.104Z","uptime":24.603317282,"environment":"production"}
+{
+  "source": "express"
+}

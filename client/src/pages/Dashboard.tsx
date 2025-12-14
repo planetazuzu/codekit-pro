@@ -18,11 +18,12 @@ export default function Dashboard() {
   
   // Obtener solo contadores (mucho más rápido que cargar todos los datos)
   // Si falla, usar valores por defecto para no bloquear el render
-  const { data: stats, refetch: refetchStats } = useStats();
-  const promptsCount = stats?.prompts ?? 0;
-  const snippetsCount = stats?.snippets ?? 0;
-  const linksCount = stats?.links ?? 0;
-  const guidesCount = stats?.guides ?? 0;
+  // CRITICAL: stats siempre tiene un valor por defecto (initialData + placeholderData)
+  const { data: stats = { prompts: 0, snippets: 0, links: 0, guides: 0 }, refetch: refetchStats } = useStats();
+  const promptsCount = stats.prompts;
+  const snippetsCount = stats.snippets;
+  const linksCount = stats.links;
+  const guidesCount = stats.guides;
 
   const handleRefresh = async () => {
     try {
