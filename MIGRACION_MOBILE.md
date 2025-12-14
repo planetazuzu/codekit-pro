@@ -8,6 +8,22 @@ Lista completa de páginas a migrar al sistema de routing adaptativo móvil/desk
   - Archivo: `pages/mobile/Dashboard.tsx`
   - Estado: Optimizado para móvil con versión simplificada
 
+- [x] **Prompts** (`/prompts`) - ✅ Completado
+  - Archivo: `pages/mobile/Prompts.tsx`
+  - Estado: Versión móvil optimizada con filtros en bottom sheet
+
+- [x] **Snippets** (`/snippets`) - ✅ Completado
+  - Archivo: `pages/mobile/Snippets.tsx`
+  - Estado: Versión móvil sin syntax highlighting pesado, preview ligero
+
+- [x] **Tools** (`/tools`) - ✅ Completado
+  - Archivo: `pages/mobile/Tools.tsx`
+  - Estado: Lista de una columna optimizada para móvil
+
+- [x] **Guides** (`/guides`) - ✅ Completado
+  - Archivo: `pages/mobile/Guides.tsx`
+  - Estado: Versión móvil sin gestos complejos
+
 ---
 
 ## 🔴 PRIORIDAD ALTA - Páginas Críticas (Problemas en Móvil)

@@ -8,14 +8,31 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import NotFound from "@/pages/not-found";
 import { PWAInstallPrompt } from "@/components/mobile";
+import { createAdaptivePage } from "@/utils/page-router";
 
-// Lazy load pages - Main pages
-const Dashboard = lazy(() => import("@/pages/Dashboard"));
-const Prompts = lazy(() => import("@/pages/Prompts"));
-const Tools = lazy(() => import("@/pages/Tools"));
+// Lazy load pages with mobile/desktop support
+// Pages with mobile versions use adaptive routing
+const Dashboard = createAdaptivePage(
+  () => import("@/pages/Dashboard"),
+  () => import("@/pages/mobile/Dashboard")
+);
+const Prompts = createAdaptivePage(
+  () => import("@/pages/Prompts"),
+  () => import("@/pages/mobile/Prompts")
+);
+const Snippets = createAdaptivePage(
+  () => import("@/pages/Snippets"),
+  () => import("@/pages/mobile/Snippets")
+);
+const Tools = createAdaptivePage(
+  () => import("@/pages/Tools"),
+  () => import("@/pages/mobile/Tools")
+);
+const Guides = createAdaptivePage(
+  () => import("@/pages/Guides"),
+  () => import("@/pages/mobile/Guides")
+);
 const Links = lazy(() => import("@/pages/Links"));
-const Snippets = lazy(() => import("@/pages/Snippets"));
-const Guides = lazy(() => import("@/pages/Guides"));
 const APIGuides = lazy(() => import("@/pages/APIGuides"));
 const Admin = lazy(() => import("@/pages/Admin"));
 const Resources = lazy(() => import("@/pages/Resources"));

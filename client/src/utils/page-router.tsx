@@ -3,8 +3,9 @@
  * Automatically loads mobile or desktop version of pages based on device detection
  */
 
-import { ComponentType, lazy, Suspense } from "react";
+import { ComponentType, lazy, Suspense, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 /**
  * Creates a component that automatically loads mobile or desktop version
@@ -20,24 +21,22 @@ export function createAdaptivePage<T extends ComponentType<any>>(
 
   return function AdaptivePage(props: any) {
     const isMobile = useIsMobile();
+    const [PageComponent, setPageComponent] = useState<typeof DesktopPage | typeof MobilePage | null>(null);
 
-    // Show loading state while determining device type
-    if (isMobile === undefined) {
-      return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>}>
-          <DesktopPage {...props} />
-        </Suspense>
-      );
+    useEffect(() => {
+      // Only set component after we know if it's mobile or not
+      if (isMobile !== undefined) {
+        setPageComponent(isMobile ? MobilePage : DesktopPage);
+      }
+    }, [isMobile]);
+
+    // Show loading state while determining device type or loading component
+    if (isMobile === undefined || PageComponent === null) {
+      return <LoadingSpinner />;
     }
 
-    const PageComponent = isMobile ? MobilePage : DesktopPage;
-
     return (
-      <Suspense fallback={<div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>}>
+      <Suspense fallback={<LoadingSpinner />}>
         <PageComponent {...props} />
       </Suspense>
     );
