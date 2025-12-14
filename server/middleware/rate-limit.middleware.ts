@@ -110,3 +110,33 @@ export const adminLimiter = rateLimit({
   },
 });
 
+/**
+ * Rate limiter specifically for analytics view tracking
+ * More permissive than general API limiter since page views are expected to be frequent
+ * 300 requests per 15 minutes per IP (allows for navigation tracking)
+ */
+export const analyticsViewLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // Limit each IP to 300 view tracking requests per windowMs
+  message: {
+    success: false,
+    error: {
+      message: "Too many analytics requests from this IP, please try again later.",
+      code: "ANALYTICS_RATE_LIMIT_EXCEEDED",
+    },
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: false, // Count all requests, even successful ones
+  handler: (req, res) => {
+    logger.warn(`Analytics rate limit exceeded for IP: ${req.ip}`);
+    res.status(429).json({
+      success: false,
+      error: {
+        message: "Too many analytics requests from this IP, please try again later.",
+        code: "ANALYTICS_RATE_LIMIT_EXCEEDED",
+      },
+    });
+  },
+});
+
