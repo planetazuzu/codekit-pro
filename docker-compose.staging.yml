@@ -1,0 +1,52 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codekit-pro-staging
+    restart: unless-stopped
+    ports:
+      - "8605:8604"  # Different port for staging
+    environment:
+      - NODE_ENV=production
+      - PORT=8604
+      - DATABASE_URL=postgresql://codekit_user:codekit_password@postgres-staging:5432/codekit_pro_staging
+      - ENVIRONMENT=staging
+    env_file:
+      - .env.staging
+    depends_on:
+      postgres-staging:
+        condition: service_healthy
+    networks:
+      - codekit-network-staging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8604/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres-staging:
+    image: postgres:16-alpine
+    container_name: codekit-postgres-staging
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=codekit_user
+      - POSTGRES_PASSWORD=codekit_password
+      - POSTGRES_DB=codekit_pro_staging
+    volumes:
+      - postgres_data_staging:/var/lib/postgresql/data
+    networks:
+      - codekit-network-staging
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codekit_user -d codekit_pro_staging"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data_staging:
+
+networks:
+  codekit-network-staging:
+    driver: bridge
