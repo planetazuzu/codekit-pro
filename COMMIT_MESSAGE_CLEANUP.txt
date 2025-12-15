@@ -1,0 +1,10 @@
+chore: remove obsolete markdown files
+
+Remove obsolete and duplicate markdown documentation files that have been
+consolidated into PROJECT_NOTES.md or are no longer relevant.
+
+Files removed:
+- Analysis and debug markdown files (consolidated)
+- Duplicate deployment command files (consolidated)
+- Old error fix documentation (no longer needed)
+- Migration and optimization docs (consolidated)

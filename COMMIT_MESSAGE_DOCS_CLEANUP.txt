@@ -1,0 +1,14 @@
+docs: consolidate documentation and update service worker version
+
+Consolidate project documentation and update service worker:
+
+- PROJECT_NOTES.md: Consolidated all internal technical documentation
+- RESUMEN_PENDIENTE.md: Summary of pending tasks
+- Service Worker: Update version to v5 for cache invalidation
+
+Also removes obsolete markdown files (consolidated into PROJECT_NOTES.md).
+
+FILES CHANGED:
+- PROJECT_NOTES.md (consolidated documentation)
+- RESUMEN_PENDIENTE.md (pending tasks summary)
+- client/public/sw.js (version bump to v5)

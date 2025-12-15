@@ -1,0 +1,20 @@
+fix(server): improve error handling and prevent 500 errors
+
+Improve error handling in storage layer and API routes to prevent 500 errors
+when database is unavailable or queries fail:
+
+- Storage fallback: Use MemStorage if PostgreSQL fails or not initialized
+- Graceful degradation: Return empty arrays/null instead of throwing errors
+- Stats endpoint: Return default stats (0,0,0,0) instead of 500 on error
+- Enhanced health checks: Verify database connection in /health endpoint
+- Improved deployment service: Better retry logic and health checks
+
+This ensures the frontend always receives valid responses even when the
+backend has issues, preventing crashes and infinite error loops.
+
+FILES CHANGED:
+- server/storage/index.ts (fallback to MemStorage, error handling)
+- server/routes/stats.ts (return default stats on error)
+- server/routes/webhooks.ts (improved retry logic)
+- server/services/deployment.service.ts (enhanced health checks)
+- server/index.ts (enhanced /health endpoint with DB check)

@@ -1,0 +1,17 @@
+fix(error-handling): improve error recovery and prevent infinite loops
+
+Improve error handling to prevent infinite error loops and improve recovery:
+
+- Global reload state: Use sessionStorage to track reload attempts globally
+- Cooldown mechanism: 5-second cooldown between reload attempts
+- ErrorBoundary improvements: Stop rendering immediately when reloading
+- RemoveChild error suppression: Ignore DOM errors during recovery
+- Environment variable fallbacks: Better handling of undefined env vars
+
+This prevents the infinite error loops that were occurring when React
+errors triggered automatic reloads.
+
+FILES CHANGED:
+- client/src/lib/chunk-error-handler.ts (global reload state, cooldown)
+- client/src/components/common/ErrorBoundary.tsx (immediate render halt)
+- client/src/lib/constants.ts (API_BASE_URL fallback)

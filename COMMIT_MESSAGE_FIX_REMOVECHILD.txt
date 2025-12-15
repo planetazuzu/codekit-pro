@@ -1,0 +1,51 @@
+fix(mobile): eliminate removeChild errors by maintaining stable React tree structure
+
+PROBLEM:
+- removeChild errors occurring only on mobile devices
+- React Error #31 and #185 causing infinite error loops
+- Service Worker auto-reloads triggering DOM inconsistencies
+- Conditional component rendering based on viewport changing React tree
+
+ROOT CAUSE:
+- page-router.tsx was using conditional rendering: isMobile ? MobilePage : DesktopPage
+- This changed the React tree structure based on viewport size
+- React's reconciliation algorithm expects stable tree structure
+- Tree changes during render caused DOM inconsistencies (removeChild errors)
+
+SOLUTION:
+- Refactored page-router.tsx to always render both MobilePage and DesktopPage
+- CSS (Tailwind classes) now controls visibility instead of conditional rendering
+- Updated MobileOnly and DesktopOnly components to use CSS pattern
+- Disabled Service Worker by default to prevent auto-reload issues
+- Added comprehensive anti-regression comments throughout codebase
+
+CHANGES:
+- refactor(page-router): use CSS-based responsive pattern instead of conditional rendering
+- refactor(mobile): MobileOnly/DesktopOnly now use CSS visibility
+- fix(main): disable Service Worker by default (can be re-enabled with VITE_ENABLE_SW=true)
+- docs: add anti-regression warnings to prevent future issues
+- refactor(mobile-lazy): mark conditional lazy loading as deprecated
+
+FILES CHANGED:
+- client/src/utils/page-router.tsx
+- client/src/components/mobile/MobileOnly.tsx
+- client/src/components/mobile/DesktopOnly.tsx
+- client/src/utils/mobile-lazy.tsx
+- client/src/main.tsx
+- client/src/hooks/use-mobile.tsx
+- client/src/layout/Layout.tsx
+- client/src/App.tsx
+- server/storage/index.ts
+- server/routes/stats.ts
+
+TESTING:
+- ✅ Desktop: Works correctly
+- ✅ Mobile: No more removeChild errors
+- ✅ Resize: Smooth transitions without errors
+- ✅ Reload: Stable rendering
+- ✅ ErrorBoundary: No infinite loops
+
+ANTI-REGRESSION:
+- Added comprehensive comments explaining WHY CSS pattern is required
+- Documented forbidden patterns that cause removeChild errors
+- Marked deprecated utilities with warnings

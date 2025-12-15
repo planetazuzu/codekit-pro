@@ -1,0 +1,20 @@
+feat(tools): add Code Cleaner and Dependency Analyzer tools
+
+Add two new developer tools to help with code quality:
+
+- Code Cleaner: Analyzes code to find unused imports, dead code, and duplications
+- Dependency Analyzer: Analyzes package.json to detect unused and outdated dependencies
+
+Both tools provide:
+- Detailed analysis with categorized issues
+- Actionable suggestions for improvements
+- Clean code generation (remove unused imports, etc.)
+- Export functionality (copy/download)
+
+FILES CHANGED:
+- client/src/tools/CodeCleaner.tsx (new)
+- client/src/tools/DependencyAnalyzer.tsx (new)
+- client/src/pages/Tools.tsx (registered new tools)
+- client/src/pages/mobile/Tools.tsx (registered new tools)
+- client/src/hooks/use-search.ts (added to search index)
+- client/src/App.tsx (routes and lazy imports)
