@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Móvil - CodeKit Pro</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      background: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-section h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    pre {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    code {
+      background: #f8f9fa;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Tests Móviles - CodeKit Pro</h1>
+  <p>Ejecuta estos tests para verificar que los fixes funcionan correctamente.</p>
+
+  <div class="test-section">
+    <h2>1. Verificar Service Worker</h2>
+    <button onclick="testServiceWorker()">Ejecutar Test</button>
+    <div id="sw-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>2. Monitorear Auto-Reloads (60s)</h2>
+    <button onclick="testAutoReload()">Iniciar Monitoreo</button>
+    <div id="reload-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>3. Monitorear Errores (60s)</h2>
+    <button onclick="testErrors()">Iniciar Monitoreo</button>
+    <div id="error-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>4. Verificar Árbol React</h2>
+    <button onclick="testTreeStability()">Ejecutar Test</button>
+    <div id="tree-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>5. Limpiar Todo</h2>
+    <button onclick="clearAll()">Limpiar SW, Cache y Storage</button>
+    <div id="clear-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>6. Script Completo</h2>
+    <p>Copia y pega esto en la consola para ejecutar todos los tests:</p>
+    <pre><code id="full-script"></code></pre>
+  </div>
+
+  <script>
+    async function testServiceWorker() {
+      const resultDiv = document.getElementById('sw-result');
+      resultDiv.innerHTML = '<p>⏳ Verificando...</p>';
+      
+      try {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        if (regs.length === 0) {
+          resultDiv.innerHTML = '<div class="result success">✅ OK: No hay Service Workers registrados</div>';
+        } else {
+          let html = `<div class="result error">❌ ERROR: ${regs.length} Service Worker(s) encontrado(s):</div><ul>`;
+          regs.forEach(r => {
+            html += `<li>Scope: ${r.scope}</li>`;
+          });
+          html += '</ul>';
+          resultDiv.innerHTML = html;
+        }
+      } catch (err) {
+        resultDiv.innerHTML = `<div class="result error">⚠️ Error: ${err.message}</div>`;
+      }
+    }
+
+    let reloadMonitor = null;
+    function testAutoReload() {
+      const resultDiv = document.getElementById('reload-result');
+      resultDiv.innerHTML = '<p>⏳ Monitoreando por 60 segundos...</p>';
+      
+      let reloadCount = 0;
+      const originalReload = window.location.reload;
+      window.location.reload = function() {
+        reloadCount++;
+        resultDiv.innerHTML = `<div class="result error">❌ AUTO-RELOAD #${reloadCount} detectado!</div>`;
+        return originalReload.apply(this, arguments);
+      };
+      
+      setTimeout(() => {
+        if (reloadCount === 0) {
+          resultDiv.innerHTML = '<div class="result success">✅ OK: No se detectaron auto-reloads en 60 segundos</div>';
+        } else {
+          resultDiv.innerHTML = `<div class="result error">❌ ERROR: ${reloadCount} auto-reload(s) detectado(s)</div>`;
+        }
+        window.location.reload = originalReload;
+      }, 60000);
+    }
+
+    let errorMonitor = null;
+    function testErrors() {
+      const resultDiv = document.getElementById('error-result');
+      resultDiv.innerHTML = '<p>⏳ Monitoreando errores por 60 segundos...</p>';
+      
+      const errors = {
+        removeChild: 0,
+        react31: 0,
+        chunkLoad: 0,
+        other: []
+      };
+      
+      const handler = (e) => {
+        const msg = e.message.toLowerCase();
+        if (msg.includes('removechild')) {
+          errors.removeChild++;
+        } else if (msg.includes('react error #31') || msg.includes('$$typeof')) {
+          errors.react31++;
+        } else if (msg.includes('chunk') || msg.includes('failed to fetch')) {
+          errors.chunkLoad++;
+        } else {
+          errors.other.push(e.message);
+        }
+      };
+      
+      window.addEventListener('error', handler);
+      
+      setTimeout(() => {
+        window.removeEventListener('error', handler);
+        
+        let html = '<div class="result">';
+        if (errors.removeChild === 0 && errors.react31 === 0 && errors.chunkLoad === 0) {
+          html += '<div class="success">✅ OK: No se detectaron errores críticos</div>';
+        } else {
+          html += '<div class="error">❌ ERRORES DETECTADOS:</div><ul>';
+          if (errors.removeChild > 0) html += `<li>removeChild: ${errors.removeChild}</li>`;
+          if (errors.react31 > 0) html += `<li>React Error #31/#185: ${errors.react31}</li>`;
+          if (errors.chunkLoad > 0) html += `<li>ChunkLoadError: ${errors.chunkLoad}</li>`;
+          html += '</ul>';
+        }
+        html += '</div>';
+        resultDiv.innerHTML = html;
+      }, 60000);
+    }
+
+    function testTreeStability() {
+      const resultDiv = document.getElementById('tree-result');
+      const hasDesktop = document.querySelector('.hidden.md\\:block');
+      const hasMobile = document.querySelector('.block.md\\:hidden');
+      
+      if (hasDesktop && hasMobile) {
+        resultDiv.innerHTML = '<div class="result success">✅ OK: Ambos wrappers (desktop/mobile) presentes</div>';
+      } else {
+        resultDiv.innerHTML = '<div class="result error">⚠️ WARNING: Wrappers CSS no encontrados (puede ser normal si no estás en la app principal)</div>';
+      }
+    }
+
+    async function clearAll() {
+      const resultDiv = document.getElementById('clear-result');
+      resultDiv.innerHTML = '<p>⏳ Limpiando...</p>';
+      
+      try {
+        // Unregister SW
+        const regs = await navigator.serviceWorker.getRegistrations();
+        regs.forEach(r => r.unregister());
+        
+        // Clear caches
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          keys.forEach(k => caches.delete(k));
+        }
+        
+        // Clear storage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        resultDiv.innerHTML = '<div class="result success">✅ Limpieza completada. Recarga la página.</div>';
+      } catch (err) {
+        resultDiv.innerHTML = `<div class="result error">⚠️ Error: ${err.message}</div>`;
+      }
+    }
+
+    // Cargar script completo
+    fetch('/scripts/test-mobile-fixes.js')
+      .then(r => r.text())
+      .then(text => {
+        document.getElementById('full-script').textContent = text;
+      })
+      .catch(() => {
+        document.getElementById('full-script').textContent = '// Script no disponible, copia desde el archivo scripts/test-mobile-fixes.js';
+      });
+  </script>
+</body>
+</html>
