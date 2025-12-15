@@ -68,26 +68,55 @@ if (typeof window !== "undefined") {
   });
 }
 
-// Service Worker Registration (DISABLED by default)
+// Service Worker Registration (COMPLETELY DISABLED)
 // ===================================================
 // 
-// ⚠️ DISABLED: Service Worker auto-reloads were causing removeChild errors on mobile
-// during React tree transitions. The app works perfectly without SW for now.
+// 🚨 CRITICAL: Service Worker is COMPLETELY DISABLED to prevent removeChild errors.
+// 
+// ⚠️ DO NOT RE-ENABLE until:
+// 1. All responsive components use CSS (not conditional rendering)
+// 2. All Suspense boundaries are stable (no viewport-based conditionals)
+// 3. ErrorBoundary auto-reload is removed
+// 4. Thoroughly tested on mobile devices
 //
-// If you need to re-enable Service Worker in the future:
-// 1. Set VITE_ENABLE_SW=true in .env
-// 2. Ensure all responsive components use CSS (not conditional rendering)
-// 3. Test thoroughly on mobile devices
-// 4. Consider implementing proper SW update strategy without forced reloads
+// Service Worker auto-reloads combined with React tree instability cause:
+// - removeChild errors
+// - ChunkLoadError loops
+// - React Error #31 / #185
+// - Infinite error loops
 //
-// Current status: Disabled for stability. PWA features (install prompt, etc.) still work.
-const enableServiceWorker = import.meta.env.VITE_ENABLE_SW === "true";
+// Current status: COMPLETELY DISABLED for stability.
+// PWA install prompt still works (browser native feature).
 
-if (
-  enableServiceWorker &&
+// COMPLETELY DISABLED - Unregister any existing Service Workers
+// This prevents all SW-related errors and reload loops
+if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+  // Unregister all existing service workers to prevent issues
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    if (registrations.length > 0) {
+      console.log(`Unregistering ${registrations.length} existing service worker(s)...`);
+      registrations.forEach((registration) => {
+        registration.unregister().then((success) => {
+          if (success) {
+            console.log("Service worker unregistered successfully");
+          }
+        }).catch((error) => {
+          console.warn("Error unregistering service worker:", error);
+        });
+      });
+    }
+  }).catch((error) => {
+    console.warn("Error getting service worker registrations:", error);
+  });
+}
+
+// DO NOT REGISTER NEW SERVICE WORKER - FORCE DISABLED
+// Change to true ONLY after fixing all tree stability issues
+if (false && // FORCE DISABLED
   typeof window !== "undefined" &&
   "serviceWorker" in navigator &&
-  import.meta.env.PROD
+  import.meta.env.PROD &&
+  import.meta.env.VITE_ENABLE_SW === "true"
 ) {
   const registerSW = () => {
     navigator.serviceWorker

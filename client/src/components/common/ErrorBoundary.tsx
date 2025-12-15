@@ -83,28 +83,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     const chunkError = isChunkLoadError(error);
     const isCriticalError = isReactError31 || chunkError.isChunkError;
     
+    // ⚠️ CRITICAL CHANGE: DO NOT AUTO-RELOAD
+    // Auto-reload combined with Service Worker and unstable React tree causes infinite loops.
+    // Instead, show error UI with manual reload button.
+    // User can click button to reload when ready.
     if (isCriticalError) {
-      console.warn('Critical error detected (React Error #31 or ChunkError), initiating reload...');
-      
-      // Mark state as reloading to prevent rendering
-      this.setState({ isReloading: true });
-      
-      // Clear any existing timeout
-      if (this.reloadTimeoutId) {
-        clearTimeout(this.reloadTimeoutId);
-      }
-      
-      // Use the centralized handler which manages global state
-      // This prevents multiple concurrent reload attempts
-      try {
-        handleChunkLoadError(error, 0);
-      } catch (reloadError) {
-        console.error('Failed to initiate reload:', reloadError);
-        // Last resort: direct reload without cache clearing
-        if (typeof window !== 'undefined') {
-          window.location.reload();
-        }
-      }
+      console.warn('Critical error detected (React Error #31 or ChunkError), showing error UI (NO AUTO-RELOAD)');
+      // DO NOT call handleChunkLoadError or window.location.reload() here
+      // Let the error UI render and user can manually reload if needed
     }
   }
 
