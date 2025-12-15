@@ -71,7 +71,10 @@ if (typeof window !== "undefined") {
 // Service Worker Registration (COMPLETELY DISABLED)
 // ===================================================
 // 
-// 🚨 CRITICAL: Service Worker is COMPLETELY DISABLED to prevent removeChild errors.
+// 🚨 CRITICAL ANTI-REGRESSION WARNING 🚨
+// =======================================
+// 
+// Service Worker is COMPLETELY DISABLED to prevent removeChild errors.
 // 
 // ⚠️ DO NOT RE-ENABLE until:
 // 1. All responsive components use CSS (not conditional rendering)

@@ -1,6 +1,23 @@
 /**
  * Error boundary component for catching React errors
  * Enhanced with ChunkLoadError detection for PWA deployments
+ * 
+ * ⚠️ CRITICAL ANTI-REGRESSION WARNING ⚠️
+ * ======================================
+ * 
+ * DO NOT re-enable auto-reload in componentDidCatch!
+ * 
+ * Auto-reload combined with:
+ * - Service Worker updates
+ * - Unstable React tree (viewport-based conditionals)
+ * - Suspense boundaries
+ * 
+ * Causes infinite error loops and removeChild errors.
+ * 
+ * ✅ CORRECT: Show error UI with manual reload button
+ * ❌ FORBIDDEN: window.location.reload() or handleChunkLoadError() in componentDidCatch
+ * 
+ * User must manually click reload button to refresh page.
  */
 
 import React, { Component, type ReactNode } from "react";
