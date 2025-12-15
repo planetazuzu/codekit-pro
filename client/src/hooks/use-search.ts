@@ -43,6 +43,8 @@ const tools = [
   { id: "test-generator", title: "Test Generator", href: "/tools/test-generator", type: "tool" as const },
   { id: "auto-docs", title: "Auto Documentation", href: "/tools/auto-docs", type: "tool" as const },
   { id: "usage-examples", title: "Usage Examples", href: "/tools/usage-examples", type: "tool" as const },
+  { id: "code-cleaner", title: "Code Cleaner", href: "/tools/code-cleaner", type: "tool" as const },
+  { id: "dependency-analyzer", title: "Dependency Analyzer", href: "/tools/dependency-analyzer", type: "tool" as const },
 ];
 
 const pages = [

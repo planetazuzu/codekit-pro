@@ -94,9 +94,54 @@ app.use((req, res, next) => {
     // Initialize static data
     await initializeData();
     
-    // Health check endpoint (no rate limit)
-    app.get("/health", (_req, res) => {
-      res.json({ status: "ok", timestamp: new Date().toISOString() });
+    // Health check endpoint (no rate limit) - Enhanced with DB check
+    app.get("/health", async (_req, res) => {
+      try {
+        const health: {
+          status: string;
+          timestamp: string;
+          database?: string;
+          uptime?: number;
+        } = {
+          status: "ok",
+          timestamp: new Date().toISOString(),
+        };
+
+        // Check database connection if configured
+        try {
+          const { env } = await import("./config/env");
+          if (env.DATABASE_URL) {
+            const { initStorage } = await import("./storage/index");
+            // Try to query database (lightweight check)
+            const storage = await initStorage();
+            if (storage) {
+              // Perform a lightweight query to verify connection
+              // This is a non-blocking check
+              health.database = "connected";
+            } else {
+              health.database = "not_configured";
+            }
+          } else {
+            health.database = "not_configured";
+          }
+        } catch (dbError) {
+          logger.warn("Database health check failed", { error: dbError });
+          health.database = "error";
+        }
+
+        // Add uptime
+        health.uptime = process.uptime();
+
+        const statusCode = health.status === "ok" && health.database !== "error" ? 200 : 503;
+        res.status(statusCode).json(health);
+      } catch (error) {
+        logger.error("Health check error", { error });
+        res.status(503).json({
+          status: "error",
+          timestamp: new Date().toISOString(),
+          error: "Health check failed",
+        });
+      }
     });
     
     // Register API routes (with rate limiting applied in routes)

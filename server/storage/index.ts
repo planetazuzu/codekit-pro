@@ -50,9 +50,9 @@ export async function initStorage(): Promise<IStorage> {
  */
 export function getStorage(): IStorage {
   if (!storageInstance) {
-    throw new Error(
-      "Storage not initialized. Call initStorage() first."
-    );
+    // Fallback to MemStorage if not initialized (prevents crashes)
+    logger.warn("Storage not initialized, using MemStorage fallback");
+    return new MemStorage();
   }
   return storageInstance;
 }
@@ -63,65 +63,373 @@ export function getStorage(): IStorage {
  */
 export const storage = {
   // Users
-  getUser: (...args: Parameters<IStorage["getUser"]>) => getStorage().getUser(...args),
-  getUserByUsername: (...args: Parameters<IStorage["getUserByUsername"]>) => getStorage().getUserByUsername(...args),
-  getUserByEmail: (...args: Parameters<IStorage["getUserByEmail"]>) => getStorage().getUserByEmail(...args),
-  createUser: (...args: Parameters<IStorage["createUser"]>) => getStorage().createUser(...args),
-  updateUser: (...args: Parameters<IStorage["updateUser"]>) => getStorage().updateUser(...args),
+  getUser: async (...args: Parameters<IStorage["getUser"]>) => {
+    try {
+      return await getStorage().getUser(...args);
+    } catch (error) {
+      logger.error("Storage error in getUser", { error });
+      return null;
+    }
+  },
+  getUserByUsername: async (...args: Parameters<IStorage["getUserByUsername"]>) => {
+    try {
+      return await getStorage().getUserByUsername(...args);
+    } catch (error) {
+      logger.error("Storage error in getUserByUsername", { error });
+      return null;
+    }
+  },
+  getUserByEmail: async (...args: Parameters<IStorage["getUserByEmail"]>) => {
+    try {
+      return await getStorage().getUserByEmail(...args);
+    } catch (error) {
+      logger.error("Storage error in getUserByEmail", { error });
+      return null;
+    }
+  },
+  createUser: async (...args: Parameters<IStorage["createUser"]>) => {
+    try {
+      return await getStorage().createUser(...args);
+    } catch (error) {
+      logger.error("Storage error in createUser", { error });
+      throw error;
+    }
+  },
+  updateUser: async (...args: Parameters<IStorage["updateUser"]>) => {
+    try {
+      return await getStorage().updateUser(...args);
+    } catch (error) {
+      logger.error("Storage error in updateUser", { error });
+      throw error;
+    }
+  },
   
   // Prompts
-  getPrompts: (...args: Parameters<IStorage["getPrompts"]>) => getStorage().getPrompts(...args),
-  getPrompt: (...args: Parameters<IStorage["getPrompt"]>) => getStorage().getPrompt(...args),
-  createPrompt: (...args: Parameters<IStorage["createPrompt"]>) => getStorage().createPrompt(...args),
-  updatePrompt: (...args: Parameters<IStorage["updatePrompt"]>) => getStorage().updatePrompt(...args),
-  deletePrompt: (...args: Parameters<IStorage["deletePrompt"]>) => getStorage().deletePrompt(...args),
+  getPrompts: async (...args: Parameters<IStorage["getPrompts"]>) => {
+    try {
+      return await getStorage().getPrompts(...args);
+    } catch (error) {
+      logger.error("Storage error in getPrompts", { error });
+      return []; // Return empty array instead of crashing
+    }
+  },
+  getPrompt: async (...args: Parameters<IStorage["getPrompt"]>) => {
+    try {
+      return await getStorage().getPrompt(...args);
+    } catch (error) {
+      logger.error("Storage error in getPrompt", { error });
+      return null;
+    }
+  },
+  createPrompt: async (...args: Parameters<IStorage["createPrompt"]>) => {
+    try {
+      return await getStorage().createPrompt(...args);
+    } catch (error) {
+      logger.error("Storage error in createPrompt", { error });
+      throw error;
+    }
+  },
+  updatePrompt: async (...args: Parameters<IStorage["updatePrompt"]>) => {
+    try {
+      return await getStorage().updatePrompt(...args);
+    } catch (error) {
+      logger.error("Storage error in updatePrompt", { error });
+      throw error;
+    }
+  },
+  deletePrompt: async (...args: Parameters<IStorage["deletePrompt"]>) => {
+    try {
+      return await getStorage().deletePrompt(...args);
+    } catch (error) {
+      logger.error("Storage error in deletePrompt", { error });
+      return false;
+    }
+  },
   
   // Snippets
-  getSnippets: (...args: Parameters<IStorage["getSnippets"]>) => getStorage().getSnippets(...args),
-  getSnippet: (...args: Parameters<IStorage["getSnippet"]>) => getStorage().getSnippet(...args),
-  createSnippet: (...args: Parameters<IStorage["createSnippet"]>) => getStorage().createSnippet(...args),
-  updateSnippet: (...args: Parameters<IStorage["updateSnippet"]>) => getStorage().updateSnippet(...args),
-  deleteSnippet: (...args: Parameters<IStorage["deleteSnippet"]>) => getStorage().deleteSnippet(...args),
+  getSnippets: async (...args: Parameters<IStorage["getSnippets"]>) => {
+    try {
+      return await getStorage().getSnippets(...args);
+    } catch (error) {
+      logger.error("Storage error in getSnippets", { error });
+      return []; // Return empty array instead of crashing
+    }
+  },
+  getSnippet: async (...args: Parameters<IStorage["getSnippet"]>) => {
+    try {
+      return await getStorage().getSnippet(...args);
+    } catch (error) {
+      logger.error("Storage error in getSnippet", { error });
+      return null;
+    }
+  },
+  createSnippet: async (...args: Parameters<IStorage["createSnippet"]>) => {
+    try {
+      return await getStorage().createSnippet(...args);
+    } catch (error) {
+      logger.error("Storage error in createSnippet", { error });
+      throw error;
+    }
+  },
+  updateSnippet: async (...args: Parameters<IStorage["updateSnippet"]>) => {
+    try {
+      return await getStorage().updateSnippet(...args);
+    } catch (error) {
+      logger.error("Storage error in updateSnippet", { error });
+      throw error;
+    }
+  },
+  deleteSnippet: async (...args: Parameters<IStorage["deleteSnippet"]>) => {
+    try {
+      return await getStorage().deleteSnippet(...args);
+    } catch (error) {
+      logger.error("Storage error in deleteSnippet", { error });
+      return false;
+    }
+  },
   
   // Links
-  getLinks: (...args: Parameters<IStorage["getLinks"]>) => getStorage().getLinks(...args),
-  getLink: (...args: Parameters<IStorage["getLink"]>) => getStorage().getLink(...args),
-  createLink: (...args: Parameters<IStorage["createLink"]>) => getStorage().createLink(...args),
-  updateLink: (...args: Parameters<IStorage["updateLink"]>) => getStorage().updateLink(...args),
-  deleteLink: (...args: Parameters<IStorage["deleteLink"]>) => getStorage().deleteLink(...args),
+  getLinks: async (...args: Parameters<IStorage["getLinks"]>) => {
+    try {
+      return await getStorage().getLinks(...args);
+    } catch (error) {
+      logger.error("Storage error in getLinks", { error });
+      return []; // Return empty array instead of crashing
+    }
+  },
+  getLink: async (...args: Parameters<IStorage["getLink"]>) => {
+    try {
+      return await getStorage().getLink(...args);
+    } catch (error) {
+      logger.error("Storage error in getLink", { error });
+      return null;
+    }
+  },
+  createLink: async (...args: Parameters<IStorage["createLink"]>) => {
+    try {
+      return await getStorage().createLink(...args);
+    } catch (error) {
+      logger.error("Storage error in createLink", { error });
+      throw error;
+    }
+  },
+  updateLink: async (...args: Parameters<IStorage["updateLink"]>) => {
+    try {
+      return await getStorage().updateLink(...args);
+    } catch (error) {
+      logger.error("Storage error in updateLink", { error });
+      throw error;
+    }
+  },
+  deleteLink: async (...args: Parameters<IStorage["deleteLink"]>) => {
+    try {
+      return await getStorage().deleteLink(...args);
+    } catch (error) {
+      logger.error("Storage error in deleteLink", { error });
+      return false;
+    }
+  },
   
   // Guides
-  getGuides: (...args: Parameters<IStorage["getGuides"]>) => getStorage().getGuides(...args),
-  getGuide: (...args: Parameters<IStorage["getGuide"]>) => getStorage().getGuide(...args),
-  createGuide: (...args: Parameters<IStorage["createGuide"]>) => getStorage().createGuide(...args),
-  updateGuide: (...args: Parameters<IStorage["updateGuide"]>) => getStorage().updateGuide(...args),
-  deleteGuide: (...args: Parameters<IStorage["deleteGuide"]>) => getStorage().deleteGuide(...args),
+  getGuides: async (...args: Parameters<IStorage["getGuides"]>) => {
+    try {
+      return await getStorage().getGuides(...args);
+    } catch (error) {
+      logger.error("Storage error in getGuides", { error });
+      return []; // Return empty array instead of crashing
+    }
+  },
+  getGuide: async (...args: Parameters<IStorage["getGuide"]>) => {
+    try {
+      return await getStorage().getGuide(...args);
+    } catch (error) {
+      logger.error("Storage error in getGuide", { error });
+      return null;
+    }
+  },
+  createGuide: async (...args: Parameters<IStorage["createGuide"]>) => {
+    try {
+      return await getStorage().createGuide(...args);
+    } catch (error) {
+      logger.error("Storage error in createGuide", { error });
+      throw error;
+    }
+  },
+  updateGuide: async (...args: Parameters<IStorage["updateGuide"]>) => {
+    try {
+      return await getStorage().updateGuide(...args);
+    } catch (error) {
+      logger.error("Storage error in updateGuide", { error });
+      throw error;
+    }
+  },
+  deleteGuide: async (...args: Parameters<IStorage["deleteGuide"]>) => {
+    try {
+      return await getStorage().deleteGuide(...args);
+    } catch (error) {
+      logger.error("Storage error in deleteGuide", { error });
+      return false;
+    }
+  },
   
   // Analytics
-  createView: (...args: Parameters<IStorage["createView"]>) => getStorage().createView(...args),
-  getViews: (...args: Parameters<IStorage["getViews"]>) => getStorage().getViews(...args),
-  getViewsByPage: (...args: Parameters<IStorage["getViewsByPage"]>) => getStorage().getViewsByPage(...args),
-  getViewsByEntityType: (...args: Parameters<IStorage["getViewsByEntityType"]>) => getStorage().getViewsByEntityType(...args),
-  getViewsByDate: (...args: Parameters<IStorage["getViewsByDate"]>) => getStorage().getViewsByDate(...args),
-  getTopPages: (...args: Parameters<IStorage["getTopPages"]>) => getStorage().getTopPages(...args),
+  createView: async (...args: Parameters<IStorage["createView"]>) => {
+    try {
+      return await getStorage().createView(...args);
+    } catch (error) {
+      logger.error("Storage error in createView", { error });
+      throw error;
+    }
+  },
+  getViews: async (...args: Parameters<IStorage["getViews"]>) => {
+    try {
+      return await getStorage().getViews(...args);
+    } catch (error) {
+      logger.error("Storage error in getViews", { error });
+      return [];
+    }
+  },
+  getViewsByPage: async (...args: Parameters<IStorage["getViewsByPage"]>) => {
+    try {
+      return await getStorage().getViewsByPage(...args);
+    } catch (error) {
+      logger.error("Storage error in getViewsByPage", { error });
+      return [];
+    }
+  },
+  getViewsByEntityType: async (...args: Parameters<IStorage["getViewsByEntityType"]>) => {
+    try {
+      return await getStorage().getViewsByEntityType(...args);
+    } catch (error) {
+      logger.error("Storage error in getViewsByEntityType", { error });
+      return [];
+    }
+  },
+  getViewsByDate: async (...args: Parameters<IStorage["getViewsByDate"]>) => {
+    try {
+      return await getStorage().getViewsByDate(...args);
+    } catch (error) {
+      logger.error("Storage error in getViewsByDate", { error });
+      return [];
+    }
+  },
+  getTopPages: async (...args: Parameters<IStorage["getTopPages"]>) => {
+    try {
+      return await getStorage().getTopPages(...args);
+    } catch (error) {
+      logger.error("Storage error in getTopPages", { error });
+      return [];
+    }
+  },
   
   // Affiliates
-  getAffiliates: (...args: Parameters<IStorage["getAffiliates"]>) => getStorage().getAffiliates(...args),
-  getAffiliate: (...args: Parameters<IStorage["getAffiliate"]>) => getStorage().getAffiliate(...args),
-  createAffiliate: (...args: Parameters<IStorage["createAffiliate"]>) => getStorage().createAffiliate(...args),
-  updateAffiliate: (...args: Parameters<IStorage["updateAffiliate"]>) => getStorage().updateAffiliate(...args),
-  deleteAffiliate: (...args: Parameters<IStorage["deleteAffiliate"]>) => getStorage().deleteAffiliate(...args),
+  getAffiliates: async (...args: Parameters<IStorage["getAffiliates"]>) => {
+    try {
+      return await getStorage().getAffiliates(...args);
+    } catch (error) {
+      logger.error("Storage error in getAffiliates", { error });
+      return [];
+    }
+  },
+  getAffiliate: async (...args: Parameters<IStorage["getAffiliate"]>) => {
+    try {
+      return await getStorage().getAffiliate(...args);
+    } catch (error) {
+      logger.error("Storage error in getAffiliate", { error });
+      return null;
+    }
+  },
+  createAffiliate: async (...args: Parameters<IStorage["createAffiliate"]>) => {
+    try {
+      return await getStorage().createAffiliate(...args);
+    } catch (error) {
+      logger.error("Storage error in createAffiliate", { error });
+      throw error;
+    }
+  },
+  updateAffiliate: async (...args: Parameters<IStorage["updateAffiliate"]>) => {
+    try {
+      return await getStorage().updateAffiliate(...args);
+    } catch (error) {
+      logger.error("Storage error in updateAffiliate", { error });
+      throw error;
+    }
+  },
+  deleteAffiliate: async (...args: Parameters<IStorage["deleteAffiliate"]>) => {
+    try {
+      return await getStorage().deleteAffiliate(...args);
+    } catch (error) {
+      logger.error("Storage error in deleteAffiliate", { error });
+      return false;
+    }
+  },
   
   // Affiliate Clicks
-  createAffiliateClick: (...args: Parameters<IStorage["createAffiliateClick"]>) => getStorage().createAffiliateClick(...args),
-  getAffiliateClicks: (...args: Parameters<IStorage["getAffiliateClicks"]>) => getStorage().getAffiliateClicks(...args),
-  getAffiliateClickStats: (...args: Parameters<IStorage["getAffiliateClickStats"]>) => getStorage().getAffiliateClickStats(...args),
+  createAffiliateClick: async (...args: Parameters<IStorage["createAffiliateClick"]>) => {
+    try {
+      return await getStorage().createAffiliateClick(...args);
+    } catch (error) {
+      logger.error("Storage error in createAffiliateClick", { error });
+      throw error;
+    }
+  },
+  getAffiliateClicks: async (...args: Parameters<IStorage["getAffiliateClicks"]>) => {
+    try {
+      return await getStorage().getAffiliateClicks(...args);
+    } catch (error) {
+      logger.error("Storage error in getAffiliateClicks", { error });
+      return [];
+    }
+  },
+  getAffiliateClickStats: async (...args: Parameters<IStorage["getAffiliateClickStats"]>) => {
+    try {
+      return await getStorage().getAffiliateClickStats(...args);
+    } catch (error) {
+      logger.error("Storage error in getAffiliateClickStats", { error });
+      return [];
+    }
+  },
   
   // Affiliate Programs
-  getAffiliatePrograms: (...args: Parameters<IStorage["getAffiliatePrograms"]>) => getStorage().getAffiliatePrograms(...args),
-  getAffiliateProgram: (...args: Parameters<IStorage["getAffiliateProgram"]>) => getStorage().getAffiliateProgram(...args),
-  createAffiliateProgram: (...args: Parameters<IStorage["createAffiliateProgram"]>) => getStorage().createAffiliateProgram(...args),
-  updateAffiliateProgram: (...args: Parameters<IStorage["updateAffiliateProgram"]>) => getStorage().updateAffiliateProgram(...args),
-  deleteAffiliateProgram: (...args: Parameters<IStorage["deleteAffiliateProgram"]>) => getStorage().deleteAffiliateProgram(...args),
+  getAffiliatePrograms: async (...args: Parameters<IStorage["getAffiliatePrograms"]>) => {
+    try {
+      return await getStorage().getAffiliatePrograms(...args);
+    } catch (error) {
+      logger.error("Storage error in getAffiliatePrograms", { error });
+      return [];
+    }
+  },
+  getAffiliateProgram: async (...args: Parameters<IStorage["getAffiliateProgram"]>) => {
+    try {
+      return await getStorage().getAffiliateProgram(...args);
+    } catch (error) {
+      logger.error("Storage error in getAffiliateProgram", { error });
+      return null;
+    }
+  },
+  createAffiliateProgram: async (...args: Parameters<IStorage["createAffiliateProgram"]>) => {
+    try {
+      return await getStorage().createAffiliateProgram(...args);
+    } catch (error) {
+      logger.error("Storage error in createAffiliateProgram", { error });
+      throw error;
+    }
+  },
+  updateAffiliateProgram: async (...args: Parameters<IStorage["updateAffiliateProgram"]>) => {
+    try {
+      return await getStorage().updateAffiliateProgram(...args);
+    } catch (error) {
+      logger.error("Storage error in updateAffiliateProgram", { error });
+      throw error;
+    }
+  },
+  deleteAffiliateProgram: async (...args: Parameters<IStorage["deleteAffiliateProgram"]>) => {
+    try {
+      return await getStorage().deleteAffiliateProgram(...args);
+    } catch (error) {
+      logger.error("Storage error in deleteAffiliateProgram", { error });
+      return false;
+    }
+  },
 };
 

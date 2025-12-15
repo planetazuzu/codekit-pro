@@ -274,6 +274,24 @@ const tools = [
     href: '/tools/usage-examples',
     color: 'text-teal-400',
     bg: 'bg-teal-400/10'
+  },
+  {
+    id: 'code-cleaner',
+    title: 'Code Cleaner',
+    description: 'Analiza código para encontrar imports no usados, código muerto y duplicaciones.',
+    icon: Scissors,
+    href: '/tools/code-cleaner',
+    color: 'text-red-400',
+    bg: 'bg-red-400/10'
+  },
+  {
+    id: 'dependency-analyzer',
+    title: 'Dependency Analyzer',
+    description: 'Analiza package.json para detectar dependencias no usadas y desactualizadas.',
+    icon: Package,
+    href: '/tools/dependency-analyzer',
+    color: 'text-blue-400',
+    bg: 'bg-blue-400/10'
   }
 ];
 

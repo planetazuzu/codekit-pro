@@ -3,7 +3,18 @@
  */
 
 // API Configuration
-export const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+// CRITICAL: Fallback to relative URL if VITE_API_URL is not set
+// In production, if VITE_API_URL is undefined, use relative paths (same origin)
+// This prevents API calls from failing in production
+export const API_BASE_URL = (() => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    return envUrl;
+  }
+  // Fallback: Use relative URLs (same origin)
+  // This works for both dev and production when API is on same domain
+  return '';
+})();
 
 // LocalStorage Keys
 export const STORAGE_KEYS = {

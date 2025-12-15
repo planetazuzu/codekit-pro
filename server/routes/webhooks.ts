@@ -125,18 +125,34 @@ router.post("/deploy", verifyWebhookSecret, async (req, res) => {
       if (stdout) logger.info("Deployment output:", stdout);
       if (stderr) logger.warn("Deployment warnings:", stderr);
       
-      // Esperar un poco para que la app inicie
-      await new Promise((resolve) => setTimeout(resolve, 10000));
+      // Esperar a que la app inicie con retry logic
+      const maxRetries = 5;
+      const retryDelay = 5000; // 5 segundos
+      let isHealthy = false;
       
-      // Realizar health check
-      const isHealthy = await deploymentService.performHealthCheck(deployment.id);
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        logger.info(`Health check attempt ${attempt}/${maxRetries}...`);
+        
+        // Esperar antes del health check
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        
+        // Realizar health check
+        isHealthy = await deploymentService.performHealthCheck(deployment.id);
+        
+        if (isHealthy) {
+          logger.info(`Health check passed on attempt ${attempt}`);
+          break;
+        } else {
+          logger.warn(`Health check failed on attempt ${attempt}, retrying...`);
+        }
+      }
       
       if (isHealthy) {
         await notificationService.notifyDeployment(deployment, "completed");
         logger.info("Deployment completed successfully");
       } else {
         await notificationService.notifyDeployment(deployment, "failed");
-        logger.error("Deployment health check failed");
+        logger.error("Deployment health check failed after all retries");
         
         // Intentar rollback automático si está configurado
         if (process.env.AUTO_ROLLBACK_ON_FAILURE === "true") {
@@ -148,6 +164,14 @@ router.post("/deploy", verifyWebhookSecret, async (req, res) => {
       logger.error("Deployment error:", error);
       await deploymentService.updateDeploymentStatus(deployment.id, "failed");
       await notificationService.notifyDeployment(deployment, "failed");
+      
+      // Intentar rollback automático si está configurado
+      if (process.env.AUTO_ROLLBACK_ON_FAILURE === "true") {
+        logger.info("Auto-rollback enabled due to deployment error, attempting rollback...");
+        await deploymentService.rollback(deployment.id).catch((rollbackError) => {
+          logger.error("Rollback also failed:", rollbackError);
+        });
+      }
     });
 
   } catch (error: any) {

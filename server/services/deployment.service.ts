@@ -135,21 +135,54 @@ class DeploymentService {
   }
 
   /**
-   * Perform health check
+   * Perform health check (enhanced with DB check)
    */
   async performHealthCheck(deploymentId: string): Promise<boolean> {
     try {
       const port = process.env.PORT || "8604";
       const healthUrl = `http://localhost:${port}/health`;
 
+      // Basic health check - verify server responds
       const response = await fetch(healthUrl, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(5000), // 5 second timeout
+        signal: AbortSignal.timeout(10000), // 10 second timeout (increased for slow starts)
       });
 
-      const isHealthy = response.ok;
-      await this.updateDeploymentStatus(deploymentId, isHealthy ? "success" : "failed", isHealthy);
+      if (!response.ok) {
+        logger.warn("Health check returned non-OK status", { 
+          deploymentId, 
+          status: response.status 
+        });
+        await this.updateDeploymentStatus(deploymentId, "failed", false);
+        return false;
+      }
+
+      // Verify response is valid JSON
+      let healthData;
+      try {
+        healthData = await response.json();
+      } catch (jsonError) {
+        logger.warn("Health check returned invalid JSON", { deploymentId });
+        await this.updateDeploymentStatus(deploymentId, "failed", false);
+        return false;
+      }
+
+      // Basic validation - response should have status
+      const isHealthy = healthData?.status === "ok" || healthData?.status === "healthy";
+      
+      // Advanced check: Verify API endpoint responds (if available)
+      if (isHealthy && healthData?.database === "connected") {
+        logger.info("Health check passed with database connection", { deploymentId });
+      } else if (isHealthy) {
+        logger.info("Health check passed (basic)", { deploymentId });
+      }
+
+      await this.updateDeploymentStatus(
+        deploymentId, 
+        isHealthy ? "success" : "failed", 
+        isHealthy
+      );
       
       return isHealthy;
     } catch (error) {

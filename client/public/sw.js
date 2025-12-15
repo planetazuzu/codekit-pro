@@ -1,7 +1,7 @@
 // Service Worker para CodeKit Pro PWA - Optimizado para móvil y offline
 // IMPORTANTE: La versión se actualiza automáticamente con cada build
 // Esto asegura que los usuarios obtengan la versión más reciente después de un deploy
-const SW_VERSION = 'v4'; // Incrementar manualmente después de cambios importantes en el SW
+const SW_VERSION = 'v5'; // Incrementar manualmente después de cambios importantes en el SW
 const CACHE_NAME = `codekit-pro-${SW_VERSION}-mobile`;
 const STATIC_CACHE = `codekit-pro-static-${SW_VERSION}`;
 const API_CACHE = `codekit-pro-api-${SW_VERSION}`;

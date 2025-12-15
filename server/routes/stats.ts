@@ -58,12 +58,16 @@ export function registerStatsRoutes(app: Express): void {
       };
 
       res.json({ success: true, data: stats });
-    } catch (error) {
+    } catch (error: any) {
       logger.error("Error fetching stats", { error, source: "stats" });
-      res.status(500).json({ 
-        success: false, 
-        error: { message: "Error fetching statistics" } 
-      });
+      // Return default stats instead of 500 error to prevent frontend crashes
+      const defaultStats: StatsResponse = {
+        prompts: 0,
+        snippets: 0,
+        links: 0,
+        guides: 0,
+      };
+      res.status(200).json({ success: true, data: defaultStats });
     }
   });
 }

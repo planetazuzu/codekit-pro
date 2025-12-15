@@ -4,6 +4,58 @@
  * Common after redeployments in PWAs
  */
 
+// Global reload state using sessionStorage to persist across component instances
+const RELOAD_STATE_KEY = '__ckp_reload_attempted';
+const RELOAD_COOLDOWN_KEY = '__ckp_reload_cooldown';
+const RELOAD_COOLDOWN_MS = 5000; // 5 second cooldown between reload attempts
+
+/**
+ * Check if a reload has been attempted recently (within cooldown period)
+ */
+function hasRecentReloadAttempt(): boolean {
+  if (typeof window === 'undefined' || !window.sessionStorage) {
+    return false;
+  }
+  
+  const cooldown = sessionStorage.getItem(RELOAD_COOLDOWN_KEY);
+  if (!cooldown) {
+    return false;
+  }
+  
+  const cooldownTime = parseInt(cooldown, 10);
+  const now = Date.now();
+  
+  // If cooldown has passed, clear it
+  if (now - cooldownTime > RELOAD_COOLDOWN_MS) {
+    sessionStorage.removeItem(RELOAD_COOLDOWN_KEY);
+    sessionStorage.removeItem(RELOAD_STATE_KEY);
+    return false;
+  }
+  
+  return true;
+}
+
+/**
+ * Mark that a reload has been attempted
+ */
+function markReloadAttempted(): void {
+  if (typeof window === 'undefined' || !window.sessionStorage) {
+    return;
+  }
+  sessionStorage.setItem(RELOAD_STATE_KEY, 'true');
+  sessionStorage.setItem(RELOAD_COOLDOWN_KEY, Date.now().toString());
+}
+
+/**
+ * Check if reload has been attempted (within current session)
+ */
+function hasReloadBeenAttempted(): boolean {
+  if (typeof window === 'undefined' || !window.sessionStorage) {
+    return false;
+  }
+  return sessionStorage.getItem(RELOAD_STATE_KEY) === 'true' || hasRecentReloadAttempt();
+}
+
 export interface ChunkError {
   isChunkError: boolean;
   chunkName?: string;
@@ -76,8 +128,15 @@ export function isChunkLoadError(error: unknown): ChunkError {
 /**
  * Handles chunk load error by reloading the page
  * This gets the new chunks from the server after a redeploy
+ * Uses global state to prevent infinite reload loops
  */
 export function handleChunkLoadError(error: unknown, retryCount: number = 0): void {
+  // Check if we've already attempted a reload recently
+  if (hasRecentReloadAttempt()) {
+    console.warn('Reload already attempted recently, skipping to prevent infinite loop');
+    return;
+  }
+  
   const maxRetries = 2;
   
   const chunkError = isChunkLoadError(error);
@@ -93,30 +152,69 @@ export function handleChunkLoadError(error: unknown, retryCount: number = 0): vo
     retryCount,
   });
 
-  // If we've already retried, do a hard reload
-  if (retryCount >= maxRetries) {
-    console.warn('Max retries reached, forcing page reload');
-    // Clear all caches and reload
-    if (typeof window !== 'undefined' && 'caches' in window) {
-      caches.keys().then(cacheNames => {
-        cacheNames.forEach(cacheName => {
-          caches.delete(cacheName).catch(() => {});
-        });
-      }).finally(() => {
-        window.location.reload();
-      });
-    } else {
-      window.location.reload();
-    }
+  // Mark reload attempt immediately to prevent concurrent calls
+  markReloadAttempted();
+
+  // Force immediate reload - don't wait, don't retry
+  // Clear caches and reload synchronously as much as possible
+  if (typeof window === 'undefined') {
     return;
   }
 
-  // First retry: wait a bit and try reloading
-  // This gives time for the service worker to update
+  // Use a more direct reload approach
+  const reloadPage = () => {
+    try {
+      // Clear caches first (fire and forget)
+      if ('caches' in window) {
+        caches.keys().then(cacheNames => {
+          cacheNames.forEach(cacheName => {
+            caches.delete(cacheName).catch(() => {});
+          });
+        }).catch(() => {});
+      }
+      
+      // Unregister service workers (fire and forget)
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(reg => {
+            reg.unregister().catch(() => {});
+          });
+        }).catch(() => {});
+      }
+      
+      // Force reload using replace to avoid history issues
+      // Split URL to remove hash and query params, then add reload param
+      const baseUrl = window.location.origin + window.location.pathname;
+      window.location.replace(baseUrl + '?reload=' + Date.now());
+    } catch (reloadError) {
+      console.error('Failed to reload:', reloadError);
+      // Last resort: direct reload
+      window.location.reload();
+    }
+  };
+
+  // If max retries reached or first critical error, reload immediately
+  if (retryCount >= maxRetries || chunkError.isChunkError) {
+    console.warn('Forcing immediate page reload');
+    reloadPage();
+    return;
+  }
+
+  // For retries, use a short delay
   setTimeout(() => {
     console.log(`Retrying chunk load (attempt ${retryCount + 1}/${maxRetries})...`);
-    window.location.reload();
-  }, 1000 * (retryCount + 1)); // Exponential backoff: 1s, 2s
+    reloadPage();
+  }, 1000 * (retryCount + 1));
+}
+
+/**
+ * Check if a reload has been attempted (for ErrorBoundary use)
+ */
+export function getReloadAttemptStatus(): { attempted: boolean; inCooldown: boolean } {
+  return {
+    attempted: hasReloadBeenAttempted(),
+    inCooldown: hasRecentReloadAttempt(),
+  };
 }
 
 /**

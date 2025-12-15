@@ -6,7 +6,7 @@
 import React, { Component, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { isChunkLoadError } from "@/lib/chunk-error-handler";
+import { isChunkLoadError, getReloadAttemptStatus, handleChunkLoadError } from "@/lib/chunk-error-handler";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -18,15 +18,15 @@ interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
   isChunkError: boolean;
+  isReloading: boolean;
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private reloadTimeoutId: ReturnType<typeof setTimeout> | null = null;
-  private hasAttemptedReload = false;
 
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null, isChunkError: false };
+    this.state = { hasError: false, error: null, isChunkError: false, isReloading: false };
   }
 
   componentWillUnmount() {
@@ -60,74 +60,51 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     console.error("ErrorBoundary caught error:", error, errorInfo);
     this.props.onError?.(error, errorInfo);
     
-    // CRITICAL: Auto-reload on React Error #31 (invalid component rendering)
-    // Only attempt reload once to prevent infinite loops
-    if (this.hasAttemptedReload) {
-      console.warn('Reload already attempted, skipping to prevent infinite loop');
+    // Check global reload state to prevent infinite loops
+    const reloadStatus = getReloadAttemptStatus();
+    if (reloadStatus.inCooldown) {
+      console.warn('Reload already attempted recently, skipping to prevent infinite loop');
+      // Mark as reloading to prevent further rendering
+      this.setState({ isReloading: true });
       return;
     }
 
     const errorMessage = error.message || String(error);
+    const errorString = String(error).toLowerCase();
+    
+    // Detect React Error #31 and other critical chunk errors
     const isReactError31 = errorMessage.includes('react error #31') ||
       errorMessage.includes('$$typeof') ||
       (errorMessage.includes('displayName') && errorMessage.includes('render')) ||
-      errorMessage.includes('Objects are not valid');
+      errorMessage.includes('Objects are not valid') ||
+      errorString.includes('react error #31');
     
-    if (isReactError31) {
-      this.hasAttemptedReload = true;
-      console.warn('React Error #31 detected, auto-reloading page immediately...');
+    // Check for chunk errors
+    const chunkError = isChunkLoadError(error);
+    const isCriticalError = isReactError31 || chunkError.isChunkError;
+    
+    if (isCriticalError) {
+      console.warn('Critical error detected (React Error #31 or ChunkError), initiating reload...');
+      
+      // Mark state as reloading to prevent rendering
+      this.setState({ isReloading: true });
       
       // Clear any existing timeout
       if (this.reloadTimeoutId) {
         clearTimeout(this.reloadTimeoutId);
       }
       
-      // Immediate reload to break the error loop
-      // Use a small timeout to allow React to finish error handling
-      this.reloadTimeoutId = setTimeout(() => {
-        try {
-          // Unregister service worker first to prevent serving stale chunks
-          if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-              registrations.forEach(reg => {
-                reg.unregister().catch(() => {});
-              });
-              // Clear caches and reload
-              if ('caches' in window) {
-                caches.keys().then(cacheNames => {
-                  cacheNames.forEach(cacheName => {
-                    caches.delete(cacheName).catch(() => {});
-                  });
-                }).finally(() => {
-                  window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
-                });
-              } else {
-                window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
-              }
-            }).catch(() => {
-              // If SW unregister fails, just reload
-              window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
-            });
-          } else {
-            // No SW, just clear cache and reload
-            if ('caches' in window) {
-              caches.keys().then(cacheNames => {
-                cacheNames.forEach(cacheName => {
-                  caches.delete(cacheName).catch(() => {});
-                });
-              }).finally(() => {
-                window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
-              });
-            } else {
-              window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
-            }
-          }
-        } catch (reloadError) {
-          console.error('Failed to reload:', reloadError);
-          // Force reload as last resort
+      // Use the centralized handler which manages global state
+      // This prevents multiple concurrent reload attempts
+      try {
+        handleChunkLoadError(error, 0);
+      } catch (reloadError) {
+        console.error('Failed to initiate reload:', reloadError);
+        // Last resort: direct reload without cache clearing
+        if (typeof window !== 'undefined') {
           window.location.reload();
         }
-      }, 100);
+      }
     }
   }
 
@@ -136,11 +113,15 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   };
 
   handleReload = () => {
-    // Prevent multiple reload attempts
-    if (this.hasAttemptedReload) {
+    // Check global reload state to prevent multiple reload attempts
+    const reloadStatus = getReloadAttemptStatus();
+    if (reloadStatus.inCooldown) {
+      console.warn('Reload already attempted, please wait');
       return;
     }
-    this.hasAttemptedReload = true;
+
+    // Mark as reloading to prevent rendering
+    this.setState({ isReloading: true });
 
     // Clear timeout if exists
     if (this.reloadTimeoutId) {
@@ -148,45 +129,24 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       this.reloadTimeoutId = null;
     }
 
-    // Unregister service worker and clear caches
-    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        registrations.forEach(reg => {
-          reg.unregister().catch(() => {});
-        });
-        // Clear caches and reload
-        if ('caches' in window) {
-          caches.keys().then(cacheNames => {
-            cacheNames.forEach(cacheName => {
-              caches.delete(cacheName).catch(() => {});
-            });
-          }).finally(() => {
-            window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
-          });
-        } else {
-          window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
-        }
-      }).catch(() => {
-        // If SW unregister fails, just reload
-        window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
-      });
-    } else {
-      // No SW, just clear cache and reload
-      if ('caches' in window) {
-        caches.keys().then(cacheNames => {
-          cacheNames.forEach(cacheName => {
-            caches.delete(cacheName).catch(() => {});
-          });
-        }).finally(() => {
-          window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
-        });
-      } else {
-        window.location.href = window.location.href.split('#')[0] + '?reload=' + Date.now();
+    // Use centralized handler
+    try {
+      handleChunkLoadError(this.state.error || new Error('Manual reload'), 0);
+    } catch (reloadError) {
+      console.error('Failed to reload:', reloadError);
+      if (typeof window !== 'undefined') {
+        window.location.reload();
       }
     }
   };
 
   render() {
+    // If we're reloading, return null to prevent any rendering
+    // This stops React from continuing to render in an error state
+    if (this.state.isReloading) {
+      return null;
+    }
+
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
