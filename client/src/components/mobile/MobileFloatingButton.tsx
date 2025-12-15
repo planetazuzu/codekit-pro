@@ -10,14 +10,18 @@ import { Button, ButtonProps } from "@/components/ui/button";
 import { hapticPress } from "@/utils/haptic-feedback";
 
 interface MobileFloatingButtonProps extends Omit<ButtonProps, "className"> {
-  icon?: ReactNode;
+  /** Icon component (pass component function, e.g. icon={Plus}) */
+  icon?: React.ComponentType<{ className?: string }>;
+  /** Icon as ReactNode (already rendered JSX, e.g. icon={<Plus />}) */
+  iconNode?: ReactNode;
   label?: string;
   position?: "bottom-right" | "bottom-left" | "bottom-center";
   className?: string;
 }
 
 export function MobileFloatingButton({
-  icon,
+  icon: Icon,
+  iconNode,
   label,
   position = "bottom-right",
   className,
@@ -54,8 +58,14 @@ export function MobileFloatingButton({
       )}
       size="icon"
     >
-      {icon && <span className="h-6 w-6">{icon}</span>}
-      {label && !icon && <span className="text-sm font-medium">{label}</span>}
+      {/* Render icon component correctly - this fixes React Error #31 */}
+      {Icon && (
+        <span className="h-6 w-6 flex items-center justify-center">
+          <Icon className="h-6 w-6" />
+        </span>
+      )}
+      {iconNode && <span className="h-6 w-6">{iconNode}</span>}
+      {label && !Icon && !iconNode && <span className="text-sm font-medium">{label}</span>}
       {children}
     </Button>
   );
