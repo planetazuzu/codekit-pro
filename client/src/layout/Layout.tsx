@@ -16,6 +16,25 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+/**
+ * Main Layout Component
+ * 
+ * ⚠️ ANTI-REGRESSION WARNING ⚠️
+ * ==============================
+ * 
+ * This layout uses CSS (Tailwind) for responsive design, NOT conditional rendering.
+ * 
+ * ✅ CORRECT PATTERN (used here):
+ *   - className="hidden md:block" for desktop
+ *   - className="block md:hidden" for mobile
+ *   - Same React tree structure always
+ * 
+ * ❌ FORBIDDEN PATTERN (causes removeChild errors):
+ *   - isMobile ? <MobileLayout /> : <DesktopLayout />
+ *   - Conditional component rendering based on viewport
+ * 
+ * Keep this pattern consistent across the entire app.
+ */
 export function Layout({ children }: LayoutProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

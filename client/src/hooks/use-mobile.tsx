@@ -6,40 +6,92 @@ const TABLET_BREAKPOINT = 1024
 /**
  * Hook para detectar si es móvil
  * Safe para SSR - retorna false inicialmente si window no está disponible
+ * 
+ * ⚠️ ANTI-REGRESSION WARNING ⚠️
+ * ==============================
+ * 
+ * DO NOT use this hook to conditionally render different root components.
+ * 
+ * ❌ FORBIDDEN:
+ *   const SelectedPage = isMobile ? MobilePage : DesktopPage;
+ *   return <SelectedPage />;
+ * 
+ * ✅ CORRECT:
+ *   - Use CSS classes: className="hidden md:block" / "block md:hidden"
+ *   - Use for props or styles only, never for component tree structure
+ *   - See page-router.tsx for the correct responsive pattern
+ * 
+ * Using this for conditional rendering causes removeChild errors and React reconciliation issues.
  */
 export function useIsMobile() {
-  // Inicializar con un valor por defecto seguro para SSR
-  // Si estamos en cliente, intentamos detectar inmediatamente
+  // CRITICAL: Initialize with a stable default value to prevent tree changes during initial render
+  // Use a function to compute initial value only once
   const [isMobile, setIsMobile] = React.useState<boolean>(() => {
     if (typeof window === "undefined") return false;
-    return window.innerWidth < MOBILE_BREAKPOINT;
+    // Use matchMedia for more reliable initial detection
+    // This prevents flicker and DOM inconsistencies
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    return mql.matches;
   });
+
+  // Track if we've mounted to prevent updates during initial render
+  const [hasMounted, setHasMounted] = React.useState(false);
 
   React.useEffect(() => {
     // Verificar que window está disponible
     if (typeof window === "undefined") return;
 
+    // Mark as mounted after initial render is complete
+    // Use requestAnimationFrame to ensure DOM is stable
+    const mountTimeout = requestAnimationFrame(() => {
+      setHasMounted(true);
+    });
+
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
     
     // Función para actualizar estado
+    // Only update if mounted to prevent DOM inconsistencies
     const updateIsMobile = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+      if (!hasMounted) return; // Don't update during initial render
+      
+      // Use matchMedia.matches instead of innerWidth for consistency
+      const newValue = mql.matches;
+      setIsMobile(prev => {
+        // Only update if value actually changed to prevent unnecessary re-renders
+        if (prev !== newValue) {
+          return newValue;
+        }
+        return prev;
+      });
     };
 
-    // Actualizar inmediatamente
-    updateIsMobile();
+    // Wait a bit before first update to ensure DOM is stable
+    // This prevents removeChild errors during initial render
+    const initialUpdateTimeout = setTimeout(() => {
+      if (hasMounted) {
+        updateIsMobile();
+      }
+    }, 100);
 
-    // Escuchar cambios
+    // Escuchar cambios solo después del mount
     // Usar addEventListener si está disponible, sino usar el evento deprecated
     if (mql.addEventListener) {
       mql.addEventListener("change", updateIsMobile);
-      return () => mql.removeEventListener("change", updateIsMobile);
+      return () => {
+        cancelAnimationFrame(mountTimeout);
+        clearTimeout(initialUpdateTimeout);
+        mql.removeEventListener("change", updateIsMobile);
+      };
     } else {
       // Fallback para navegadores antiguos
       mql.addListener(updateIsMobile);
-      return () => mql.removeListener(updateIsMobile);
+      return () => {
+        cancelAnimationFrame(mountTimeout);
+        clearTimeout(initialUpdateTimeout);
+        mql.removeListener(updateIsMobile);
+      };
     }
-  }, []);
+  }, [hasMounted]);
 
   return isMobile;
 }

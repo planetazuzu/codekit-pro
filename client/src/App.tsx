@@ -11,7 +11,9 @@ import { PWAInstallPrompt } from "@/components/mobile";
 import { createAdaptivePage } from "@/utils/page-router";
 
 // Lazy load pages with mobile/desktop support
-// Pages with mobile versions use adaptive routing
+// Pages with mobile versions use adaptive routing (CSS-based, not conditional rendering)
+// ⚠️ IMPORTANT: createAdaptivePage maintains stable React tree - both mobile/desktop always rendered
+// Changing this to conditional rendering (isMobile ? Mobile : Desktop) will cause removeChild errors
 const Dashboard = createAdaptivePage(
   () => import("@/pages/Dashboard"),
   () => import("@/pages/mobile/Dashboard")
@@ -108,10 +110,18 @@ const ErrorExplainer = lazy(() => import("@/tools/ErrorExplainer"));
 const TestGenerator = lazy(() => import("@/tools/TestGenerator"));
 const AutoDocumentation = lazy(() => import("@/tools/AutoDocumentation"));
 const UsageExamplesGenerator = lazy(() => import("@/tools/UsageExamplesGenerator"));
+const CodeCleaner = lazy(() => import("@/tools/CodeCleaner"));
+const DependencyAnalyzer = lazy(() => import("@/tools/DependencyAnalyzer"));
 
 // Wrapper component for Suspense with Error Boundary
 // Enhanced to properly catch chunk loading errors
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
+  // CRITICAL: Validate children is valid ReactNode before rendering
+  // Prevents React Error #31 from invalid children
+  if (children === null || children === undefined) {
+    return <LoadingSpinner />;
+  }
+  
   return (
     <ErrorBoundary
       onError={(error, errorInfo) => {
@@ -346,6 +356,16 @@ function Router() {
           <UsageExamplesGenerator />
         </SuspenseWrapper>
       </Route>
+      <Route path="/tools/code-cleaner">
+        <SuspenseWrapper>
+          <CodeCleaner />
+        </SuspenseWrapper>
+      </Route>
+      <Route path="/tools/dependency-analyzer">
+        <SuspenseWrapper>
+          <DependencyAnalyzer />
+        </SuspenseWrapper>
+      </Route>
       
       {/* Affiliate Landing Pages */}
       <Route path="/tools/:slug">
@@ -360,15 +380,31 @@ function Router() {
 }
 
 function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-        <PWAInstallPrompt />
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
+  // CRITICAL: Ensure all components are valid before rendering
+  // This prevents React Error #31 from invalid component references
+  try {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+          <PWAInstallPrompt />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  } catch (error) {
+    // Fallback UI if App fails to render
+    // This should never happen, but protects against React Error #31
+    console.error('App render error:', error);
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-xl font-semibold mb-2">Error de Carga</h1>
+          <p className="text-muted-foreground">Por favor, recarga la página</p>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default App;

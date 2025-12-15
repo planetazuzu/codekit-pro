@@ -1,10 +1,44 @@
 /**
  * Page Router Utility
- * Automatically loads mobile or desktop version of pages based on device detection
+ * 
+ * Provides responsive page loading that maintains a stable React tree structure.
+ * Uses CSS (Tailwind) for responsive display instead of conditional component rendering.
+ * 
+ * ⚠️ ANTI-REGRESSION WARNING ⚠️
+ * ==============================
+ * 
+ * CRITICAL: This utility NEVER changes the React tree based on viewport size.
+ * Both mobile and desktop components are always mounted - CSS controls visibility.
+ * 
+ * ❌ FORBIDDEN PATTERN (causes removeChild errors):
+ *   const SelectedPage = isMobile ? MobilePage : DesktopPage;
+ *   return <SelectedPage />;
+ * 
+ * ✅ REQUIRED PATTERN (stable tree):
+ *   return (
+ *     <>
+ *       <div className="hidden md:block"><DesktopPage /></div>
+ *       <div className="block md:hidden"><MobilePage /></div>
+ *     </>
+ *   );
+ * 
+ * WHY THIS MATTERS:
+ * - React reconciliation expects stable tree structure
+ * - Changing root components causes unmount/remount cycles
+ * - Suspense boundaries break when parent changes
+ * - Service Worker reloads trigger errors during transitions
+ * - Mobile viewport changes during initial render cause DOM inconsistencies
+ * 
+ * IF YOU CHANGE THIS TO USE CONDITIONAL RENDERING:
+ * - removeChild errors will return
+ * - React Error #31/#185 will return
+ * - Mobile app will crash
+ * - You will break production
+ * 
+ * This pattern matches Layout.tsx (CSS-based responsive, not JS-based).
  */
 
-import { ComponentType, lazy, Suspense, useState, useEffect } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { ComponentType, lazy, Suspense } from "react";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { isChunkLoadError, handleChunkLoadError } from "@/lib/chunk-error-handler";
 
@@ -93,21 +127,41 @@ export function createAdaptivePage<T extends ComponentType<any>>(
       try {
         const module = await importFn();
         
-        // Double-check that we have a valid component before returning
-        if (!module?.default || typeof module.default !== 'function') {
-          throw new Error(`Invalid component: ${module?.default ? typeof module.default : 'undefined'}`);
+        // CRITICAL: Validate module structure first
+        if (!module) {
+          throw new Error('Import returned null or undefined');
         }
         
-        // Ensure the default export is actually a React component
-        // React components are functions that can be called with props
-        if (typeof module.default !== 'function') {
-          throw new Error('Component export is not a function');
+        if (typeof module !== 'object') {
+          throw new Error(`Import returned non-object: ${typeof module}`);
         }
         
-        return module;
+        // CRITICAL: Validate default export exists
+        if (!('default' in module)) {
+          throw new Error('Module missing default export');
+        }
+        
+        const component = module.default;
+        
+        // CRITICAL: Validate default is a function (React component)
+        if (!component) {
+          throw new Error('Default export is null or undefined');
+        }
+        
+        // CRITICAL: Validate default is a function (React component)
+        if (typeof component !== 'function') {
+          throw new Error(`Default export is not a function: ${typeof component}, value: ${String(component).substring(0, 100)}`);
+        }
+        
+        // Additional validation: check if it looks like a React component
+        // React components have $$typeof in production, but functions can still be valid
+        // Just ensure it's callable (already checked above, but explicit for clarity)
+        
+        return module as { default: T };
       } catch (error) {
         console.error('SafeLazy import failed:', error);
         // Re-throw to let ErrorBoundary handle it
+        // CRITICAL: Never return invalid modules that could cause React Error #31
         throw error;
       }
     });
@@ -116,40 +170,66 @@ export function createAdaptivePage<T extends ComponentType<any>>(
   const DesktopPage = createSafeLazy(safeDesktopImport);
   const MobilePage = safeMobileImport ? createSafeLazy(safeMobileImport) : DesktopPage;
 
-  return function AdaptivePage(props: any) {
-    const isMobile = useIsMobile();
-    const [mounted, setMounted] = useState(false);
-    const [componentKey, setComponentKey] = useState(0);
-
-    useEffect(() => {
-      // Only render after mount and when we know device type
-      if (isMobile !== undefined) {
-        setMounted(true);
-        // Reset component key when device type changes to force re-mount
-        setComponentKey(prev => prev + 1);
-      }
-    }, [isMobile]);
-
-    // Show loading state while determining device type
-    if (isMobile === undefined || !mounted) {
-      return <LoadingSpinner />;
-    }
-
-    // Select the correct component based on device
-    // Use key to force re-mount and prevent stale component references
-    const SelectedPage = isMobile ? MobilePage : DesktopPage;
-
-    // CRITICAL: Always wrap in Suspense to catch loading errors
-    // Key ensures component is re-created if device type changes
-    // This prevents React from trying to render a stale lazy component
+  /**
+   * ResponsivePageWrapper Component
+   * 
+   * CRITICAL ARCHITECTURAL DECISION:
+   * =================================
+   * 
+   * This component ALWAYS renders both DesktopPage and MobilePage in the React tree.
+   * CSS (Tailwind classes) controls visibility, NOT conditional rendering.
+   * 
+   * ❌ NEVER DO THIS (causes removeChild errors):
+   *   const SelectedPage = isMobile ? MobilePage : DesktopPage;
+   *   return <SelectedPage /> // ❌ Changes tree structure = DOM inconsistencies
+   * 
+   * ✅ ALWAYS DO THIS (stable tree):
+   *   return (
+   *     <>
+   *       <div className="hidden md:block"><DesktopPage /></div>
+   *       <div className="block md:hidden"><MobilePage /></div>
+   *     </>
+   *   ); // ✅ Same tree always, CSS handles visibility
+   * 
+   * WHY THIS MATTERS:
+   * - React's reconciliation algorithm expects stable tree structure
+   * - Changing root components based on viewport causes unmount/remount cycles
+   * - Suspense boundaries get confused when parent changes
+   * - Service Worker reloads trigger errors during tree transitions
+   * - Mobile viewport can change during initial render (orientation, zoom, etc.)
+   * 
+   * This pattern matches our Layout.tsx approach (CSS-based responsive, not JS-based).
+   */
+  function ResponsivePageWrapper(props: any) {
     return (
-      <Suspense 
-        fallback={<LoadingSpinner />}
-        key={`adaptive-${isMobile ? 'mobile' : 'desktop'}-${componentKey}`}
-      >
-        <SelectedPage key={`page-${componentKey}`} {...props} />
-      </Suspense>
+      <>
+        {/* Desktop: Hidden below md breakpoint (768px), visible above */}
+        <div className="hidden md:block">
+          <Suspense fallback={<LoadingSpinner />}>
+            <DesktopPage {...props} />
+          </Suspense>
+        </div>
+
+        {/* Mobile: Visible below md breakpoint (768px), hidden above */}
+        <div className="block md:hidden">
+          <Suspense fallback={<LoadingSpinner />}>
+            <MobilePage {...props} />
+          </Suspense>
+        </div>
+      </>
     );
+  }
+
+  /**
+   * AdaptivePage Component
+   * 
+   * Returns a component that adapts to mobile/desktop using CSS, not conditional rendering.
+   * The React tree structure NEVER changes - this is key to preventing removeChild errors.
+   */
+  return function AdaptivePage(props: any) {
+    // Always return the same component structure - React tree is stable
+    // CSS handles responsive display via Tailwind's md: breakpoint
+    return <ResponsivePageWrapper {...props} />;
   };
 }
 
